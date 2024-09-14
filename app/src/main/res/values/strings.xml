@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Easycontrol Next</string>
+    <string name="introduction">App Introduction</string>
+    <string name="introduction_detail">1. A screen casting tool based on ADB\n2. Supports screen mirroring and app streaming\n3. Aims to provide the best experience for large-screen devices</string>
+
+    <string name="home">Home</string>
+    <string name="manager">Manager</string>
+    <string name="settings">Settings</string>
+
+    <string name="appearance">Appearance</string>
+    <string name="dark_theme">Dark theme</string>
+    <string name="follow_system">Follow system</string>
+    <string name="always_off">Always off</string>
+    <string name="always_on">Always on</string>
+    <string name="system_color">Use system theme color</string>
+    <string name="others">Others</string>
+    <string name="enable_log">Enable log output</string>
+    <string name="log_viewer">Log Viewer</string>
+    <string name="export_log">Export log</string>
+    <string name="exporting_log">Exporting log, please wait…</string>
+    <string name="export_log_success">Log export successful</string>
+    <string name="export_log_fail">Failed to export log</string>
+    <string name="license">License</string>
+
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="clear">Clear</string>
+    <string-array name="log_viewer_spinner">
+        <item>Verbose</item>
+        <item>Debug</item>
+        <item>Info</item>
+        <item>Warning</item>
+        <item>Error</item>
+        <item>Assert</item>
+    </string-array>
+</resources>

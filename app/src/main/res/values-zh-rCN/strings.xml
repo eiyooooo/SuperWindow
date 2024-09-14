@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">新一代易控</string>
+    <string name="introduction">应用简介</string>
+    <string name="introduction_detail">1. 基于ADB的投屏工具\n2. 支持屏幕镜像及应用流转\n3. 致力于为大屏设备提供最佳体验</string>
+
+    <string name="home">主页</string>
+    <string name="manager">管理</string>
+    <string name="settings">设置</string>
+
+    <string name="appearance">界面外观</string>
+    <string name="dark_theme">深色主题</string>
+    <string name="follow_system">跟随系统</string>
+    <string name="always_off">总是关闭</string>
+    <string name="always_on">总是开启</string>
+    <string name="system_color">使用系统主题颜色</string>
+    <string name="others">其他</string>
+    <string name="enable_log">启用日志输出</string>
+    <string name="log_viewer">日志查看器</string>
+    <string name="export_log">导出日志</string>
+    <string name="exporting_log">导出日志中，请稍候…</string>
+    <string name="export_log_success">导出日志成功</string>
+    <string name="export_log_fail">导出日志失败</string>
+    <string name="license">开源许可</string>
+
+    <string name="confirm">确定</string>
+    <string name="cancel">取消</string>
+
+    <string name="clear">清除</string>
+    <string-array name="log_viewer_spinner">
+        <item>Verbose</item>
+        <item>Debug</item>
+        <item>Info</item>
+        <item>Warning</item>
+        <item>Error</item>
+        <item>Assert</item>
+    </string-array>
+</resources>

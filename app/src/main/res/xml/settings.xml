@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="@string/appearance">
+
+        <Preference
+            android:icon="@drawable/settings_night_sight"
+            android:key="appearance.dark_theme"
+            android:title="@string/dark_theme" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:icon="@drawable/palette"
+            android:key="appearance.system_color"
+            android:title="@string/system_color"
+            app:widgetLayout="@layout/preference_material_switch" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/others"
+        app:allowDividerAbove="false">
+
+        <SwitchPreferenceCompat
+            android:icon="@drawable/pending_actions"
+            android:key="others.enable_log"
+            android:title="@string/enable_log"
+            app:widgetLayout="@layout/preference_material_switch" />
+        <Preference
+            android:icon="@drawable/log"
+            android:key="others.log_viewer"
+            android:title="@string/log_viewer" />
+        <Preference
+            android:icon="@drawable/export"
+            android:key="others.export_log"
+            android:title="@string/export_log" />
+        <Preference
+            android:icon="@drawable/license"
+            android:key="others.license"
+            android:title="@string/license" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
