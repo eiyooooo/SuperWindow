@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.contentMain.bottomNavigation?.let {
             it.setupWithNavController(navController)
-            setSupportActionBar(binding.toolbar)
+            setSupportActionBar(binding.contentMain.toolbar)
         } ?: binding.contentMain.navigationRail?.setupWithNavController(navController)
     }
 
