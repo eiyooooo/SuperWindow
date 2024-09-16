@@ -11,6 +11,6 @@
     app:borderTopDrawable="@null"
     app:borderTopVisibility="whenTop"
     app:fitsSystemWindowsInsets="bottom|top"
-    app:layoutManager="@string/main_layout_manager"
+    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     app:spanCount="2" />
