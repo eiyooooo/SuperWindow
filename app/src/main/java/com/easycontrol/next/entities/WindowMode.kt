@@ -4,7 +4,7 @@ enum class WindowMode {
 
     COMPACT,
 
-    MEDIUM,
+    DUAL,
 
-    EXPANDED
+    MULTI
 }

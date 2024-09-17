@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.easycontrol.next.views.ExpandTargetViewTouchAreaConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <include
+        android:id="@+id/left_view"
+        layout="@layout/item_widget_card"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/split_handle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/split_handle"
+        android:layout_width="5dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center"
+        android:layout_margin="4dp"
+        android:alpha="0.5"
+        android:background="@drawable/split_handle_background"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/right_view"
+        app:layout_constraintStart_toEndOf="@+id/left_view"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <include
+        android:id="@+id/right_view"
+        layout="@layout/item_widget_card"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/split_handle"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</com.easycontrol.next.views.ExpandTargetViewTouchAreaConstraintLayout>
