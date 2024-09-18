@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Easycontrol Next</string>
+    <string name="app_name">SuperWindow</string>
     <string name="introduction">App Introduction</string>
-    <string name="introduction_detail">1. A screen casting tool based on ADB\n2. Supports screen mirroring and app streaming\n3. Aims to provide the best experience for large-screen devices</string>
+    <string name="introduction_detail">1. Multi-screen solution for large-screen devices\n2. Aims to provide the best experience for large-screen devices\n3. Requires Android 12L or higher and Shizuku authorization for local use\n4. For cross-device use, the target device must have Android 12L or higher and ADB enabled</string>
 
     <string name="home">Home</string>
     <string name="manager">Manager</string>

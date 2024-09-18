@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">新一代易控</string>
+    <string name="app_name">超级视窗</string>
     <string name="introduction">应用简介</string>
-    <string name="introduction_detail">1. 基于ADB的投屏工具\n2. 支持屏幕镜像及应用流转\n3. 致力于为大屏设备提供最佳体验</string>
+    <string name="introduction_detail">1. 大屏设备多分屏解决方案\n2. 致力于为大屏设备提供最佳体验\n3. 本机使用需安卓12L以上及Shizuku授权\n4. 跨设备使用需目标设备安卓12L以上及打开ADB</string>
 
     <string name="home">主页</string>
     <string name="manager">管理</string>
