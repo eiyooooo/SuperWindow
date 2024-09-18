@@ -15,8 +15,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.eiyooooo.superwindow.R
 import com.eiyooooo.superwindow.databinding.ActivityMainCompactBinding
-import com.eiyooooo.superwindow.databinding.ActivityMainDualBinding
-import com.eiyooooo.superwindow.databinding.ActivityMainMultiBinding
+import com.eiyooooo.superwindow.databinding.ActivityMainExpandedBinding
 import com.eiyooooo.superwindow.databinding.ControlPanelBinding
 import com.eiyooooo.superwindow.entities.WindowMode
 import com.eiyooooo.superwindow.utils.dp2px
@@ -27,8 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var windowMode: WindowMode
     private lateinit var bindingCompact: ActivityMainCompactBinding
-    private lateinit var bindingDual: ActivityMainDualBinding
-    private lateinit var bindingMulti: ActivityMainMultiBinding
+    private lateinit var bindingExpanded: ActivityMainExpandedBinding
 
     private lateinit var bindingControlPanel: ControlPanelBinding
 
@@ -49,8 +47,8 @@ class MainActivity : AppCompatActivity() {
 
             else -> {
                 setupFullScreen()
-                bindingDual = ActivityMainDualBinding.inflate(layoutInflater).also {
-                    it.main.setTargetView(it.splitHandle)
+                bindingExpanded = ActivityMainExpandedBinding.inflate(layoutInflater).also {
+                    it.widgetContainer.setTargetView(it.splitHandle)
                     it.leftView.widgetView.setTargetView(it.leftView.controlBar)
                     it.rightView.widgetView.setTargetView(it.rightView.controlBar)
 
@@ -85,7 +83,7 @@ class MainActivity : AppCompatActivity() {
             override fun onTouch(v: View?, event: MotionEvent): Boolean {
                 return when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        X = bindingDual.splitHandle.x
+                        X = bindingExpanded.splitHandle.x
                         touchX = event.rawX
                         true
                     }
@@ -107,14 +105,14 @@ class MainActivity : AppCompatActivity() {
         if (newX < 0) return
 
         val constraintSet = ConstraintSet()
-        constraintSet.clone(bindingDual.main)
+        constraintSet.clone(bindingExpanded.widgetContainer)
 
-        constraintSet.connect(R.id.split_handle, ConstraintSet.START, R.id.main, ConstraintSet.START, newX.toInt())
+        constraintSet.connect(R.id.split_handle, ConstraintSet.START, R.id.widget_container, ConstraintSet.START, newX.toInt())
         constraintSet.connect(R.id.split_handle, ConstraintSet.END, R.id.right_view, ConstraintSet.START, 0)
         constraintSet.connect(R.id.left_view, ConstraintSet.END, R.id.split_handle, ConstraintSet.START, dp2px(4))
         constraintSet.connect(R.id.right_view, ConstraintSet.START, R.id.split_handle, ConstraintSet.END, dp2px(4))
 
-        constraintSet.applyTo(bindingDual.main)
+        constraintSet.applyTo(bindingExpanded.widgetContainer)
     }
 
     @Suppress("DEPRECATION")
@@ -132,8 +130,7 @@ class MainActivity : AppCompatActivity() {
     internal fun showSnackBar(text: String) {
         when (windowMode) {
             WindowMode.COMPACT -> Snackbar.make(bindingCompact.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingControlPanel.bottomNavigation).show()
-            WindowMode.DUAL -> Snackbar.make(bindingDual.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingControlPanel.bottomNavigation).show()
-            WindowMode.MULTI -> Snackbar.make(bindingMulti.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingControlPanel.bottomNavigation).show()
+            WindowMode.DUAL -> Snackbar.make(bindingExpanded.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingControlPanel.bottomNavigation).show()
         }
     }
 }
