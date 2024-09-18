@@ -20,6 +20,7 @@ import com.eiyooooo.superwindow.databinding.ControlPanelBinding
 import com.eiyooooo.superwindow.entities.WindowMode
 import com.eiyooooo.superwindow.utils.dp2px
 import com.eiyooooo.superwindow.viewmodels.MainActivityViewModel
+import com.eiyooooo.superwindow.views.animations.AnimExecutor
 import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
@@ -85,6 +86,7 @@ class MainActivity : AppCompatActivity() {
                     MotionEvent.ACTION_DOWN -> {
                         X = bindingExpanded.splitHandle.x
                         touchX = event.rawX
+                        AnimExecutor.dragPressAnimation(bindingExpanded.splitHandle, true)
                         true
                     }
 
@@ -93,6 +95,16 @@ class MainActivity : AppCompatActivity() {
                         val newX = X + deltaX
                         mainModel.updateDualSplitHandlePosition(newX)
                         true
+                    }
+
+                    MotionEvent.ACTION_UP -> {
+                        AnimExecutor.dragPressAnimation(bindingExpanded.splitHandle, false)
+                        true
+                    }
+
+                    MotionEvent.ACTION_CANCEL -> {
+                        AnimExecutor.dragPressAnimation(bindingExpanded.splitHandle, false)
+                        false
                     }
 
                     else -> false
