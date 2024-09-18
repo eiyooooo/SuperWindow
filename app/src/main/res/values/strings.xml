@@ -26,6 +26,8 @@
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
 
+    <string name="icon">Icon</string>
+
     <string name="clear">Clear</string>
     <string-array name="log_viewer_spinner">
         <item>Verbose</item>

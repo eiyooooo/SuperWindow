@@ -26,6 +26,8 @@
     <string name="confirm">确定</string>
     <string name="cancel">取消</string>
 
+    <string name="icon">图标</string>
+
     <string name="clear">清除</string>
     <string-array name="log_viewer_spinner">
         <item>Verbose</item>

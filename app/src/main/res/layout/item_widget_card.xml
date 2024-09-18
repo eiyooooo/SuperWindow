@@ -16,6 +16,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
+        <FrameLayout
+            android:id="@+id/blur_layer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"/>
+
         <View
             android:id="@+id/control_bar"
             android:layout_width="50dp"
@@ -24,6 +30,23 @@
             android:layout_marginTop="12dp"
             android:alpha="0.4"
             android:background="@drawable/top_handle_background" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/icon_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            app:cardCornerRadius="20dp">
+
+            <ImageView
+                android:id="@+id/icon"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:contentDescription="@string/icon"
+                android:src="@mipmap/ic_launcher" />
+
+        </androidx.cardview.widget.CardView>
 
     </FrameLayout>
 

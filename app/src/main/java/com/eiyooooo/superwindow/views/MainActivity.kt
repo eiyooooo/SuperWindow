@@ -1,12 +1,15 @@
 package com.eiyooooo.superwindow.views
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
+import android.widget.FrameLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +21,7 @@ import com.eiyooooo.superwindow.databinding.ActivityMainCompactBinding
 import com.eiyooooo.superwindow.databinding.ActivityMainExpandedBinding
 import com.eiyooooo.superwindow.databinding.ControlPanelBinding
 import com.eiyooooo.superwindow.entities.WindowMode
+import com.eiyooooo.superwindow.utils.BlurUtil
 import com.eiyooooo.superwindow.utils.dp2px
 import com.eiyooooo.superwindow.viewmodels.MainActivityViewModel
 import com.eiyooooo.superwindow.views.animations.AnimExecutor
@@ -84,6 +88,7 @@ class MainActivity : AppCompatActivity() {
             override fun onTouch(v: View?, event: MotionEvent): Boolean {
                 return when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
+                        showBlurLayer()
                         X = bindingExpanded.splitHandle.x
                         touchX = event.rawX
                         AnimExecutor.dragPressAnimation(bindingExpanded.splitHandle, true)
@@ -98,11 +103,13 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     MotionEvent.ACTION_UP -> {
+                        removeBlurLayerImmediately()
                         AnimExecutor.dragPressAnimation(bindingExpanded.splitHandle, false)
                         true
                     }
 
                     MotionEvent.ACTION_CANCEL -> {
+                        removeBlurLayerImmediately()
                         AnimExecutor.dragPressAnimation(bindingExpanded.splitHandle, false)
                         false
                     }
@@ -112,6 +119,75 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun getFrameLayoutBitmap(frameLayout: FrameLayout): Bitmap {
+        val bitmap = Bitmap.createBitmap(frameLayout.width, frameLayout.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        frameLayout.draw(canvas)
+        return bitmap
+    }
+
+    private fun showBlurLayer() {
+//        cancelForegroundAnimations()
+        bindingExpanded.leftView.blurLayer.visibility = View.VISIBLE
+        bindingExpanded.leftView.iconContainer.visibility = View.VISIBLE
+        bindingExpanded.leftView.contentContainer.visibility = View.GONE
+        bindingExpanded.leftView.blurLayer.foreground = BlurUtil.blurForeground(this, getFrameLayoutBitmap(bindingExpanded.leftView.contentContainer))
+    }
+
+    private fun removeBlurLayerImmediately() {
+        if (bindingExpanded.leftView.blurLayer.foreground != null) {
+            bindingExpanded.leftView.contentContainer.foreground = null
+            bindingExpanded.leftView.contentContainer.visibility = View.VISIBLE
+            bindingExpanded.leftView.iconContainer.visibility = View.GONE
+            bindingExpanded.leftView.blurLayer.visibility = View.GONE
+        }
+    }
+
+//    private val mRemoveForegroundAnimList = mutableListOf<ObjectAnimator>()
+//
+//    private fun cancelForegroundAnimations() {
+//        mRemoveForegroundAnimList.forEach {
+//            it.cancel()
+//        }
+//        mRemoveForegroundAnimList.clear()
+//    }
+//
+//    private fun removeBlurForeground() {
+//        val virtualDisplayRoot = bindingExpanded.leftView.blurLayer
+//        if (virtualDisplayRoot.foreground != null) {
+//            val originForeGround = virtualDisplayRoot.foreground
+//            val removeForegroundAnim = ObjectAnimator.ofInt(virtualDisplayRoot.foreground, "alpha", 255, 0).apply {
+//                duration = 400
+//                addListener(object : Animator.AnimatorListener {
+//                    override fun onAnimationStart(animation: Animator) {
+//                        Timber.d("开始执行移除模糊遮罩动画:${this.hashCode()}")
+//                    }
+//
+//                    override fun onAnimationEnd(animation: Animator) {
+//                        val animHashCode = this.hashCode()
+//                        if (isPressDrag.get()) {
+//                            Timber.i("透明度动画执行完毕，但当前还在按压，暂不移除遮罩:$animHashCode")
+//                        } else {
+//                            Timber.d("透明度动画执行完毕，移除模糊遮罩:$animHashCode")
+//                            originForeGround.alpha = 255
+//                            virtualDisplayRoot.foreground = null
+//                            bindingExpanded.leftView.blurLayer.visibility = View.GONE
+//                        }
+//                    }
+//
+//                    override fun onAnimationCancel(animation: Animator) {
+//                        Timber.d("Cancel透明度动画执行:${this.hashCode()}")
+//                    }
+//
+//                    override fun onAnimationRepeat(animation: Animator) {
+//                    }
+//                })
+//                start()
+//            }
+//            mRemoveForegroundAnimList.add(removeForegroundAnim)
+//        }
+//    }
 
     private fun updateDualLayout(newX: Float) {
         if (newX < 0) return
