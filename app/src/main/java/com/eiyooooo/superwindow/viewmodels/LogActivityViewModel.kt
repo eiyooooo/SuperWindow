@@ -1,11 +1,11 @@
-package com.easycontrol.next.viewmodels
+package com.eiyooooo.superwindow.viewmodels
 
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.easycontrol.next.entities.LogItem
-import com.easycontrol.next.utils.FLog
+import com.eiyooooo.superwindow.entities.LogItem
+import com.eiyooooo.superwindow.utils.FLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job

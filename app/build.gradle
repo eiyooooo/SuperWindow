@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace 'com.easycontrol.next'
+    namespace 'com.eiyooooo.superwindow'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.easycontrol.next"
+        applicationId "com.eiyooooo.superwindow"
         minSdk 21
         targetSdk 34
         versionCode 1

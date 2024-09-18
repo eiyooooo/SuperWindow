@@ -1,10 +1,10 @@
-package com.easycontrol.next.views
+package com.eiyooooo.superwindow.views
 
 import android.content.Context
 import android.util.AttributeSet
-import android.widget.LinearLayout
+import androidx.appcompat.widget.AppCompatTextView
 
-class CustomLinearLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : LinearLayout(context, attrs, defStyleAttr) {
+class CustomTextView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : AppCompatTextView(context, attrs, defStyleAttr) {
 
     companion object {
         private const val MIN_HEIGHT_DP = 80

@@ -1,4 +1,4 @@
-package com.easycontrol.next.views
+package com.eiyooooo.superwindow.views
 
 import android.annotation.SuppressLint
 import android.os.Build
@@ -13,14 +13,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
-import com.easycontrol.next.R
-import com.easycontrol.next.databinding.ActivityMainCompactBinding
-import com.easycontrol.next.databinding.ActivityMainDualBinding
-import com.easycontrol.next.databinding.ActivityMainMultiBinding
-import com.easycontrol.next.databinding.ControlPanelBinding
-import com.easycontrol.next.entities.WindowMode
-import com.easycontrol.next.utils.dp2px
-import com.easycontrol.next.viewmodels.MainActivityViewModel
+import com.eiyooooo.superwindow.R
+import com.eiyooooo.superwindow.databinding.ActivityMainCompactBinding
+import com.eiyooooo.superwindow.databinding.ActivityMainDualBinding
+import com.eiyooooo.superwindow.databinding.ActivityMainMultiBinding
+import com.eiyooooo.superwindow.databinding.ControlPanelBinding
+import com.eiyooooo.superwindow.entities.WindowMode
+import com.eiyooooo.superwindow.utils.dp2px
+import com.eiyooooo.superwindow.viewmodels.MainActivityViewModel
 import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {

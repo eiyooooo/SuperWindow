@@ -1,4 +1,4 @@
-package com.easycontrol.next.views
+package com.eiyooooo.superwindow.views
 
 import android.content.Context
 import android.graphics.Rect
@@ -6,7 +6,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.easycontrol.next.utils.dp2px
+import com.eiyooooo.superwindow.utils.dp2px
 
 class ExpandTargetViewTouchAreaConstraintLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : ConstraintLayout(context, attrs, defStyleAttr) {
 

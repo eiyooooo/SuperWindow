@@ -1,4 +1,4 @@
-package com.easycontrol.next.entities
+package com.eiyooooo.superwindow.entities
 
 enum class WindowMode {
 

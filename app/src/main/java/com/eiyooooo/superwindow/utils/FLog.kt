@@ -1,10 +1,10 @@
-package com.easycontrol.next.utils
+package com.eiyooooo.superwindow.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
-import com.easycontrol.next.BuildConfig
-import com.easycontrol.next.MyApplication.Companion.appStartTime
+import com.eiyooooo.superwindow.BuildConfig
+import com.eiyooooo.superwindow.MyApplication.Companion.appStartTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -27,8 +27,8 @@ import java.util.Locale
 
 object FLog {
 
-    const val PREFIX = "[Easycontrol_Next ${BuildConfig.VERSION_NAME}]-> "
-    const val SUFFIX = " <-[Easycontrol_Next ${BuildConfig.VERSION_NAME}]"
+    const val PREFIX = "[SuperWindow ${BuildConfig.VERSION_NAME}]-> "
+    const val SUFFIX = " <-[SuperWindow ${BuildConfig.VERSION_NAME}]"
 
     var logFile: File? = null
     private var fLogTree = FLogTree()
@@ -45,7 +45,7 @@ object FLog {
                 file.delete()
             }
         }
-        logFile = File(context.cacheDir, "Easycontrol_Next-${BuildConfig.VERSION_NAME}-${appStartTime.time}.log")
+        logFile = File(context.cacheDir, "SuperWindow-${BuildConfig.VERSION_NAME}-${appStartTime.time}.log")
     }
 
     fun makeFLog(logDateFormat: SimpleDateFormat, priority: Int, tag: String?, message: String) {

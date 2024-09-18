@@ -23,7 +23,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.easycontrol.next.log"
+            android:authorities="com.eiyooooo.superwindow.log"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

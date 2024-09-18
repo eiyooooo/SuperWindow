@@ -1,12 +1,12 @@
-package com.easycontrol.next.entities
+package com.eiyooooo.superwindow.entities
 
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceManager
-import com.easycontrol.next.BuildConfig
-import com.easycontrol.next.utils.get
-import com.easycontrol.next.utils.put
+import com.eiyooooo.superwindow.BuildConfig
+import com.eiyooooo.superwindow.utils.get
+import com.eiyooooo.superwindow.utils.put
 import com.fredporciuncula.flow.preferences.FlowSharedPreferences
 
 object Preferences {

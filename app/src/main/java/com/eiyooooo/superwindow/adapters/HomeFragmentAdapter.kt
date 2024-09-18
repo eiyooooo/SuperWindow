@@ -1,7 +1,7 @@
-package com.easycontrol.next.adapters
+package com.eiyooooo.superwindow.adapters
 
 import android.annotation.SuppressLint
-import com.easycontrol.next.views.cards.IntroductionViewHolder
+import com.eiyooooo.superwindow.views.cards.IntroductionViewHolder
 import rikka.recyclerview.IdBasedRecyclerViewAdapter
 import rikka.recyclerview.IndexCreatorPool
 

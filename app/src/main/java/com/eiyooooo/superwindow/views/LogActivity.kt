@@ -1,4 +1,4 @@
-package com.easycontrol.next.views
+package com.eiyooooo.superwindow.views
 
 import android.os.Bundle
 import android.view.MenuItem
@@ -11,10 +11,10 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
-import com.easycontrol.next.R
-import com.easycontrol.next.adapters.LogAdapter
-import com.easycontrol.next.databinding.ActivityLogBinding
-import com.easycontrol.next.viewmodels.LogActivityViewModel
+import com.eiyooooo.superwindow.R
+import com.eiyooooo.superwindow.adapters.LogAdapter
+import com.eiyooooo.superwindow.databinding.ActivityLogBinding
+import com.eiyooooo.superwindow.viewmodels.LogActivityViewModel
 import kotlinx.coroutines.launch
 
 class LogActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener {

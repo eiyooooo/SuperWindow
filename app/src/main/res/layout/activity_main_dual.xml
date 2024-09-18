@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.easycontrol.next.views.ExpandTargetViewTouchAreaConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.eiyooooo.superwindow.views.ExpandTargetViewTouchAreaConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
@@ -39,4 +39,4 @@
         app:layout_constraintStart_toEndOf="@+id/split_handle"
         app:layout_constraintTop_toTopOf="parent" />
 
-</com.easycontrol.next.views.ExpandTargetViewTouchAreaConstraintLayout>
+</com.eiyooooo.superwindow.views.ExpandTargetViewTouchAreaConstraintLayout>

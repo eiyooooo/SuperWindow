@@ -1,9 +1,9 @@
-package com.easycontrol.next.utils
+package com.eiyooooo.superwindow.utils
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.preference.Preference
-import com.easycontrol.next.R
+import com.eiyooooo.superwindow.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 @Suppress("UNCHECKED_CAST")

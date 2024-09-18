@@ -1,4 +1,4 @@
-package com.easycontrol.next.utils
+package com.eiyooooo.superwindow.utils
 
 import android.content.Context
 import android.util.TypedValue

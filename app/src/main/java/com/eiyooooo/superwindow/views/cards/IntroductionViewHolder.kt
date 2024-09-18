@@ -1,13 +1,13 @@
-package com.easycontrol.next.views.cards
+package com.eiyooooo.superwindow.views.cards
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.setPadding
-import com.easycontrol.next.R
-import com.easycontrol.next.databinding.HomeItemContainerBinding
-import com.easycontrol.next.databinding.ItemTitleDetailCardBinding
-import com.easycontrol.next.utils.dp2px
+import com.eiyooooo.superwindow.R
+import com.eiyooooo.superwindow.databinding.HomeItemContainerBinding
+import com.eiyooooo.superwindow.databinding.ItemTitleDetailCardBinding
+import com.eiyooooo.superwindow.utils.dp2px
 import rikka.recyclerview.BaseViewHolder
 import rikka.recyclerview.BaseViewHolder.Creator
 

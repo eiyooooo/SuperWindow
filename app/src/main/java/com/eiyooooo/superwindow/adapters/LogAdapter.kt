@@ -1,4 +1,4 @@
-package com.easycontrol.next.adapters
+package com.eiyooooo.superwindow.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,8 +6,8 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Filter
 import android.widget.Filterable
-import com.easycontrol.next.databinding.ItemLogBinding
-import com.easycontrol.next.entities.LogItem
+import com.eiyooooo.superwindow.databinding.ItemLogBinding
+import com.eiyooooo.superwindow.entities.LogItem
 import java.text.SimpleDateFormat
 import java.util.Locale
 

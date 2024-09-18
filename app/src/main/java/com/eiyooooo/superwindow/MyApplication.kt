@@ -1,10 +1,10 @@
-package com.easycontrol.next
+package com.eiyooooo.superwindow
 
 import android.app.Application
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
-import com.easycontrol.next.entities.Preferences
-import com.easycontrol.next.utils.FLog
+import com.eiyooooo.superwindow.entities.Preferences
+import com.eiyooooo.superwindow.utils.FLog
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
 import timber.log.Timber

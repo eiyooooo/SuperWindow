@@ -1,4 +1,4 @@
-package com.easycontrol.next.viewmodels
+package com.eiyooooo.superwindow.viewmodels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel

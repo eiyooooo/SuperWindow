@@ -1,4 +1,4 @@
-package com.easycontrol.next.views
+package com.eiyooooo.superwindow.views
 
 import android.os.Bundle
 import android.util.TypedValue
@@ -7,9 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.easycontrol.next.adapters.HomeFragmentAdapter
-import com.easycontrol.next.databinding.FragmentHomeBinding
-import com.easycontrol.next.viewmodels.MainActivityViewModel
+import com.eiyooooo.superwindow.adapters.HomeFragmentAdapter
+import com.eiyooooo.superwindow.databinding.FragmentHomeBinding
+import com.eiyooooo.superwindow.viewmodels.MainActivityViewModel
 import rikka.recyclerview.addEdgeSpacing
 import rikka.recyclerview.addItemSpacing
 import rikka.recyclerview.fixEdgeEffect

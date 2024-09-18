@@ -1,4 +1,4 @@
-package com.easycontrol.next.views
+package com.eiyooooo.superwindow.views
 
 import android.content.Intent
 import android.os.Build
@@ -8,11 +8,11 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import com.easycontrol.next.BuildConfig
-import com.easycontrol.next.R
-import com.easycontrol.next.entities.Preferences
-import com.easycontrol.next.utils.FLog
-import com.easycontrol.next.utils.showListPreferenceOnClick
+import com.eiyooooo.superwindow.BuildConfig
+import com.eiyooooo.superwindow.R
+import com.eiyooooo.superwindow.entities.Preferences
+import com.eiyooooo.superwindow.utils.FLog
+import com.eiyooooo.superwindow.utils.showListPreferenceOnClick
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

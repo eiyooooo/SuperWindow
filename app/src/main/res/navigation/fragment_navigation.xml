@@ -6,10 +6,10 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.easycontrol.next.views.HomeFragment"
+        android:name="com.eiyooooo.superwindow.views.HomeFragment"
         tools:layout="@layout/fragment_home" />
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.easycontrol.next.views.SettingsFragment" />
+        android:name="com.eiyooooo.superwindow.views.SettingsFragment" />
 
 </navigation>

@@ -1,7 +1,7 @@
-package com.easycontrol.next.entities
+package com.eiyooooo.superwindow.entities
 
 import androidx.annotation.ColorRes
-import com.easycontrol.next.R
+import com.eiyooooo.superwindow.R
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
