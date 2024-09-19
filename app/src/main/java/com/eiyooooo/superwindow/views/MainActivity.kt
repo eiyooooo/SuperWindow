@@ -1,15 +1,12 @@
 package com.eiyooooo.superwindow.views
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
-import android.widget.FrameLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +20,7 @@ import com.eiyooooo.superwindow.databinding.ControlPanelBinding
 import com.eiyooooo.superwindow.entities.WindowMode
 import com.eiyooooo.superwindow.utils.BlurUtil
 import com.eiyooooo.superwindow.utils.dp2px
+import com.eiyooooo.superwindow.utils.getBitmap
 import com.eiyooooo.superwindow.viewmodels.MainActivityViewModel
 import com.eiyooooo.superwindow.views.animations.AnimExecutor
 import com.google.android.material.snackbar.Snackbar
@@ -120,19 +118,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getFrameLayoutBitmap(frameLayout: FrameLayout): Bitmap {
-        val bitmap = Bitmap.createBitmap(frameLayout.width, frameLayout.height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        frameLayout.draw(canvas)
-        return bitmap
-    }
-
     private fun showBlurLayer() {
 //        cancelForegroundAnimations()
         bindingExpanded.leftView.blurLayer.visibility = View.VISIBLE
         bindingExpanded.leftView.iconContainer.visibility = View.VISIBLE
         bindingExpanded.leftView.contentContainer.visibility = View.GONE
-        bindingExpanded.leftView.blurLayer.foreground = BlurUtil.blurForeground(this, getFrameLayoutBitmap(bindingExpanded.leftView.contentContainer))
+        bindingExpanded.leftView.blurLayer.foreground = BlurUtil.blurForeground(this, bindingExpanded.leftView.contentContainer.getBitmap())
     }
 
     private fun removeBlurLayerImmediately() {
