@@ -18,9 +18,8 @@ import com.eiyooooo.superwindow.databinding.ActivityMainCompactBinding
 import com.eiyooooo.superwindow.databinding.ActivityMainExpandedBinding
 import com.eiyooooo.superwindow.databinding.ControlPanelBinding
 import com.eiyooooo.superwindow.entities.WindowMode
-import com.eiyooooo.superwindow.utils.BlurUtil
+import com.eiyooooo.superwindow.utils.BlurUtils
 import com.eiyooooo.superwindow.utils.dp2px
-import com.eiyooooo.superwindow.utils.getBitmap
 import com.eiyooooo.superwindow.viewmodels.MainActivityViewModel
 import com.eiyooooo.superwindow.views.animations.AnimExecutor
 import com.google.android.material.snackbar.Snackbar
@@ -123,7 +122,7 @@ class MainActivity : AppCompatActivity() {
         bindingExpanded.leftView.blurLayer.visibility = View.VISIBLE
         bindingExpanded.leftView.iconContainer.visibility = View.VISIBLE
         bindingExpanded.leftView.contentContainer.visibility = View.GONE
-        bindingExpanded.leftView.blurLayer.foreground = BlurUtil.blurForeground(this, bindingExpanded.leftView.contentContainer.getBitmap())
+        bindingExpanded.leftView.blurLayer.foreground = BlurUtils.blurView(bindingExpanded.leftView.contentContainer)
     }
 
     private fun removeBlurLayerImmediately() {
