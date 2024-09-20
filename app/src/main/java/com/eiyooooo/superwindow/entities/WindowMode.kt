@@ -2,7 +2,9 @@ package com.eiyooooo.superwindow.entities
 
 enum class WindowMode {
 
-    COMPACT,
+    SINGLE,
 
-    EXPANDED
+    DUAL,
+
+    TRIPLE
 }

@@ -3,7 +3,7 @@ package com.eiyooooo.superwindow.adapters
 import com.eiyooooo.superwindow.viewmodels.MainActivityViewModel
 import com.eiyooooo.superwindow.views.MainActivity
 
-class WidgetCardAdapter(private val mainActivity: MainActivity, private val mainModel: MainActivityViewModel) {
+class WidgetCardManager(private val mainActivity: MainActivity, private val mainModel: MainActivityViewModel) {
 
 //    fun a() {
 //        it.widgetContainer.setTargetView(it.splitHandle)

@@ -11,24 +11,26 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.eiyooooo.superwindow.R
-import com.eiyooooo.superwindow.adapters.WidgetCardAdapter
+import com.eiyooooo.superwindow.adapters.WidgetCardManager
 import com.eiyooooo.superwindow.databinding.ActivityMainCompactBinding
 import com.eiyooooo.superwindow.databinding.ActivityMainExpandedBinding
 import com.eiyooooo.superwindow.databinding.ControlPanelBinding
+import com.eiyooooo.superwindow.databinding.ControlPanelExpandedBinding
 import com.eiyooooo.superwindow.entities.WindowMode
 import com.eiyooooo.superwindow.viewmodels.MainActivityViewModel
 import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var windowMode: WindowMode
+    private var windowMode: WindowMode? = null
     private lateinit var bindingCompact: ActivityMainCompactBinding
     private lateinit var bindingExpanded: ActivityMainExpandedBinding
 
-    private lateinit var bindingControlPanel: ControlPanelBinding
+    private lateinit var bindingControlPanelCompact: ControlPanelBinding
+    private lateinit var bindingControlPanelExpanded: ControlPanelExpandedBinding
 
     private val mainModel: MainActivityViewModel by viewModels()
-    private val widgetCardAdapter: WidgetCardAdapter by lazy { WidgetCardAdapter(this, mainModel) }
+    private val widgetCardManager: WidgetCardManager by lazy { WidgetCardManager(this, mainModel) }//TODO
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,32 +39,68 @@ class MainActivity : AppCompatActivity() {
         windowMode = when (resources.configuration.screenWidthDp) {
             in 0..599 -> {
                 bindingCompact = ActivityMainCompactBinding.inflate(layoutInflater).also {
-                    bindingControlPanel = ControlPanelBinding.inflate(layoutInflater, it.root, true)
+                    bindingControlPanelCompact = ControlPanelBinding.inflate(layoutInflater, it.root, true)
                     setContentView(it.root)
                 }
-                WindowMode.COMPACT
+                null
             }
 
             else -> {
                 setupFullScreen()
                 bindingExpanded = ActivityMainExpandedBinding.inflate(layoutInflater).also {
-                    bindingControlPanel = ControlPanelBinding.inflate(layoutInflater, null, false)
                     setContentView(it.root)
                 }
-                WindowMode.EXPANDED
+                when (mainModel.windowMode.value) {
+                    WindowMode.SINGLE -> {
+                        bindingControlPanelExpanded = ControlPanelExpandedBinding.inflate(layoutInflater, null, false)//TODO
+                    }
+
+                    else -> {
+                        bindingControlPanelCompact = ControlPanelBinding.inflate(layoutInflater, null, false)//TODO
+                    }
+                }
+                mainModel.windowMode.value
             }
         }
 
-        if (this::bindingControlPanel.isInitialized) {
-            val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-            val navController = navHostFragment.navController
-            bindingControlPanel.bottomNavigation.setupWithNavController(navController)
-            setSupportActionBar(bindingControlPanel.toolbar)
+        setupControlPanel()
+
+        windowMode?.let {
+            //TODO: init widgetCardManager with it
+        }
+
+        mainModel.windowMode.observe(this) {
+            if (windowMode != it) {
+                recreate()
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        //TODO: recycle widgetCardManager
+    }
+
+    private fun setupControlPanel() {
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        when (windowMode) {
+            WindowMode.SINGLE -> {
+                bindingControlPanelExpanded.navigationRail.setupWithNavController(navHostFragment.navController)
+                setSupportActionBar(bindingControlPanelExpanded.toolbar)
+            }
+
+            else -> {
+                bindingControlPanelCompact.bottomNavigation.setupWithNavController(navHostFragment.navController)
+                setSupportActionBar(bindingControlPanelCompact.toolbar)
+            }
         }
     }
 
     fun getControlPanelView(): View {
-        return bindingControlPanel.root
+        return when (windowMode) {
+            WindowMode.SINGLE -> bindingControlPanelExpanded.root
+            else -> bindingControlPanelCompact.root
+        }
     }
 
     @Suppress("DEPRECATION")
@@ -79,8 +117,9 @@ class MainActivity : AppCompatActivity() {
 
     internal fun showSnackBar(text: String) {
         when (windowMode) {
-            WindowMode.COMPACT -> Snackbar.make(bindingCompact.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingControlPanel.bottomNavigation).show()
-            WindowMode.EXPANDED -> Snackbar.make(bindingExpanded.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingControlPanel.bottomNavigation).show()
+            WindowMode.SINGLE -> Snackbar.make(bindingExpanded.root, text, Snackbar.LENGTH_LONG).show()
+            WindowMode.DUAL, WindowMode.TRIPLE -> Snackbar.make(bindingExpanded.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingControlPanelCompact.bottomNavigation).show()
+            null -> Snackbar.make(bindingCompact.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingControlPanelCompact.bottomNavigation).show()
         }
     }
 }
