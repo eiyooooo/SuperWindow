@@ -9,20 +9,33 @@ import android.widget.LinearLayout
 import androidx.appcompat.content.res.AppCompatResources
 import com.eiyooooo.superwindow.R
 import com.eiyooooo.superwindow.utils.dp2px
+import com.eiyooooo.superwindow.views.animations.AnimExecutor
 
 class SplitHandleView(context: Context) {
 
     private val splitHandle: View = View(context).apply {
+        val margin = context.dp2px(4)
         id = View.generateViewId()
         layoutParams = LinearLayout.LayoutParams(
             context.dp2px(5),
             context.dp2px(80)
         ).apply {
             gravity = Gravity.CENTER
-            setMargins(context.dp2px(4), context.dp2px(4), context.dp2px(4), context.dp2px(4))
+            setMargins(margin, margin, margin, margin)
         }
         alpha = 0.5f
         background = AppCompatResources.getDrawable(context, R.drawable.split_handle_background)
+    }
+
+    private var initialized = false
+
+    private lateinit var leftWidgetCard: WidgetCardView
+    private lateinit var rightWidgetCard: WidgetCardView
+
+    fun setWidgetCard(leftWidgetCard: WidgetCardView, rightWidgetCard: WidgetCardView) {
+        this.leftWidgetCard = leftWidgetCard
+        this.rightWidgetCard = rightWidgetCard
+        initialized = true
     }
 
     private val splitHandleListener by lazy {
@@ -32,31 +45,35 @@ class SplitHandleView(context: Context) {
 
             @SuppressLint("ClickableViewAccessibility")
             override fun onTouch(v: View, event: MotionEvent): Boolean {
+                if (!initialized) return false
                 return when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-//                        showBlurLayer()
+                        leftWidgetCard.makeBlur()
+                        rightWidgetCard.makeBlur()
                         X = v.x
                         touchX = event.rawX
-//                        AnimExecutor.dragPressAnimation(bindingExpanded.splitHandle, true)
+                        AnimExecutor.dragPressAnimation(splitHandle, true)
                         true
                     }
 
                     MotionEvent.ACTION_MOVE -> {
                         val deltaX = event.rawX - touchX
                         val newX = X + deltaX
-//                        mainModel.updateDualSplitHandlePosition(newX)
+//TODO                        position.update { newX }
                         true
                     }
 
                     MotionEvent.ACTION_UP -> {
-//                        removeBlurLayerImmediately()
-//                        AnimExecutor.dragPressAnimation(bindingExpanded.splitHandle, false)
+                        leftWidgetCard.startBlurTransitAnimation()
+                        rightWidgetCard.startBlurTransitAnimation()
+                        AnimExecutor.dragPressAnimation(splitHandle, false)
                         true
                     }
 
                     MotionEvent.ACTION_CANCEL -> {
-//                        removeBlurLayerImmediately()
-//                        AnimExecutor.dragPressAnimation(bindingExpanded.splitHandle, false)
+                        leftWidgetCard.startBlurTransitAnimation()
+                        rightWidgetCard.startBlurTransitAnimation()
+                        AnimExecutor.dragPressAnimation(splitHandle, false)
                         false
                     }
 

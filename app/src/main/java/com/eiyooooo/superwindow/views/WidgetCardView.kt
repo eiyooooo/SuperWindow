@@ -3,6 +3,7 @@ package com.eiyooooo.superwindow.views
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import com.eiyooooo.superwindow.databinding.ItemWidgetCardBinding
@@ -10,12 +11,35 @@ import com.eiyooooo.superwindow.utils.BlurUtils
 import com.eiyooooo.superwindow.views.animations.EaseCubicInterpolator
 import java.util.concurrent.atomic.AtomicBoolean
 
-class WidgetCardView(layoutInflater: LayoutInflater) {
+class WidgetCardView(context: Context) {
 
-    private val widgetCard: ItemWidgetCardBinding = ItemWidgetCardBinding.inflate(layoutInflater)
+    constructor(view: View) : this(view.context) {
+        widgetCard.contentContainer.addView(view)
+    }
+
+    private val widgetCard: ItemWidgetCardBinding = ItemWidgetCardBinding.inflate(LayoutInflater.from(context), null, false)
 
     private val blurring = AtomicBoolean(false)
     private val blurTransitAnimationList = mutableListOf<AnimatorSet>()
+
+    fun setContentView(view: View?) {
+        widgetCard.contentContainer.removeAllViews()
+        view?.let {
+            widgetCard.contentContainer.addView(view)
+        }
+    }
+
+    fun setIcon(icon: Int) {
+        widgetCard.icon.setImageResource(icon)
+    }
+
+    fun getRootView(): View {
+        return widgetCard.root
+    }
+
+    init {
+        widgetCard.widgetView.setTargetView(widgetCard.controlBar)
+    }
 
     fun makeBlur() {
         cancelBlurTransitAnimations()
