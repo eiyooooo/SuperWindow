@@ -1,5 +1,8 @@
 package com.eiyooooo.superwindow.views
 
+import android.animation.Animator
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
@@ -22,7 +25,9 @@ import com.eiyooooo.superwindow.utils.BlurUtils
 import com.eiyooooo.superwindow.utils.dp2px
 import com.eiyooooo.superwindow.viewmodels.MainActivityViewModel
 import com.eiyooooo.superwindow.views.animations.AnimExecutor
+import com.eiyooooo.superwindow.views.animations.EaseCubicInterpolator
 import com.google.android.material.snackbar.Snackbar
+import java.util.concurrent.atomic.AtomicBoolean
 
 class MainActivity : AppCompatActivity() {
 
@@ -85,7 +90,7 @@ class MainActivity : AppCompatActivity() {
             override fun onTouch(v: View?, event: MotionEvent): Boolean {
                 return when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        showBlurLayer()
+                        makeBlur()
                         X = bindingExpanded.splitHandle.x
                         touchX = event.rawX
                         AnimExecutor.dragPressAnimation(bindingExpanded.splitHandle, true)
@@ -100,13 +105,13 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     MotionEvent.ACTION_UP -> {
-                        removeBlurLayerImmediately()
+                        startBlurTransitAnimation()
                         AnimExecutor.dragPressAnimation(bindingExpanded.splitHandle, false)
                         true
                     }
 
                     MotionEvent.ACTION_CANCEL -> {
-                        removeBlurLayerImmediately()
+                        startBlurTransitAnimation()
                         AnimExecutor.dragPressAnimation(bindingExpanded.splitHandle, false)
                         false
                     }
@@ -117,67 +122,69 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showBlurLayer() {
-//        cancelForegroundAnimations()
+    private val blurring = AtomicBoolean(false)
+    private val blurTransitAnimationList = mutableListOf<AnimatorSet>()
+
+    private fun makeBlur() {
+        cancelBlurTransitAnimations()
+        bindingExpanded.leftView.blurLayer.foreground = BlurUtils.blurView(bindingExpanded.leftView.contentContainer)
+        bindingExpanded.leftView.blurLayer.foreground.alpha = 255
         bindingExpanded.leftView.blurLayer.visibility = View.VISIBLE
         bindingExpanded.leftView.iconContainer.visibility = View.VISIBLE
         bindingExpanded.leftView.contentContainer.visibility = View.GONE
-        bindingExpanded.leftView.blurLayer.foreground = BlurUtils.blurView(bindingExpanded.leftView.contentContainer)
+        bindingExpanded.leftView.contentContainer.alpha = 0F
+        blurring.set(true)
     }
 
-    private fun removeBlurLayerImmediately() {
-        if (bindingExpanded.leftView.blurLayer.foreground != null) {
-            bindingExpanded.leftView.contentContainer.foreground = null
-            bindingExpanded.leftView.contentContainer.visibility = View.VISIBLE
+    private fun removeBlurImmediately() {
+        bindingExpanded.leftView.contentContainer.alpha = 1F
+        bindingExpanded.leftView.contentContainer.visibility = View.VISIBLE
+        bindingExpanded.leftView.iconContainer.visibility = View.GONE
+        bindingExpanded.leftView.blurLayer.visibility = View.GONE
+        bindingExpanded.leftView.blurLayer.foreground.alpha = 255
+        bindingExpanded.leftView.blurLayer.foreground = null
+        blurring.set(false)
+    }
+
+    private fun startBlurTransitAnimation() {
+        if (blurring.get()) {
+            val blurLayerAnimation = ObjectAnimator.ofInt(bindingExpanded.leftView.blurLayer.foreground, "alpha", 255, 0).apply {
+                duration = 300
+                interpolator = EaseCubicInterpolator(0.35f, 0f, 0.35f, 1f)
+            }
+            val contentContainerAnimation = ObjectAnimator.ofFloat(bindingExpanded.leftView.contentContainer, "alpha", 0F, 1F).apply {
+                duration = 300
+                addListener(object : Animator.AnimatorListener {
+                    override fun onAnimationStart(animation: Animator) {
+                    }
+
+                    override fun onAnimationEnd(animation: Animator) {
+                        removeBlurImmediately()
+                    }
+
+                    override fun onAnimationCancel(animation: Animator) {
+                    }
+
+                    override fun onAnimationRepeat(animation: Animator) {
+                    }
+                })
+                interpolator = EaseCubicInterpolator(0.35f, 0f, 0.35f, 1f)
+            }
             bindingExpanded.leftView.iconContainer.visibility = View.GONE
-            bindingExpanded.leftView.blurLayer.visibility = View.GONE
+            bindingExpanded.leftView.contentContainer.visibility = View.VISIBLE
+            val animSet = AnimatorSet()
+            animSet.playTogether(blurLayerAnimation, contentContainerAnimation)
+            animSet.start()
+            blurTransitAnimationList.add(animSet)
         }
     }
 
-//    private val mRemoveForegroundAnimList = mutableListOf<ObjectAnimator>()
-//
-//    private fun cancelForegroundAnimations() {
-//        mRemoveForegroundAnimList.forEach {
-//            it.cancel()
-//        }
-//        mRemoveForegroundAnimList.clear()
-//    }
-//
-//    private fun removeBlurForeground() {
-//        val virtualDisplayRoot = bindingExpanded.leftView.blurLayer
-//        if (virtualDisplayRoot.foreground != null) {
-//            val originForeGround = virtualDisplayRoot.foreground
-//            val removeForegroundAnim = ObjectAnimator.ofInt(virtualDisplayRoot.foreground, "alpha", 255, 0).apply {
-//                duration = 400
-//                addListener(object : Animator.AnimatorListener {
-//                    override fun onAnimationStart(animation: Animator) {
-//                        Timber.d("开始执行移除模糊遮罩动画:${this.hashCode()}")
-//                    }
-//
-//                    override fun onAnimationEnd(animation: Animator) {
-//                        val animHashCode = this.hashCode()
-//                        if (isPressDrag.get()) {
-//                            Timber.i("透明度动画执行完毕，但当前还在按压，暂不移除遮罩:$animHashCode")
-//                        } else {
-//                            Timber.d("透明度动画执行完毕，移除模糊遮罩:$animHashCode")
-//                            originForeGround.alpha = 255
-//                            virtualDisplayRoot.foreground = null
-//                            bindingExpanded.leftView.blurLayer.visibility = View.GONE
-//                        }
-//                    }
-//
-//                    override fun onAnimationCancel(animation: Animator) {
-//                        Timber.d("Cancel透明度动画执行:${this.hashCode()}")
-//                    }
-//
-//                    override fun onAnimationRepeat(animation: Animator) {
-//                    }
-//                })
-//                start()
-//            }
-//            mRemoveForegroundAnimList.add(removeForegroundAnim)
-//        }
-//    }
+    private fun cancelBlurTransitAnimations() {
+        blurTransitAnimationList.forEach {
+            it.cancel()
+        }
+        blurTransitAnimationList.clear()
+    }
 
     private fun updateDualLayout(newX: Float) {
         if (newX < 0) return
