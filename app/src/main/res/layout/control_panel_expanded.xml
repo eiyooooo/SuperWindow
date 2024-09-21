@@ -8,11 +8,11 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/toolbar_container"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@id/navigation_rail"
+        app:layout_constraintBottom_toTopOf="@id/nav_host_fragment"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/navigation_rail"
         app:layout_constraintTop_toTopOf="parent"
         app:liftOnScroll="true"
         tools:viewBindingIgnore="true">
@@ -49,7 +49,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/nav_host_fragment"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_container"
+        app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/navigation_menu"
         app:menuGravity="center" />
 
