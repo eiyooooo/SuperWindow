@@ -6,14 +6,16 @@ import android.animation.ObjectAnimator
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.FrameLayout
 import com.eiyooooo.superwindow.databinding.ItemWidgetCardBinding
+import com.eiyooooo.superwindow.entities.WidgetCardData
 import com.eiyooooo.superwindow.utils.BlurUtils
 import com.eiyooooo.superwindow.views.animations.EaseCubicInterpolator
 import java.util.concurrent.atomic.AtomicBoolean
 
-class WidgetCardView(context: Context) {
+class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
 
-    constructor(view: View) : this(view.context) {
+    constructor(view: View, widgetCardData: WidgetCardData) : this(view.context, widgetCardData) {
         widgetCard.contentContainer.addView(view)
     }
 
@@ -29,6 +31,10 @@ class WidgetCardView(context: Context) {
         }
     }
 
+    fun getContentView(): View? {
+        return widgetCard.contentContainer.getChildAt(0)
+    }
+
     fun setIcon(icon: Int) {
         widgetCard.icon.setImageResource(icon)
     }
@@ -37,8 +43,19 @@ class WidgetCardView(context: Context) {
         return widgetCard.root
     }
 
+    fun getControlBar(): View {
+        return widgetCard.controlBar
+    }
+
     init {
         widgetCard.widgetView.setTargetView(widgetCard.controlBar)
+        widgetCard.root.layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
+        widgetCardData.icon?.let {
+            widgetCard.icon.setImageDrawable(it)
+        }
     }
 
     fun makeBlur() {

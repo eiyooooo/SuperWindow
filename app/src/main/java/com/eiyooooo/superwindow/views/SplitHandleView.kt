@@ -13,27 +13,25 @@ import com.eiyooooo.superwindow.views.animations.AnimExecutor
 
 class SplitHandleView(context: Context) : View(context) {
 
-    init {
-        id = generateViewId()
-        layoutParams = LinearLayout.LayoutParams(context.dp2px(5), context.dp2px(80)).apply {
-            gravity = Gravity.CENTER
-            val margin = context.dp2px(4)
-            setMargins(margin, 0, margin, 0)
-        }
-        alpha = 0.5f
-        background = AppCompatResources.getDrawable(context, R.drawable.split_handle_background)
+    private var widgetCards: List<WidgetCardView>? = null
 
-        setOnTouchListener(object : OnTouchListener {
+    fun setWidgetCards(widgetCards: List<WidgetCardView>?) {
+        this.widgetCards = widgetCards
+    }
+
+    private val touchListener by lazy {
+        object : OnTouchListener {
             private var X: Float = 0F
             private var touchX: Float = 0F
 
             @SuppressLint("ClickableViewAccessibility")
             override fun onTouch(v: View, event: MotionEvent): Boolean {
-                if (!widgetCardInitialized) return false
+                if (widgetCards.isNullOrEmpty()) return false
                 return when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        leftWidgetCard.makeBlur()
-                        rightWidgetCard.makeBlur()
+                        for (widgetCard in widgetCards!!) {
+                            widgetCard.makeBlur()
+                        }
                         X = v.x
                         touchX = event.rawX
                         AnimExecutor.pressHandleAnimation(this@SplitHandleView, true)
@@ -48,15 +46,17 @@ class SplitHandleView(context: Context) : View(context) {
                     }
 
                     MotionEvent.ACTION_UP -> {
-                        leftWidgetCard.startBlurTransitAnimation()
-                        rightWidgetCard.startBlurTransitAnimation()
+                        for (widgetCard in widgetCards!!) {
+                            widgetCard.startBlurTransitAnimation()
+                        }
                         AnimExecutor.pressHandleAnimation(this@SplitHandleView, false)
                         true
                     }
 
                     MotionEvent.ACTION_CANCEL -> {
-                        leftWidgetCard.startBlurTransitAnimation()
-                        rightWidgetCard.startBlurTransitAnimation()
+                        for (widgetCard in widgetCards!!) {
+                            widgetCard.startBlurTransitAnimation()
+                        }
                         AnimExecutor.pressHandleAnimation(this@SplitHandleView, false)
                         false
                     }
@@ -64,17 +64,18 @@ class SplitHandleView(context: Context) : View(context) {
                     else -> false
                 }
             }
-        })
+        }
     }
 
-    private var widgetCardInitialized = false
-
-    private lateinit var leftWidgetCard: WidgetCardView
-    private lateinit var rightWidgetCard: WidgetCardView
-
-    fun setWidgetCard(leftWidgetCard: WidgetCardView, rightWidgetCard: WidgetCardView) {
-        this.leftWidgetCard = leftWidgetCard
-        this.rightWidgetCard = rightWidgetCard
-        widgetCardInitialized = true
+    init {
+        id = generateViewId()
+        layoutParams = LinearLayout.LayoutParams(context.dp2px(5), context.dp2px(80)).apply {
+            gravity = Gravity.CENTER
+            val margin = context.dp2px(4)
+            setMargins(margin, 0, margin, 0)
+        }
+        alpha = 0.5f
+        background = AppCompatResources.getDrawable(context, R.drawable.split_handle_background)
+        setOnTouchListener(touchListener)
     }
 }

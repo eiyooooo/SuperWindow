@@ -6,6 +6,16 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
+    <FrameLayout
+        android:id="@+id/control_panel_creator"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <com.eiyooooo.superwindow.views.ExpandTargetViewsTouchAreaConstraintLayout
         android:id="@+id/widget_container"
         android:layout_width="match_parent"
