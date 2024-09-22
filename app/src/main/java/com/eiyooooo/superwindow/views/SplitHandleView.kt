@@ -2,21 +2,27 @@ package com.eiyooooo.superwindow.views
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.view.Gravity
+import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.widget.LinearLayout
-import androidx.appcompat.content.res.AppCompatResources
-import com.eiyooooo.superwindow.R
-import com.eiyooooo.superwindow.utils.dp2px
 import com.eiyooooo.superwindow.views.animations.AnimExecutor
 
-class SplitHandleView(context: Context) : View(context) {
+class SplitHandleView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
 
-    private var widgetCards: List<WidgetCardView>? = null
+    private var widgetCards: Array<out WidgetCardView>? = null
 
-    fun setWidgetCards(widgetCards: List<WidgetCardView>?) {
-        this.widgetCards = widgetCards
+    fun setWidgetCards(vararg widgetCards: WidgetCardView) {
+        if (widgetCards.isEmpty()) {
+            this.widgetCards = null
+        } else {
+            this.widgetCards = widgetCards
+        }
+    }
+
+    private var onDragHandle: ((newX: Float) -> Unit)? = null
+
+    fun setOnDragHandle(onDragHandle: ((newX: Float) -> Unit)?) {
+        this.onDragHandle = onDragHandle
     }
 
     private val touchListener by lazy {
@@ -41,7 +47,7 @@ class SplitHandleView(context: Context) : View(context) {
                     MotionEvent.ACTION_MOVE -> {
                         val deltaX = event.rawX - touchX
                         val newX = X + deltaX
-                        //TODO: position.update { newX }
+                        onDragHandle?.invoke(newX)
                         true
                     }
 
@@ -68,14 +74,6 @@ class SplitHandleView(context: Context) : View(context) {
     }
 
     init {
-        id = generateViewId()
-        layoutParams = LinearLayout.LayoutParams(context.dp2px(5), context.dp2px(80)).apply {
-            gravity = Gravity.CENTER
-            val margin = context.dp2px(4)
-            setMargins(margin, 0, margin, 0)
-        }
-        alpha = 0.5f
-        background = AppCompatResources.getDrawable(context, R.drawable.split_handle_background)
         setOnTouchListener(touchListener)
     }
 }

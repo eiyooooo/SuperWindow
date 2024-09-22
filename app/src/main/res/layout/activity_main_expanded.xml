@@ -23,7 +23,69 @@
         app:layout_constraintBottom_toTopOf="@+id/bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <FrameLayout
+            android:id="@+id/first_view"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/widget_container_background"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/left_split_handle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.eiyooooo.superwindow.views.SplitHandleView
+            android:id="@+id/left_split_handle"
+            android:layout_width="5dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            android:layout_margin="4dp"
+            android:alpha="0.5"
+            android:background="@drawable/split_handle_background"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/second_view"
+            app:layout_constraintStart_toEndOf="@+id/first_view"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <FrameLayout
+            android:id="@+id/second_view"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/widget_container_background"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/right_split_handle"
+            app:layout_constraintStart_toEndOf="@+id/left_split_handle"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.eiyooooo.superwindow.views.SplitHandleView
+            android:id="@+id/right_split_handle"
+            android:layout_width="5dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            android:layout_margin="4dp"
+            android:alpha="0.5"
+            android:background="@drawable/split_handle_background"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/third_view"
+            app:layout_constraintStart_toEndOf="@+id/second_view"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <FrameLayout
+            android:id="@+id/third_view"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/widget_container_background"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/right_split_handle"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </com.eiyooooo.superwindow.views.ExpandTargetViewsTouchAreaConstraintLayout>
 
     <LinearLayout
         android:id="@+id/bar"

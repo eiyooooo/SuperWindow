@@ -1,14 +1,18 @@
 package com.eiyooooo.superwindow.adapters
 
 import android.view.View
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.lifecycleScope
+import androidx.transition.ChangeBounds
+import androidx.transition.TransitionManager
+import com.eiyooooo.superwindow.R
 import com.eiyooooo.superwindow.entities.WidgetCardData
-import com.eiyooooo.superwindow.entities.WindowMode.DUAL
-import com.eiyooooo.superwindow.entities.WindowMode.SINGLE
-import com.eiyooooo.superwindow.entities.WindowMode.TRIPLE
+import com.eiyooooo.superwindow.entities.WidgetCardGroup
 import com.eiyooooo.superwindow.viewmodels.MainActivityViewModel
 import com.eiyooooo.superwindow.views.MainActivity
 import com.eiyooooo.superwindow.views.WidgetCardView
+import com.eiyooooo.superwindow.views.animations.EaseCubicInterpolator
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class WidgetCardManager(private val mainActivity: MainActivity, private val mainModel: MainActivityViewModel) {
@@ -21,56 +25,146 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             controlPanelWidgetCard.setContentView(mainActivity.getControlPanelExpandedView())
         }
 
-//        mainModel.windowMode.observe(mainActivity) {
-//            //TODO: 取消windowMode硬依赖，动态更换
-//        }
-        when (mainModel.windowMode.value!!) {//TODO: 取消windowMode硬依赖
-            SINGLE -> {
-                mainModel.firstWidgetCardData.observe(mainActivity) {
-                    mainActivity.bindingExpanded.widgetContainer.removeAllViews()
-                    val showWidget = if (it.isControlPanel) {
-                        controlPanelWidgetCard
-                    } else if (widgetCards[it.identifier] == null) {
-                        val widgetCard = WidgetCardView(mainActivity, it)//TODO: change to TextureView
-                        widgetCards[it.identifier] = widgetCard
-                        widgetCard
-                    } else {
-                        widgetCards[it.identifier]!!
-                    }
-                    showWidget.getControlBar().visibility = View.GONE
-                    mainActivity.bindingExpanded.widgetContainer.addView(showWidget.getRootView())
+        mainModel.widgetCardGroup.observe(mainActivity) {//TODO: handle pendingWidgetCard
+            when (it.foregroundWidgetCardCount) {
+                1 -> {
+                    widgetCardCountChanged(1)
+                    showSingleWidgetCard(it)
+                }
+
+                2 -> {
+                    widgetCardCountChanged(2)
+                    showDualWidgetCard(it)
+                }
+
+                3 -> {
+                    widgetCardCountChanged(3)
+                    showTripleWidgetCard(it)
                 }
             }
+            mainModel.lastWidgetCardGroup = it
+        }
 
-            DUAL -> {
-
-            }
-
-            TRIPLE -> {
-
-            }
+        //TODO: remove this test module
+        mainActivity.lifecycleScope.launch {
+            delay(2000)
+            mainModel.lastWidgetCardGroup?.copy(secondWidgetCard = WidgetCardData(false, "test1"), thirdWidgetCard = null)?.let { mainModel.updateWidgetCardGroup(it) }
         }
     }
-//        it.widgetContainer.setTargetView(it.splitHandle)
-//        it.leftView.widgetView.setTargetView(it.leftView.controlBar)
-//        it.rightView.widgetView.setTargetView(it.rightView.controlBar)
-//
-//        it.splitHandle.setOnTouchListener(dualSplitHandleListener)
-//
-//        it.leftView.contentContainer.addView(bindingControlPanel.root)
 
+    private fun showSingleWidgetCard(group: WidgetCardGroup) {
+        val showWidgetCard = getWidgetCard(group.firstWidgetCard)
+        showWidgetCard.getControlBar().visibility = View.GONE
+        mainActivity.bindingExpanded.firstView.removeAllViews()
+        mainActivity.bindingExpanded.secondView.removeAllViews()
+        mainActivity.bindingExpanded.thirdView.removeAllViews()
+        mainActivity.bindingExpanded.firstView.addView(showWidgetCard.getRootView())
+        mainActivity.bindingExpanded.leftSplitHandle.setWidgetCards()
+        mainActivity.bindingExpanded.leftSplitHandle.setOnDragHandle(null)
+        mainActivity.bindingExpanded.rightSplitHandle.setWidgetCards()
+        mainActivity.bindingExpanded.rightSplitHandle.setOnDragHandle(null)
+    }
 
-//    private fun updateDualLayout(newX: Float) {
-//        if (newX < 0) return
-//
-//        val constraintSet = ConstraintSet()
-//        constraintSet.clone(bindingExpanded.widgetContainer)
-//
-//        constraintSet.connect(R.id.split_handle, ConstraintSet.START, R.id.widget_container, ConstraintSet.START, newX.toInt())
-//        constraintSet.connect(R.id.split_handle, ConstraintSet.END, R.id.right_view, ConstraintSet.START, 0)
-//        constraintSet.connect(R.id.left_view, ConstraintSet.END, R.id.split_handle, ConstraintSet.START, dp2px(4))
-//        constraintSet.connect(R.id.right_view, ConstraintSet.START, R.id.split_handle, ConstraintSet.END, dp2px(4))
-//
-//        constraintSet.applyTo(bindingExpanded.widgetContainer)
-//    }
+    private fun showDualWidgetCard(group: WidgetCardGroup) {
+        val showFirstWidgetCard = getWidgetCard(group.firstWidgetCard)
+        val showSecondWidgetCard = getWidgetCard(group.secondWidgetCard!!)
+        showFirstWidgetCard.getControlBar().visibility = View.VISIBLE
+        showSecondWidgetCard.getControlBar().visibility = View.VISIBLE
+        mainActivity.bindingExpanded.firstView.removeAllViews()
+        mainActivity.bindingExpanded.secondView.removeAllViews()
+        mainActivity.bindingExpanded.thirdView.removeAllViews()
+        mainActivity.bindingExpanded.firstView.addView(showFirstWidgetCard.getRootView())
+        mainActivity.bindingExpanded.secondView.addView(showSecondWidgetCard.getRootView())
+        mainActivity.bindingExpanded.leftSplitHandle.setWidgetCards(showFirstWidgetCard, showSecondWidgetCard)
+        mainActivity.bindingExpanded.leftSplitHandle.setOnDragHandle { updateDualWidgetCardLayout(it) }
+        mainActivity.bindingExpanded.rightSplitHandle.setWidgetCards()
+        mainActivity.bindingExpanded.rightSplitHandle.setOnDragHandle(null)
+    }
+
+    private fun showTripleWidgetCard(group: WidgetCardGroup) {
+        val showFirstWidgetCard = getWidgetCard(group.firstWidgetCard)
+        val showSecondWidgetCard = getWidgetCard(group.secondWidgetCard!!)
+        val showThirdWidgetCard = getWidgetCard(group.thirdWidgetCard!!)
+        showFirstWidgetCard.getControlBar().visibility = View.VISIBLE
+        showSecondWidgetCard.getControlBar().visibility = View.VISIBLE
+        showThirdWidgetCard.getControlBar().visibility = View.VISIBLE
+        mainActivity.bindingExpanded.firstView.removeAllViews()
+        mainActivity.bindingExpanded.secondView.removeAllViews()
+        mainActivity.bindingExpanded.thirdView.removeAllViews()
+        mainActivity.bindingExpanded.firstView.addView(showFirstWidgetCard.getRootView())
+        mainActivity.bindingExpanded.secondView.addView(showSecondWidgetCard.getRootView())
+        mainActivity.bindingExpanded.thirdView.addView(showThirdWidgetCard.getRootView())
+        mainActivity.bindingExpanded.leftSplitHandle.setWidgetCards(showFirstWidgetCard, showSecondWidgetCard, showThirdWidgetCard)
+        mainActivity.bindingExpanded.leftSplitHandle.setOnDragHandle(null)//TODO
+        mainActivity.bindingExpanded.rightSplitHandle.setWidgetCards(showFirstWidgetCard, showSecondWidgetCard, showThirdWidgetCard)
+        mainActivity.bindingExpanded.rightSplitHandle.setOnDragHandle(null)//TODO
+    }
+
+    private fun getWidgetCard(widgetCard: WidgetCardData): WidgetCardView {
+        return if (widgetCard.isControlPanel) {
+            controlPanelWidgetCard
+        } else if (widgetCards[widgetCard.identifier] == null) {
+            val newWidgetCard = WidgetCardView(mainActivity, widgetCard)//TODO: change to TextureView
+            widgetCards[widgetCard.identifier] = newWidgetCard
+            newWidgetCard
+        } else {
+            widgetCards[widgetCard.identifier]!!
+        }
+    }
+
+    private val constraintSet = ConstraintSet()
+
+    private fun widgetCardCountChanged(viewCount: Int) {
+        constraintSet.clone(mainActivity.bindingExpanded.widgetContainer)
+
+        val transition = ChangeBounds().apply {
+            duration = 250
+            interpolator = EaseCubicInterpolator(0.25f, 0.1f, 0.25f, 1f)
+        }
+        TransitionManager.beginDelayedTransition(mainActivity.bindingExpanded.widgetContainer, transition)
+
+        when (viewCount) {
+            1 -> {
+                constraintSet.constrainPercentWidth(R.id.first_view, 1.0f)
+                constraintSet.setVisibility(R.id.second_view, ConstraintSet.GONE)
+                constraintSet.setVisibility(R.id.third_view, ConstraintSet.GONE)
+                constraintSet.setVisibility(R.id.left_split_handle, ConstraintSet.GONE)
+                constraintSet.setVisibility(R.id.right_split_handle, ConstraintSet.GONE)
+            }
+
+            2 -> {
+                constraintSet.constrainPercentWidth(R.id.first_view, 0.5f)
+                constraintSet.constrainPercentWidth(R.id.second_view, 0.5f)
+                constraintSet.setVisibility(R.id.second_view, ConstraintSet.VISIBLE)
+                constraintSet.setVisibility(R.id.left_split_handle, ConstraintSet.VISIBLE)
+                constraintSet.setVisibility(R.id.third_view, ConstraintSet.GONE)
+                constraintSet.setVisibility(R.id.right_split_handle, ConstraintSet.GONE)
+            }
+
+            3 -> {
+                constraintSet.constrainPercentWidth(R.id.first_view, 0.33f)
+                constraintSet.constrainPercentWidth(R.id.second_view, 0.33f)
+                constraintSet.constrainPercentWidth(R.id.third_view, 0.33f)
+                constraintSet.setVisibility(R.id.second_view, ConstraintSet.VISIBLE)
+                constraintSet.setVisibility(R.id.third_view, ConstraintSet.VISIBLE)
+                constraintSet.setVisibility(R.id.left_split_handle, ConstraintSet.VISIBLE)
+                constraintSet.setVisibility(R.id.right_split_handle, ConstraintSet.VISIBLE)
+            }
+        }
+
+        constraintSet.applyTo(mainActivity.bindingExpanded.widgetContainer)
+    }
+
+    private fun updateDualWidgetCardLayout(newX: Float) {
+        constraintSet.clone(mainActivity.bindingExpanded.widgetContainer)
+
+        val parentWidth = mainActivity.bindingExpanded.widgetContainer.width
+        val newPercent = newX / parentWidth
+
+        if (newPercent in 0.2f..0.8f) {
+            constraintSet.constrainPercentWidth(R.id.first_view, newPercent)
+            constraintSet.constrainPercentWidth(R.id.second_view, 1 - newPercent)
+            constraintSet.applyTo(mainActivity.bindingExpanded.widgetContainer)
+        }
+    }
 }

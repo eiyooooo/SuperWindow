@@ -16,9 +16,6 @@ import com.eiyooooo.superwindow.databinding.ActivityMainCompactBinding
 import com.eiyooooo.superwindow.databinding.ActivityMainExpandedBinding
 import com.eiyooooo.superwindow.databinding.ControlPanelCompactBinding
 import com.eiyooooo.superwindow.databinding.ControlPanelExpandedBinding
-import com.eiyooooo.superwindow.entities.WindowMode.DUAL
-import com.eiyooooo.superwindow.entities.WindowMode.SINGLE
-import com.eiyooooo.superwindow.entities.WindowMode.TRIPLE
 import com.eiyooooo.superwindow.viewmodels.MainActivityViewModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,18 +57,20 @@ class MainActivity : AppCompatActivity() {
                         bindingExpanded.controlPanelCreator.removeAllViews()
                         controlPanelExpandedInitialized.update { true }
                     }
+                    it.widgetContainer.addTargetView(it.leftSplitHandle)
+                    it.widgetContainer.addTargetView(it.rightSplitHandle)
                     widgetCardManager.init()
                     setContentView(it.root)
                 }
-                mainModel.windowMode.observe(this) {
-                    when (it!!) {
-                        SINGLE -> {
+                mainModel.widgetCardGroup.observe(this) {
+                    if (!it.isControlPanelForeground) return@observe
+                    when (it.foregroundWidgetCardCount) {
+                        1 -> {
                             bindingControlPanelExpanded.bottomNavigation.visibility = View.GONE
                             bindingControlPanelExpanded.navigationRail.visibility = View.VISIBLE
                         }
 
-                        DUAL,
-                        TRIPLE -> {
+                        else -> {
                             bindingControlPanelExpanded.bottomNavigation.visibility = View.VISIBLE
                             bindingControlPanelExpanded.navigationRail.visibility = View.GONE
                         }
@@ -82,11 +81,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         setupControlPanel()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        //TODO: recycle widgetCardManager
     }
 
     private fun setupControlPanel() {
@@ -120,10 +114,15 @@ class MainActivity : AppCompatActivity() {
 
     internal fun showSnackBar(text: String) {
         if (isExpanded) {
-            if (mainModel.windowMode.value == SINGLE) {
-                Snackbar.make(bindingExpanded.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingExpanded.bar).show()
+            val widgetCardGroup = mainModel.widgetCardGroup.value!!
+            if (widgetCardGroup.isControlPanelForeground) {
+                if (widgetCardGroup.foregroundWidgetCardCount == 1) {
+                    Snackbar.make(bindingExpanded.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingExpanded.bar).show()
+                } else {
+                    Snackbar.make(bindingExpanded.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingControlPanelExpanded.bottomNavigation).show()
+                }
             } else {
-                Snackbar.make(bindingExpanded.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingControlPanelExpanded.bottomNavigation).show()
+                Snackbar.make(bindingExpanded.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingExpanded.bar).show()
             }
         } else {
             Snackbar.make(bindingCompact.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingControlPanelCompact.bottomNavigation).show()
