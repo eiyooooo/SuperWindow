@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import com.eiyooooo.superwindow.entities.WidgetCardData
 import com.eiyooooo.superwindow.entities.WindowMode
+import com.eiyooooo.superwindow.utils.BlurUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 
@@ -43,5 +44,10 @@ class MainActivityViewModel : ViewModel() {
 
     fun updateBackgroundWidgetCardData(widgetCardData: List<WidgetCardData>) {
         mBackgroundWidgetCardData.update { widgetCardData }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        BlurUtils.destroy()
     }
 }

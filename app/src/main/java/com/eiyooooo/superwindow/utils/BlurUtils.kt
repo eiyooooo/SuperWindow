@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.eiyooooo.superwindow.utils
 
 import android.content.Context
