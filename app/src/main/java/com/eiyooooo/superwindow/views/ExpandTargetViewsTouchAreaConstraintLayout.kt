@@ -58,6 +58,7 @@ class ExpandTargetViewsTouchAreaConstraintLayout @JvmOverloads constructor(conte
         val touchY: Int = event?.y?.toInt() ?: 0
 
         for (view in targetViews) {
+            if (!view.isShown) continue
             val rect = Rect()
             view.getHitRect(rect)
             rect.left -= expandTouchPx

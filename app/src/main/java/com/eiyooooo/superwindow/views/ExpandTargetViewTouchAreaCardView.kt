@@ -50,6 +50,7 @@ class ExpandTargetViewTouchAreaCardView @JvmOverloads constructor(context: Conte
 
     private fun isTouchingTargetViewRegion(event: MotionEvent?): Boolean {
         targetView?.let {
+            if (!it.isShown) return false
             val rect = Rect()
             it.getHitRect(rect)
             rect.left -= expandTouchPx
