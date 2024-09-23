@@ -2,6 +2,7 @@ package com.eiyooooo.superwindow.adapters
 
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.animation.PathInterpolatorCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
@@ -11,7 +12,6 @@ import com.eiyooooo.superwindow.entities.WidgetCardGroup
 import com.eiyooooo.superwindow.viewmodels.MainActivityViewModel
 import com.eiyooooo.superwindow.views.MainActivity
 import com.eiyooooo.superwindow.views.WidgetCardView
-import com.eiyooooo.superwindow.views.animations.EaseCubicInterpolator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -119,7 +119,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
 
         val transition = ChangeBounds().apply {
             duration = 250
-            interpolator = EaseCubicInterpolator(0.25f, 0.1f, 0.25f, 1f)
+            interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)
         }
         TransitionManager.beginDelayedTransition(mainActivity.bindingExpanded.widgetContainer, transition)
 

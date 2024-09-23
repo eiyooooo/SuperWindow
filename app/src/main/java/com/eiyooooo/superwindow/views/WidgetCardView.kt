@@ -10,11 +10,11 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
 import android.widget.FrameLayout
+import androidx.core.view.animation.PathInterpolatorCompat
 import com.eiyooooo.superwindow.databinding.ItemWidgetCardBinding
 import com.eiyooooo.superwindow.entities.WidgetCardData
 import com.eiyooooo.superwindow.utils.BlurUtils
 import com.eiyooooo.superwindow.views.animations.AnimExecutor
-import com.eiyooooo.superwindow.views.animations.EaseCubicInterpolator
 import java.util.concurrent.atomic.AtomicBoolean
 
 class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
@@ -131,7 +131,7 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
             val blurLayerAnimation = if (canBlur) {
                 ObjectAnimator.ofInt(widgetCard.blurLayer.foreground, "alpha", 255, 0).apply {
                     duration = 300
-                    interpolator = EaseCubicInterpolator(0.35f, 0f, 0.35f, 1f)
+                    interpolator = PathInterpolatorCompat.create(0.35f, 0f, 0.35f, 1f)
                 }
             } else null
             val contentContainerAnimation = ObjectAnimator.ofFloat(widgetCard.contentContainer, "alpha", 0F, 1F).apply {
@@ -150,7 +150,7 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
                     override fun onAnimationRepeat(animation: Animator) {
                     }
                 })
-                interpolator = EaseCubicInterpolator(0.35f, 0f, 0.35f, 1f)
+                interpolator = PathInterpolatorCompat.create(0.35f, 0f, 0.35f, 1f)
             }
             widgetCard.iconContainer.visibility = View.GONE
             widgetCard.contentContainer.visibility = View.VISIBLE
