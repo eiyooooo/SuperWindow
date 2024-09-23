@@ -95,17 +95,11 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
         widgetCard.controlBar.setOnTouchListener(touchListener)
     }
 
-    private var canBlur = true
-
     fun makeBlur() {
         cancelBlurTransitAnimations()
-        val blurredDrawable = BlurUtils.blurView(widgetCard.contentContainer)
-        widgetCard.blurLayer.foreground = blurredDrawable
-        if (blurredDrawable != null) {
-            canBlur = true
+        BlurUtils.blurView(widgetCard.contentContainer)?.let {
+            widgetCard.blurLayer.foreground = it
             widgetCard.blurLayer.foreground.alpha = 255
-        } else {
-            canBlur = false
         }
         widgetCard.blurLayer.visibility = View.VISIBLE
         widgetCard.iconContainer.visibility = View.VISIBLE
@@ -115,12 +109,13 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
     }
 
     fun removeBlurImmediately() {
+        cancelBlurTransitAnimations()
         widgetCard.contentContainer.alpha = 1F
         widgetCard.contentContainer.visibility = View.VISIBLE
         widgetCard.iconContainer.visibility = View.GONE
         widgetCard.blurLayer.visibility = View.GONE
-        if (canBlur) {
-            widgetCard.blurLayer.foreground.alpha = 255
+        widgetCard.blurLayer.foreground?.let {
+            it.alpha = 255
         }
         widgetCard.blurLayer.foreground = null
         blurring.set(false)
@@ -128,12 +123,12 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
 
     fun startBlurTransitAnimation() {
         if (blurring.get()) {
-            val blurLayerAnimation = if (canBlur) {
-                ObjectAnimator.ofInt(widgetCard.blurLayer.foreground, "alpha", 255, 0).apply {
+            val blurLayerAnimation = widgetCard.blurLayer.foreground.let {
+                ObjectAnimator.ofInt(it, "alpha", 255, 0).apply {
                     duration = 300
                     interpolator = PathInterpolatorCompat.create(0.35f, 0f, 0.35f, 1f)
                 }
-            } else null
+            } ?: null
             val contentContainerAnimation = ObjectAnimator.ofFloat(widgetCard.contentContainer, "alpha", 0F, 1F).apply {
                 duration = 300
                 addListener(object : Animator.AnimatorListener {

@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
 
     private val controlPanelExpandedInitialized = MutableStateFlow(false)
     private lateinit var bindingControlPanelCompact: ControlPanelCompactBinding
-    private lateinit var bindingControlPanelExpanded: ControlPanelExpandedBinding
+    internal lateinit var bindingControlPanelExpanded: ControlPanelExpandedBinding
 
     private val mainModel: MainActivityViewModel by viewModels()
     private val widgetCardManager: WidgetCardManager by lazy { WidgetCardManager(this, mainModel) }
@@ -61,20 +61,6 @@ class MainActivity : AppCompatActivity() {
                     it.widgetContainer.addTargetView(it.rightSplitHandle)
                     widgetCardManager.init()
                     setContentView(it.root)
-                }
-                mainModel.widgetCardGroup.observe(this) {
-                    if (!it.isControlPanelForeground) return@observe
-                    when (it.foregroundWidgetCardCount) {
-                        1 -> {
-                            bindingControlPanelExpanded.bottomNavigation.visibility = View.GONE
-                            bindingControlPanelExpanded.navigationRail.visibility = View.VISIBLE
-                        }
-
-                        else -> {
-                            bindingControlPanelExpanded.bottomNavigation.visibility = View.VISIBLE
-                            bindingControlPanelExpanded.navigationRail.visibility = View.GONE
-                        }
-                    }
                 }
                 true
             }
