@@ -31,6 +31,13 @@ class MainActivityViewModel : ViewModel() {
 
     var lastWidgetCardGroup: WidgetCardGroup? = null
 
+    private val mDualSplitHandlePosition: MutableStateFlow<Float> by lazy { MutableStateFlow(-1f) }
+    val dualSplitHandlePosition: LiveData<Float> = mDualSplitHandlePosition.asLiveData()
+
+    fun updateDualSplitHandlePosition(position: Float) {
+        mDualSplitHandlePosition.update { position }
+    }
+
     private val mShizukuStatus: MutableStateFlow<ShizukuStatus> by lazy { MutableStateFlow(ShizukuStatus.SHIZUKU_NOT_RUNNING) }
 
     private var checkShizukuPermissionJob: Job? = null

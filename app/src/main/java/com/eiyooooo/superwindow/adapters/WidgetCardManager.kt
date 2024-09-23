@@ -3,6 +3,7 @@ package com.eiyooooo.superwindow.adapters
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.animation.PathInterpolatorCompat
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
@@ -26,6 +27,8 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         }
 
         mainModel.widgetCardGroup.observe(mainActivity) {//TODO: handle pendingWidgetCard
+            mainModel.dualSplitHandlePosition.removeObserver(dualSplitHandlePositionObserver)
+
             when (it.foregroundWidgetCardCount) {
                 1 -> {
                     widgetCardCountChanged(1)
@@ -35,6 +38,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 2 -> {
                     widgetCardCountChanged(2)
                     showDualWidgetCard(it)
+                    mainModel.dualSplitHandlePosition.observe(mainActivity, dualSplitHandlePositionObserver)
                 }
 
                 3 -> {
@@ -42,6 +46,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                     showTripleWidgetCard(it)
                 }
             }
+
             mainModel.lastWidgetCardGroup = it
         }
 
@@ -76,7 +81,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         mainActivity.bindingExpanded.firstView.addView(showFirstWidgetCard.getRootView())
         mainActivity.bindingExpanded.secondView.addView(showSecondWidgetCard.getRootView())
         mainActivity.bindingExpanded.leftSplitHandle.setWidgetCards(showFirstWidgetCard, showSecondWidgetCard)
-        mainActivity.bindingExpanded.leftSplitHandle.setOnDragHandle { updateDualWidgetCardLayout(it) }
+        mainActivity.bindingExpanded.leftSplitHandle.setOnDragHandle { mainModel.updateDualSplitHandlePosition(it) }
         mainActivity.bindingExpanded.rightSplitHandle.setWidgetCards()
         mainActivity.bindingExpanded.rightSplitHandle.setOnDragHandle(null)
     }
@@ -155,16 +160,13 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         constraintSet.applyTo(mainActivity.bindingExpanded.widgetContainer)
     }
 
-    private fun updateDualWidgetCardLayout(newX: Float) {
+    private val dualSplitHandlePositionObserver = Observer<Float> {
+        if (it == -1f) return@Observer
+        val windowWidth = mainActivity.getResources().displayMetrics.widthPixels
+        val newPercent = (it / windowWidth).coerceIn(0.2f, 0.8f)
         constraintSet.clone(mainActivity.bindingExpanded.widgetContainer)
-
-        val parentWidth = mainActivity.bindingExpanded.widgetContainer.width
-        val newPercent = newX / parentWidth
-
-        if (newPercent in 0.2f..0.8f) {
-            constraintSet.constrainPercentWidth(R.id.first_view, newPercent)
-            constraintSet.constrainPercentWidth(R.id.second_view, 1 - newPercent)
-            constraintSet.applyTo(mainActivity.bindingExpanded.widgetContainer)
-        }
+        constraintSet.constrainPercentWidth(R.id.first_view, newPercent)
+        constraintSet.constrainPercentWidth(R.id.second_view, 1 - newPercent)
+        constraintSet.applyTo(mainActivity.bindingExpanded.widgetContainer)
     }
 }
