@@ -14,8 +14,8 @@
     <string name="Shizuku_explanation">Authorize Shizuku to use Super Window on this device</string>
     <string name="Shizuku_connected">Shizuku connected</string>
     <string name="Shizuku_need_update">Shizuku version is outdated, please update</string>
-    <string name="Shizuku_setup_instruction">Shizuku is not running\nClick to view Shizuku setup instructions</string>
-    <string name="Shizuku_authorization_instruction">Once Shizuku permissions are granted, the app will have elevated privileges beyond regular apps\nPlease be mindful of your device\'s security\nClick to grant Shizuku permission to this app</string>
+    <string name="Shizuku_setup_instruction">Shizuku is not running, click to view Shizuku setup instructions</string>
+    <string name="Shizuku_authorization_instruction">Once Shizuku permissions are granted, the app will have elevated privileges beyond regular apps, please be mindful of your device\'s security, click to grant Shizuku permission to this app</string>
 
     <string name="appearance">Appearance</string>
     <string name="dark_theme">Dark theme</string>
