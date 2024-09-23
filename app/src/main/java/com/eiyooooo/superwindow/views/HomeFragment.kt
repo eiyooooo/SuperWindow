@@ -17,8 +17,8 @@ import rikka.recyclerview.fixEdgeEffect
 class HomeFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeBinding
-    private val mainModel: MainActivityViewModel by activityViewModels() //TODO
-    private val adapter by lazy { HomeFragmentAdapter() }
+    private val mainModel: MainActivityViewModel by activityViewModels()
+    private val adapter by lazy { HomeFragmentAdapter(mainModel) }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,7 +31,9 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter.updateData()
+        mainModel.homeData.observe(viewLifecycleOwner) {
+            adapter.updateData(it)
+        }
 
         val recyclerView = binding.list
         recyclerView.adapter = adapter

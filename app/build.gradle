@@ -72,4 +72,7 @@ dependencies {
     implementation 'com.fredporciuncula:flow-preferences:1.9.1'
 
     implementation 'com.google.android.gms:play-services-oss-licenses:17.1.0'
+
+    implementation "dev.rikka.shizuku:api:13.1.5"
+    implementation "dev.rikka.shizuku:provider:13.1.5"
 }

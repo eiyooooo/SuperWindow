@@ -81,6 +81,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         setupControlPanel()
+
+        mainModel.addShizukuListener()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mainModel.checkShizukuPermission()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mainModel.removeShizukuListener()
     }
 
     private fun setupControlPanel() {
