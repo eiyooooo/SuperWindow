@@ -8,6 +8,7 @@ import android.view.WindowInsetsController
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.eiyooooo.superwindow.R
@@ -16,12 +17,14 @@ import com.eiyooooo.superwindow.databinding.ActivityMainCompactBinding
 import com.eiyooooo.superwindow.databinding.ActivityMainExpandedBinding
 import com.eiyooooo.superwindow.databinding.ControlPanelCompactBinding
 import com.eiyooooo.superwindow.databinding.ControlPanelExpandedBinding
+import com.eiyooooo.superwindow.entities.Preferences
 import com.eiyooooo.superwindow.viewmodels.MainActivityViewModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -61,6 +64,12 @@ class MainActivity : AppCompatActivity() {
                     it.widgetContainer.addTargetView(it.rightSplitHandle)
                     widgetCardManager.init()
                     setContentView(it.root)
+                }
+                lifecycleScope.launch {
+                    Preferences.topBottomPaddingFlow.collect {
+                        val padding = getResources().displayMetrics.heightPixels * it / 100
+                        bindingExpanded.root.setPadding(0, padding, 0, padding)
+                    }
                 }
                 true
             }

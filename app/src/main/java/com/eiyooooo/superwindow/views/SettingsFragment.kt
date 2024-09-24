@@ -13,6 +13,7 @@ import com.eiyooooo.superwindow.R
 import com.eiyooooo.superwindow.entities.Preferences
 import com.eiyooooo.superwindow.utils.FLog
 import com.eiyooooo.superwindow.utils.showListPreferenceOnClick
+import com.eiyooooo.superwindow.utils.showSliderPreferenceOnClick
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,6 +24,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     private var darkThemePreference: Preference? = null
     private var systemColorPreference: Preference? = null
+    private var topBottomPaddingPreference: Preference? = null
     private var enableLogPreference: Preference? = null
     private var logViewerPreference: Preference? = null
     private var exportLogPreference: Preference? = null
@@ -38,6 +40,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         darkThemePreference = findPreference("appearance.dark_theme")
         systemColorPreference = findPreference("appearance.system_color")
+        topBottomPaddingPreference = findPreference("appearance.top_bottom_padding")
         enableLogPreference = findPreference("others.enable_log")
         logViewerPreference = findPreference("others.log_viewer")
         exportLogPreference = findPreference("others.export_log")
@@ -72,6 +75,17 @@ class SettingsFragment : PreferenceFragmentCompat() {
             } else {
                 isVisible = false
             }
+        }
+        topBottomPaddingPreference?.apply {
+            this.showSliderPreferenceOnClick(
+                setupDialog = { setIcon(R.drawable.padding) },
+                initialValue = { Preferences.topBottomPadding.toFloat() },
+                valueRange = 0f to 25f,
+                step = 1f,
+                labelFormatter = { "${it.toInt()}%" },
+                onValueChanged = {
+                    Preferences.topBottomPadding = it.toInt()
+                })
         }
 
         enableLogPreference?.setOnPreferenceChangeListener { _, newValue ->

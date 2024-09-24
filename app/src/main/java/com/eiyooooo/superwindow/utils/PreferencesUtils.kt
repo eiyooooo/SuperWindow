@@ -1,10 +1,12 @@
 package com.eiyooooo.superwindow.utils
 
 import android.content.SharedPreferences
+import android.widget.LinearLayout
 import androidx.core.content.edit
 import androidx.preference.Preference
 import com.eiyooooo.superwindow.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.slider.Slider
 
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T> SharedPreferences.put(key: String, value: T?) {
@@ -58,6 +60,42 @@ fun Preference.showListPreferenceOnClick(
                 onSelected(which)
             }
             .setPositiveButton(R.string.cancel, null)
+            .apply(setupDialog)
+            .show()
+        return@setOnPreferenceClickListener true
+    }
+
+fun Preference.showSliderPreferenceOnClick(
+    setupDialog: MaterialAlertDialogBuilder.() -> Unit,
+    initialValue: () -> Float,
+    valueRange: Pair<Float, Float>,
+    step: Float = 1f,
+    labelFormatter: ((Float) -> String)? = null,
+    onValueChanged: (Float) -> Unit
+) =
+    setOnPreferenceClickListener {
+        val slider = Slider(context).apply {
+            valueFrom = valueRange.first
+            valueTo = valueRange.second
+            stepSize = step
+            value = initialValue()
+            labelFormatter?.let {
+                setLabelFormatter(it)
+            }
+            addOnChangeListener { _, value, _ ->
+                onValueChanged(value)
+            }
+        }
+        val dp10 = context.dp2px(10)
+        val linearLayout = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp10, dp10, dp10, dp10)
+            addView(slider)
+        }
+        MaterialAlertDialogBuilder(context)
+            .setTitle(title)
+            .setView(linearLayout)
+            .setPositiveButton(R.string.confirm, null)
             .apply(setupDialog)
             .show()
         return@setOnPreferenceClickListener true

@@ -35,6 +35,13 @@ object Preferences {
         get() = sharedPreferences.get("appearance.system_color", true)
         set(value) = sharedPreferences.put("appearance.system_color", value)
 
+    var topBottomPadding
+        get() = sharedPreferences.get("appearance.top_bottom_padding", 0)
+        set(value) = sharedPreferences.put("appearance.top_bottom_padding", value)
+
+    val topBottomPaddingFlow
+        get() = flowSharedPreferences.getInt("appearance.top_bottom_padding", 0).asFlow()
+
     var enableLog
         get() = sharedPreferences.get("others.enable_log", BuildConfig.DEBUG)
         set(value) = sharedPreferences.put("others.enable_log", value)

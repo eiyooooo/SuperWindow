@@ -23,6 +23,8 @@
     <string name="always_off">总是关闭</string>
     <string name="always_on">总是开启</string>
     <string name="system_color">使用系统主题颜色</string>
+    <string name="top_bottom_padding">上下边距</string>
+    <string name="top_bottom_padding_summary">设置展开视图上下边距</string>
     <string name="others">其他</string>
     <string name="enable_log">启用日志输出</string>
     <string name="log_viewer">日志查看器</string>
