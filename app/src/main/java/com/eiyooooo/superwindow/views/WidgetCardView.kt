@@ -25,6 +25,8 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
 
     private val widgetCard: ItemWidgetCardBinding = ItemWidgetCardBinding.inflate(LayoutInflater.from(context), null, false)
 
+    private val covering = AtomicBoolean(false)
+    private val coverTransitAnimationList = mutableListOf<ObjectAnimator>()
     private val blurring = AtomicBoolean(false)
     private val blurTransitAnimationList = mutableListOf<AnimatorSet>()
 
@@ -95,7 +97,64 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
         widgetCard.controlBar.setOnTouchListener(touchListener)
     }
 
+    fun makeCover() {
+        if (blurring.get()) return
+        cancelCoverTransitAnimations()
+        widgetCard.iconContainer.visibility = View.VISIBLE
+        widgetCard.contentContainer.visibility = View.GONE
+        widgetCard.contentContainer.alpha = 0F
+        covering.set(true)
+    }
+
+    fun removeCoverImmediately() {
+        if (blurring.get()) return
+        cancelCoverTransitAnimations()
+        widgetCard.contentContainer.alpha = 1F
+        widgetCard.contentContainer.visibility = View.VISIBLE
+        widgetCard.iconContainer.visibility = View.GONE
+        covering.set(false)
+    }
+
+    fun startCoverTransitAnimation() {
+        if (blurring.get()) return
+        if (covering.get()) {
+            val contentContainerAnimation = ObjectAnimator.ofFloat(widgetCard.contentContainer, "alpha", 0F, 1F).apply {
+                duration = 300
+                addListener(object : Animator.AnimatorListener {
+                    override fun onAnimationStart(animation: Animator) {
+                    }
+
+                    override fun onAnimationEnd(animation: Animator) {
+                        widgetCard.contentContainer.alpha = 1F
+                        widgetCard.contentContainer.visibility = View.VISIBLE
+                        widgetCard.iconContainer.visibility = View.GONE
+                        covering.set(false)
+                    }
+
+                    override fun onAnimationCancel(animation: Animator) {
+                    }
+
+                    override fun onAnimationRepeat(animation: Animator) {
+                    }
+                })
+                interpolator = PathInterpolatorCompat.create(0.35f, 0f, 0.35f, 1f)
+            }
+            widgetCard.iconContainer.visibility = View.GONE
+            widgetCard.contentContainer.visibility = View.VISIBLE
+            contentContainerAnimation.start()
+            coverTransitAnimationList.add(contentContainerAnimation)
+        }
+    }
+
+    private fun cancelCoverTransitAnimations() {
+        coverTransitAnimationList.forEach {
+            it.cancel()
+        }
+        coverTransitAnimationList.clear()
+    }
+
     fun makeBlur() {
+        if (covering.get()) return
         cancelBlurTransitAnimations()
         BlurUtils.blurView(widgetCard.contentContainer)?.let {
             widgetCard.blurLayer.foreground = it
@@ -109,6 +168,7 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
     }
 
     fun removeBlurImmediately() {
+        if (covering.get()) return
         cancelBlurTransitAnimations()
         widgetCard.contentContainer.alpha = 1F
         widgetCard.contentContainer.visibility = View.VISIBLE
@@ -122,6 +182,7 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
     }
 
     fun startBlurTransitAnimation() {
+        if (covering.get()) return
         if (blurring.get()) {
             val blurLayerAnimation = widgetCard.blurLayer.foreground.let {
                 ObjectAnimator.ofInt(it, "alpha", 255, 0).apply {
@@ -136,7 +197,15 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
                     }
 
                     override fun onAnimationEnd(animation: Animator) {
-                        removeBlurImmediately()
+                        widgetCard.contentContainer.alpha = 1F
+                        widgetCard.contentContainer.visibility = View.VISIBLE
+                        widgetCard.iconContainer.visibility = View.GONE
+                        widgetCard.blurLayer.visibility = View.GONE
+                        widgetCard.blurLayer.foreground?.let {
+                            it.alpha = 255
+                        }
+                        widgetCard.blurLayer.foreground = null
+                        blurring.set(false)
                     }
 
                     override fun onAnimationCancel(animation: Animator) {

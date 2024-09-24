@@ -36,25 +36,19 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             mainModel.dualSplitHandlePosition.removeObserver(dualSplitHandlePositionObserver)
             when (it.foregroundWidgetCardCount) {
                 1 -> {
-                    showSingleWidgetCard(it)//TODO: not thread safe, could cause ConcurrentModificationException
-                    mainActivity.bindingExpanded.widgetContainer.post {//TODO: not thread safe, could cause ConcurrentModificationException
-                        onWidgetCardCountChanged(it)
-                    }
+                    showSingleWidgetCard(it)
+                    onWidgetCardCountChanged(it)
                 }
 
                 2 -> {
                     showDualWidgetCard(it)
-                    mainActivity.bindingExpanded.widgetContainer.post {
-                        onWidgetCardCountChanged(it)
-                        mainModel.dualSplitHandlePosition.observe(mainActivity, dualSplitHandlePositionObserver)
-                    }
+                    onWidgetCardCountChanged(it)
+                    mainModel.dualSplitHandlePosition.observe(mainActivity, dualSplitHandlePositionObserver)
                 }
 
                 3 -> {
                     showTripleWidgetCard(it)
-                    mainActivity.bindingExpanded.widgetContainer.post {
-                        onWidgetCardCountChanged(it)
-                    }
+                    onWidgetCardCountChanged(it)
                 }
             }
         }
@@ -151,6 +145,33 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
 
     private val constraintSet = ConstraintSet()
 
+    private val onWidgetCardCountChangedTransition = AutoTransition().apply {
+        duration = 250
+        interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)
+        addListener(object : Transition.TransitionListener {
+            override fun onTransitionStart(transition: Transition) {
+            }
+
+            override fun onTransitionEnd(transition: Transition) {
+                firstWidgetCard?.startCoverTransitAnimation()
+                secondWidgetCard?.startCoverTransitAnimation()
+                thirdWidgetCard?.startCoverTransitAnimation()
+            }
+
+            override fun onTransitionCancel(transition: Transition) {
+                firstWidgetCard?.startCoverTransitAnimation()
+                secondWidgetCard?.startCoverTransitAnimation()
+                thirdWidgetCard?.startCoverTransitAnimation()
+            }
+
+            override fun onTransitionPause(transition: Transition) {
+            }
+
+            override fun onTransitionResume(transition: Transition) {
+            }
+        })
+    }
+
     private fun onWidgetCardCountChanged(group: WidgetCardGroup) {
         val oldWidgetCardCount = if (forceRefreshUI) -1 else mainModel.lastWidgetCardGroup?.foregroundWidgetCardCount ?: -1
         val newWidgetCardCount = group.foregroundWidgetCardCount
@@ -161,36 +182,10 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         constraintSet.clone(mainActivity.bindingExpanded.widgetContainer)
 
         if (oldWidgetCardCount != -1) {
-            firstWidgetCard?.makeBlur()
-            secondWidgetCard?.makeBlur()
-            thirdWidgetCard?.makeBlur()
-            val transition = AutoTransition().apply {
-                duration = 250
-                interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)
-                addListener(object : Transition.TransitionListener {
-                    override fun onTransitionStart(transition: Transition) {
-                    }
-
-                    override fun onTransitionEnd(transition: Transition) {
-                        firstWidgetCard?.startBlurTransitAnimation()
-                        secondWidgetCard?.startBlurTransitAnimation()
-                        thirdWidgetCard?.startBlurTransitAnimation()
-                    }
-
-                    override fun onTransitionCancel(transition: Transition) {
-                        firstWidgetCard?.startBlurTransitAnimation()
-                        secondWidgetCard?.startBlurTransitAnimation()
-                        thirdWidgetCard?.startBlurTransitAnimation()
-                    }
-
-                    override fun onTransitionPause(transition: Transition) {
-                    }
-
-                    override fun onTransitionResume(transition: Transition) {
-                    }
-                })
-            }
-            TransitionManager.beginDelayedTransition(mainActivity.bindingExpanded.widgetContainer, transition)
+            firstWidgetCard?.makeCover()
+            secondWidgetCard?.makeCover()
+            thirdWidgetCard?.makeCover()
+            TransitionManager.beginDelayedTransition(mainActivity.bindingExpanded.widgetContainer, onWidgetCardCountChangedTransition)
         }
 
         when (newWidgetCardCount) {
