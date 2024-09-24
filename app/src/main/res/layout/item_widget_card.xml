@@ -20,7 +20,7 @@
             android:id="@+id/blur_layer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <View
             android:id="@+id/control_bar"
@@ -37,7 +37,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:visibility="gone"
-            app:cardCornerRadius="20dp">
+            app:cardBackgroundColor="@android:color/transparent"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp">
 
             <ImageView
                 android:id="@+id/icon"
