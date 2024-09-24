@@ -5,23 +5,25 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.SurfaceTexture
 import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.Surface
+import android.view.TextureView
 import android.view.View
 import android.view.View.OnTouchListener
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.view.animation.PathInterpolatorCompat
 import com.eiyooooo.superwindow.databinding.ItemWidgetCardBinding
 import com.eiyooooo.superwindow.entities.WidgetCardData
 import com.eiyooooo.superwindow.utils.BlurUtils
 import com.eiyooooo.superwindow.views.animations.AnimExecutor
+import com.eiyooooo.superwindow.wrappers.LocalContent
 import java.util.concurrent.atomic.AtomicBoolean
 
-class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
-
-    constructor(view: View, widgetCardData: WidgetCardData) : this(view.context, widgetCardData) {
-        widgetCard.contentContainer.addView(view)
-    }
+@SuppressLint("ClickableViewAccessibility")
+class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
 
     private val widgetCard: ItemWidgetCardBinding = ItemWidgetCardBinding.inflate(LayoutInflater.from(context), null, false)
 
@@ -37,11 +39,11 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
         }
     }
 
-    fun getContentView(): View? {
+    fun getContentView(): View? {//TODO: check if need to remove
         return widgetCard.contentContainer.getChildAt(0)
     }
 
-    fun setIcon(icon: Int) {
+    fun setIcon(icon: Int) {//TODO: load icon
         widgetCard.icon.setImageResource(icon)
     }
 
@@ -53,9 +55,21 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
         return widgetCard.controlBar
     }
 
-    private val touchListener by lazy {
+    var displayId: Int? = null
+
+    private val contentContainerListener by lazy {
         object : OnTouchListener {
-            @SuppressLint("ClickableViewAccessibility")
+            override fun onTouch(v: View, event: MotionEvent): Boolean {
+                displayId?.let {
+                    LocalContent.injectMotionEvent(event, it)//TODO: check why need double click
+                }
+                return true
+            }
+        }
+    }
+
+    private val controlBarListener by lazy {
+        object : OnTouchListener {
             override fun onTouch(v: View, event: MotionEvent): Boolean {
                 return when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
@@ -94,7 +108,41 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
         widgetCardData.icon?.let {
             widgetCard.icon.setImageDrawable(it)
         }
-        widgetCard.controlBar.setOnTouchListener(touchListener)
+        widgetCard.controlBar.setOnTouchListener(controlBarListener)
+
+        if (widgetCardData.identifier.contains("@")) {
+            val packageName = widgetCardData.identifier.split("@")[0]
+            val providerName = widgetCardData.identifier.split("@")[1]
+            val textureView = TextureView(context).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                surfaceTextureListener = object : TextureView.SurfaceTextureListener {
+                    var surface: Surface? = null
+
+                    override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
+                        surface = Surface(surfaceTexture).apply {//TODO: do not reload when activity recreate
+                            displayId = LocalContent.createContainerForPackage(null, packageName, width, height, context.resources.displayMetrics.densityDpi, this)
+                        }
+                    }
+
+                    override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
+                        //TODO: handle size change
+                    }
+
+                    override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
+                        surface?.release()
+                        return true
+                    }
+
+                    override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) {
+                    }
+                }
+            }
+            widgetCard.contentContainer.setOnTouchListener(contentContainerListener)
+            setContentView(textureView)
+        }
     }
 
     fun makeCover() {

@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -39,6 +40,7 @@ class MainActivityViewModel : ViewModel() {
     }
 
     private val mShizukuStatus: MutableStateFlow<ShizukuStatus> by lazy { MutableStateFlow(ShizukuStatus.SHIZUKU_NOT_RUNNING) }
+    val shizukuStatus: StateFlow<ShizukuStatus> = mShizukuStatus
 
     private var checkShizukuPermissionJob: Job? = null
 

@@ -2,11 +2,14 @@ package com.eiyooooo.superwindow
 
 import android.app.Application
 import android.content.Context
+import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
 import com.eiyooooo.superwindow.entities.Preferences
 import com.eiyooooo.superwindow.utils.FLog
+import com.eiyooooo.superwindow.wrappers.FakeContext
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
+import org.lsposed.hiddenapibypass.HiddenApiBypass
 import timber.log.Timber
 import java.util.Date
 
@@ -19,6 +22,9 @@ class MyApplication : Application() {
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            HiddenApiBypass.addHiddenApiExemptions("L")
+        }
     }
 
     override fun onCreate() {
@@ -37,5 +43,7 @@ class MyApplication : Application() {
                 .setPrecondition { _, _ -> Preferences.systemColor }
                 .build()
         )
+
+        FakeContext.set(this)
     }
 }

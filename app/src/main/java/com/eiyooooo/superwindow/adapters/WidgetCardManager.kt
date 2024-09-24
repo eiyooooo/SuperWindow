@@ -9,13 +9,17 @@ import androidx.transition.AutoTransition
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.eiyooooo.superwindow.R
+import com.eiyooooo.superwindow.entities.ShizukuStatus
 import com.eiyooooo.superwindow.entities.WidgetCardData
 import com.eiyooooo.superwindow.entities.WidgetCardGroup
 import com.eiyooooo.superwindow.utils.BlurUtils
 import com.eiyooooo.superwindow.viewmodels.MainActivityViewModel
 import com.eiyooooo.superwindow.views.MainActivity
 import com.eiyooooo.superwindow.views.WidgetCardView
+import com.eiyooooo.superwindow.wrappers.LocalContent
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class WidgetCardManager(private val mainActivity: MainActivity, private val mainModel: MainActivityViewModel) {
@@ -53,20 +57,31 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             }
         }
 
+        mainActivity.lifecycleScope.launch {
+            mainModel.shizukuStatus.collect {
+                if (it == ShizukuStatus.HAVE_PERMISSION) {
+                    LocalContent.init()
+                } else {
+                    LocalContent.destroy()
+                }
+            }
+        }
+
         //TODO: remove this test module
         mainActivity.lifecycleScope.launch {
-//            delay(2000)
-//            mainModel.lastWidgetCardGroup?.copy(secondWidgetCard = WidgetCardData(false, "test1"), thirdWidgetCard = null)?.let { mainModel.updateWidgetCardGroup(it) }
-            while (true) {
-                delay(2000)
-                mainModel.lastWidgetCardGroup?.copy(secondWidgetCard = WidgetCardData(false, "test1"))?.let { mainModel.updateWidgetCardGroup(it) }
-                delay(2000)
-                mainModel.lastWidgetCardGroup?.copy(thirdWidgetCard = WidgetCardData(false, "test2"))?.let { mainModel.updateWidgetCardGroup(it) }
-                delay(2000)
-                mainModel.lastWidgetCardGroup?.copy(thirdWidgetCard = null)?.let { mainModel.updateWidgetCardGroup(it) }
-                delay(2000)
-                mainModel.lastWidgetCardGroup?.copy(secondWidgetCard = null)?.let { mainModel.updateWidgetCardGroup(it) }
-            }
+            mainModel.shizukuStatus.filter { it == ShizukuStatus.HAVE_PERMISSION }.first()
+            delay(2000)
+            mainModel.lastWidgetCardGroup?.copy(secondWidgetCard = WidgetCardData(false, "com.tencent.mm@local"), thirdWidgetCard = null)?.let { mainModel.updateWidgetCardGroup(it) }
+//            while (true) {
+//                delay(2000)
+//                mainModel.lastWidgetCardGroup?.copy(secondWidgetCard = WidgetCardData(false, "test1"))?.let { mainModel.updateWidgetCardGroup(it) }
+//                delay(2000)
+//                mainModel.lastWidgetCardGroup?.copy(thirdWidgetCard = WidgetCardData(false, "test2"))?.let { mainModel.updateWidgetCardGroup(it) }
+//                delay(2000)
+//                mainModel.lastWidgetCardGroup?.copy(thirdWidgetCard = null)?.let { mainModel.updateWidgetCardGroup(it) }
+//                delay(2000)
+//                mainModel.lastWidgetCardGroup?.copy(secondWidgetCard = null)?.let { mainModel.updateWidgetCardGroup(it) }
+//            }
         }
     }
 
@@ -135,7 +150,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         return if (widgetCard.isControlPanel) {
             controlPanelWidgetCard
         } else if (widgetCards[widgetCard.identifier] == null) {
-            val newWidgetCard = WidgetCardView(mainActivity, widgetCard)//TODO: change to TextureView
+            val newWidgetCard = WidgetCardView(mainActivity, widgetCard)
             widgetCards[widgetCard.identifier] = newWidgetCard
             newWidgetCard
         } else {
