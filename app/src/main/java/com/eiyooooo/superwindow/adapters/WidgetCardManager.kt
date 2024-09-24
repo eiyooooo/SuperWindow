@@ -11,6 +11,7 @@ import androidx.transition.TransitionManager
 import com.eiyooooo.superwindow.R
 import com.eiyooooo.superwindow.entities.WidgetCardData
 import com.eiyooooo.superwindow.entities.WidgetCardGroup
+import com.eiyooooo.superwindow.utils.BlurUtils
 import com.eiyooooo.superwindow.viewmodels.MainActivityViewModel
 import com.eiyooooo.superwindow.views.MainActivity
 import com.eiyooooo.superwindow.views.WidgetCardView
@@ -25,6 +26,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
 
     fun init() {
         forceRefreshUI = true
+        BlurUtils.init(mainActivity.applicationContext)
 
         mainActivity.lifecycleScope.launch {
             controlPanelWidgetCard.setContentView(mainActivity.getControlPanelExpandedView())
@@ -150,9 +152,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
     private val constraintSet = ConstraintSet()
 
     private fun onWidgetCardCountChanged(group: WidgetCardGroup) {
-        val oldWidgetCardCount = mainModel.lastWidgetCardGroup?.let {
-            if (forceRefreshUI) -1 else it.foregroundWidgetCardCount
-        } ?: 0
+        val oldWidgetCardCount = if (forceRefreshUI) -1 else mainModel.lastWidgetCardGroup?.foregroundWidgetCardCount ?: -1
         val newWidgetCardCount = group.foregroundWidgetCardCount
         mainModel.lastWidgetCardGroup = group
         if (newWidgetCardCount == oldWidgetCardCount) return

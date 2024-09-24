@@ -19,20 +19,29 @@ object BlurUtils {
     private var mInput: Allocation? = null
     private var mOutput: Allocation? = null
 
+    fun init(context: Context) {
+        if (mRenderScript == null) {
+            mRenderScript = RenderScript.create(context)
+        }
+        if (mBlur == null) {
+            mBlur = ScriptIntrinsicBlur.create(mRenderScript, Element.U8_4(mRenderScript))
+        }
+    }
+
     fun blurView(input: View, blurRadius: Float = 10F, scaleRatio: Int = 15): Drawable? {
         val inputBitmap = input.getBitmap()
         if (inputBitmap == null || inputBitmap.width <= 1 || inputBitmap.height <= 1 || inputBitmap.isRecycled) {
             return null
         }
         try {
-            val output = blurBitmap(input.context, inputBitmap, blurRadius, scaleRatio)
+            val output = blurBitmap(inputBitmap, blurRadius, scaleRatio)
             return if (output == null || output.isRecycled) null else output.toDrawable(input.context.resources)
         } catch (e: Exception) {
             return null
         }
     }
 
-    private fun blurBitmap(context: Context, input: Bitmap?, blurRadius: Float = 10F, scaleRatio: Int = 15): Bitmap? {
+    private fun blurBitmap(input: Bitmap?, blurRadius: Float = 10F, scaleRatio: Int = 15): Bitmap? {
         if (input == null || input.width <= 1 || input.height <= 1 || input.isRecycled) {
             return null
         }
@@ -47,12 +56,6 @@ object BlurUtils {
             val width = input.width / scaleRatio
             val height = input.height / scaleRatio
             val bitmap = Bitmap.createScaledBitmap(input, width, height, false)
-            if (mRenderScript == null) {
-                mRenderScript = RenderScript.create(context)
-            }
-            if (mBlur == null) {
-                mBlur = ScriptIntrinsicBlur.create(mRenderScript, Element.U8_4(mRenderScript))
-            }
             mInput = Allocation.createFromBitmap(mRenderScript, bitmap)
             mOutput = Allocation.createTyped(mRenderScript, mInput!!.type)
             mBlur!!.setRadius(blurRadiusLimited)
