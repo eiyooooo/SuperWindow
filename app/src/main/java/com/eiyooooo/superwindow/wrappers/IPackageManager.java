@@ -16,8 +16,8 @@ public class IPackageManager {
     private static IInterface manager;
     private static Class<?> CLASS;
     private static Method getPackageInfoMethod = null;
-    private static Method getQueryIntentActivitiesMethod = null;
-    private static Method getInstalledPackagesMethod = null;
+    private static Method queryIntentActivitiesMethod = null;
+    private static Method getAllPackagesMethod = null;
 
     public static void init(IInterface m) {
         manager = m;
@@ -32,8 +32,8 @@ public class IPackageManager {
         manager = null;
         CLASS = null;
         getPackageInfoMethod = null;
-        getQueryIntentActivitiesMethod = null;
-        getInstalledPackagesMethod = null;
+        queryIntentActivitiesMethod = null;
+        getAllPackagesMethod = null;
         Timber.d("IPackageManager destroyed");
     }
 
@@ -43,41 +43,44 @@ public class IPackageManager {
                 Timber.e("Error in getGetPackageInfoMethod: CLASS is null");
                 return null;
             }
-            getPackageInfoMethod = CLASS.getDeclaredMethod("getPackageInfo", String.class, int.class);
-            getPackageInfoMethod.setAccessible(true);
+            try {
+                getPackageInfoMethod = CLASS.getDeclaredMethod("getPackageInfo", String.class, long.class, int.class);
+            } catch (Exception e) {
+                getPackageInfoMethod = CLASS.getDeclaredMethod("getPackageInfo", String.class, int.class, int.class);
+            }
         }
         return getPackageInfoMethod;
     }
 
     private static Method getQueryIntentActivitiesMethod() throws ReflectiveOperationException {
-        if (getQueryIntentActivitiesMethod == null) {
+        if (queryIntentActivitiesMethod == null) {
             if (CLASS == null) {
-                Timber.e("Error in getGetPackageInfoMethod: CLASS is null");
+                Timber.e("Error in getQueryIntentActivitiesMethod: CLASS is null");
                 return null;
             }
             try {
-                getQueryIntentActivitiesMethod = CLASS.getMethod("queryIntentActivities", Intent.class, String.class, long.class, int.class);
+                queryIntentActivitiesMethod = CLASS.getMethod("queryIntentActivities", Intent.class, String.class, long.class, int.class);
             } catch (Exception ignored) {
-                getQueryIntentActivitiesMethod = CLASS.getMethod("queryIntentActivities", Intent.class, String.class, int.class, int.class);
+                queryIntentActivitiesMethod = CLASS.getMethod("queryIntentActivities", Intent.class, String.class, int.class, int.class);
             }
         }
-        return getQueryIntentActivitiesMethod;
+        return queryIntentActivitiesMethod;
     }
 
-    private static Method getGetInstalledPackagesMethod() throws ReflectiveOperationException {
-        if (getInstalledPackagesMethod == null) {
+    private static Method getGetAllPackagesMethod() throws ReflectiveOperationException {
+        if (getAllPackagesMethod == null) {
             if (CLASS == null) {
-                Timber.e("Error in getGetPackageInfoMethod: CLASS is null");
+                Timber.e("Error in getGetAllPackagesMethod: CLASS is null");
                 return null;
             }
-            getInstalledPackagesMethod = CLASS.getMethod("getAllPackages");
+            getAllPackagesMethod = CLASS.getMethod("getAllPackages");
         }
-        return getInstalledPackagesMethod;
+        return getAllPackagesMethod;
     }
 
-    public static PackageInfo getPackageInfo(String packageName, int flag) {
+    public static PackageInfo getPackageInfo(String packageName, int flag, int userId) {
         try {
-            return (PackageInfo) Objects.requireNonNull(getGetPackageInfoMethod()).invoke(manager, new Object[]{packageName, flag});
+            return (PackageInfo) Objects.requireNonNull(getGetPackageInfoMethod()).invoke(manager, packageName, flag, userId);
         } catch (Exception e) {
             Timber.e(e, "Error in getPackageInfo");
         }
@@ -87,8 +90,12 @@ public class IPackageManager {
     @SuppressWarnings("unchecked")
     public static List<ResolveInfo> queryIntentActivities(Intent intent, String resolvedType, int flags, int userId) {
         try {
-            Object parceledListSlice = Objects.requireNonNull(getQueryIntentActivitiesMethod()).invoke(manager, intent, resolvedType, flags, userId);
-            return (List<ResolveInfo>) Objects.requireNonNull(parceledListSlice).getClass().getMethod("getList").invoke(parceledListSlice);
+            Object object = Objects.requireNonNull(getQueryIntentActivitiesMethod()).invoke(manager, intent, resolvedType, flags, userId);
+            try {
+                return (List<ResolveInfo>) object;
+            } catch (ClassCastException ignored) {
+                return (List<ResolveInfo>) Objects.requireNonNull(object).getClass().getMethod("getList").invoke(object);
+            }
         } catch (Exception e) {
             Timber.e(e, "Error in queryIntentActivities");
         }
@@ -96,11 +103,11 @@ public class IPackageManager {
     }
 
     @SuppressWarnings("unchecked")
-    public static List<String> getInstalledPackages(int flag) {
+    public static List<String> getAllPackages() {
         try {
-            return (List<String>) Objects.requireNonNull(getGetInstalledPackagesMethod()).invoke(manager, new Object[]{flag});
+            return (List<String>) Objects.requireNonNull(getGetAllPackagesMethod()).invoke(manager);
         } catch (Exception e) {
-            Timber.e(e, "Error in getInstalledPackages");
+            Timber.e(e, "Error in getAllPackages");
         }
         return null;
     }

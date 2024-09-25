@@ -50,7 +50,7 @@ object LocalContent {//TODO
         } catch (e: Exception) {
             Timber.w("$packageName get package info by context failed", e)
         }
-        return IPackageManager.getPackageInfo(packageName, flag)
+        return IPackageManager.getPackageInfo(packageName, flag, 0)
     }
 
     private fun getAppMainActivity(context: Context? = null, packageName: String): String {
@@ -86,7 +86,7 @@ object LocalContent {//TODO
                 return packages
             }
         }
-        return IPackageManager.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES)
+        return IPackageManager.getAllPackages()
     }
 
     private fun openApp(context: Context? = null, packageName: String, activity: String? = null, displayId: Int): String? {
