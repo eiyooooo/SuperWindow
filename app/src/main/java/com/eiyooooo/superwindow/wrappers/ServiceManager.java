@@ -13,23 +13,16 @@ import timber.log.Timber;
 public class ServiceManager {
 
     @SuppressLint({"DiscouragedPrivateApi", "PrivateApi"})
-    public static void setupManagers() {
-        for (int i = 0; i < 3; i++) {
-            try {
-                switch (i) {
-                    case 0:
-                        InputManagerWrapper.init(getService("input", "android.hardware.input.IInputManager"));
-                        break;
-                    case 1:
-                        IPackageManager.init(getService("package", "android.content.pm.IPackageManager"));
-                        break;
-                    case 2:
-                        DisplayManagerWrapper.init(getService("display", "android.hardware.display.IDisplayManager"));
-                        break;
-                }
-            } catch (Exception e) {
-                Timber.e(e, "Error in ServiceManager.setupManagers");
-            }
+    public static Boolean setupManagers() {
+        try {
+            InputManagerWrapper.init(getService("input", "android.hardware.input.IInputManager"));
+            IPackageManager.init(getService("package", "android.content.pm.IPackageManager"));
+            DisplayManagerWrapper.init(getService("display", "android.hardware.display.IDisplayManager"));
+            return true;
+        } catch (Exception e) {
+            Timber.e(e, "Error in ServiceManager.setupManagers");
+            destroy();
+            return false;
         }
     }
 
