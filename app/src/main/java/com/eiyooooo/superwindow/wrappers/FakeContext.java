@@ -14,10 +14,12 @@ public final class FakeContext extends MutableContextWrapper {
     public static final String PACKAGE_NAME = "com.android.shell";
     public static final int ROOT_UID = 0; // Like android.os.Process.ROOT_UID, but before API 29
 
-    private static FakeContext INSTANCE;
+    private static FakeContext INSTANCE = null;
+    private static final FakeContext INSTANCE_NOT_FILLED = new FakeContext();
 
     public static FakeContext get() {
-        return INSTANCE;
+        if (INSTANCE == null) return INSTANCE_NOT_FILLED;
+        else return INSTANCE;
     }
 
     public static void set(Context context) {
@@ -27,6 +29,10 @@ public final class FakeContext extends MutableContextWrapper {
 
     private FakeContext(Context context) {
         super(context);
+    }
+
+    private FakeContext() {
+        super(null);
     }
 
     @Override
