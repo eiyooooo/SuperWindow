@@ -34,6 +34,7 @@ public class ServiceManager {
     }
 
     public static void destroy() {
+        InputManagerWrapper.destroy();
         IPackageManager.destroy();
         DisplayManagerWrapper.destroy();
     }

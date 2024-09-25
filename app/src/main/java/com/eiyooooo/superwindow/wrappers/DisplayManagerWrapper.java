@@ -8,6 +8,8 @@ import android.view.Surface;
 
 import java.lang.reflect.Field;
 
+import timber.log.Timber;
+
 public final class DisplayManagerWrapper {
 
     private static DisplayManager displayManager;
@@ -28,10 +30,12 @@ public final class DisplayManagerWrapper {
         Field mGlobalField = DisplayManager.class.getDeclaredField("mGlobal");
         mGlobalField.setAccessible(true);
         mGlobalField.set(displayManager, displayManagerGlobal);
+        Timber.d("DisplayManagerWrapper initialized");
     }
 
     public static void destroy() {
         displayManager = null;
+        Timber.d("DisplayManagerWrapper destroyed");
     }
 
     public static VirtualDisplay createVirtualDisplay(String name, int width, int height, int densityDpi, Surface surface) {

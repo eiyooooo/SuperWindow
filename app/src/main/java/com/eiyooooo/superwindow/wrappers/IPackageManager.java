@@ -26,6 +26,7 @@ public class IPackageManager {
             return;
         }
         CLASS = manager.getClass();
+        Timber.d("IPackageManager initialized");
     }
 
     public static void destroy() {

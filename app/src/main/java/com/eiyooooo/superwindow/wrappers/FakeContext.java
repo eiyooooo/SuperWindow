@@ -7,6 +7,8 @@ import android.content.MutableContextWrapper;
 import android.os.Build;
 import android.os.Process;
 
+import timber.log.Timber;
+
 public final class FakeContext extends MutableContextWrapper {
 
     public static final String PACKAGE_NAME = "com.android.shell";
@@ -20,6 +22,7 @@ public final class FakeContext extends MutableContextWrapper {
 
     public static void set(Context context) {
         INSTANCE = new FakeContext(context);
+        Timber.d("FakeContext initialized");
     }
 
     private FakeContext(Context context) {

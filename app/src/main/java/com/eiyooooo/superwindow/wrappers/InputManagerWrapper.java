@@ -23,6 +23,15 @@ public final class InputManagerWrapper {
                 .getDeclaredConstructor(Class.forName("android.hardware.input.IInputManager"))
                 .newInstance(iInputManager);
         CLASS = manager.getClass();
+        Timber.d("InputManagerWrapper initialized");
+    }
+
+    public static void destroy() {
+        manager = null;
+        CLASS = null;
+        injectInputEventMethod = null;
+        setDisplayIdMethod = null;
+        Timber.d("InputManagerWrapper destroyed");
     }
 
     private static Method getInjectInputEventMethod() throws ReflectiveOperationException {
