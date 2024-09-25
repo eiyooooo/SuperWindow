@@ -46,7 +46,7 @@ public class IPackageManager {
             }
             try {
                 getPackageInfoMethod = CLASS.getDeclaredMethod("getPackageInfo", String.class, long.class, int.class);
-            } catch (Exception e) {
+            } catch (Exception ignored) {
                 getPackageInfoMethod = CLASS.getDeclaredMethod("getPackageInfo", String.class, int.class, int.class);
             }
         }
@@ -95,7 +95,7 @@ public class IPackageManager {
             try {
                 return (List<ResolveInfo>) object;
             } catch (ClassCastException ignored) {
-                return (List<ResolveInfo>) Objects.requireNonNull(object).getClass().getMethod("getList").invoke(object);
+                return (List<ResolveInfo>) object.getClass().getMethod("getList").invoke(object);
             }
         } catch (Exception e) {
             Timber.e(e, "Error in queryIntentActivities");
