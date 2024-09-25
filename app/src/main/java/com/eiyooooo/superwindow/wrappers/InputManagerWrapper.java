@@ -19,9 +19,13 @@ public final class InputManagerWrapper {
 
     @SuppressLint({"DiscouragedPrivateApi", "PrivateApi"})
     public static void init(Object iInputManager) throws Exception {
-        manager = Class.forName("android.hardware.input.InputManagerGlobal")
-                .getDeclaredConstructor(Class.forName("android.hardware.input.IInputManager"))
-                .newInstance(iInputManager);
+        Class<?> inputManagerClass;
+        try {
+            inputManagerClass = Class.forName("android.hardware.input.InputManagerGlobal");
+        } catch (ClassNotFoundException e) {
+            inputManagerClass = android.hardware.input.InputManager.class;
+        }
+        manager = inputManagerClass.getDeclaredConstructor(Class.forName("android.hardware.input.IInputManager")).newInstance(iInputManager);
         CLASS = manager.getClass();
         Timber.d("InputManagerWrapper initialized");
     }
