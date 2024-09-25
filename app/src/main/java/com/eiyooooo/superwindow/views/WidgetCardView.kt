@@ -49,11 +49,11 @@ class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
 
     var displayId: Int? = null
 
-    private val contentContainerListener by lazy {
+    private val textureViewTouchListener by lazy {
         object : OnTouchListener {
             override fun onTouch(v: View, event: MotionEvent): Boolean {
                 displayId?.let {
-                    LocalContent.injectMotionEvent(event, it)//TODO: check why need double click
+                    LocalContent.injectMotionEvent(event, it)
                 }
                 return true
             }
@@ -136,8 +136,8 @@ class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
                     override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) {
                     }
                 }
+                setOnTouchListener(textureViewTouchListener)
             }
-            widgetCard.contentContainer.setOnTouchListener(contentContainerListener)
             setContentView(textureView)
         }
     }

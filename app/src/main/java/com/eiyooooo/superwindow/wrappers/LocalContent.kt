@@ -7,10 +7,7 @@ import android.content.res.AssetManager
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.hardware.display.VirtualDisplay
-import android.os.SystemClock
 import android.view.MotionEvent
-import android.view.MotionEvent.PointerCoords
-import android.view.MotionEvent.PointerProperties
 import android.view.Surface
 import androidx.core.content.res.ResourcesCompat
 import rikka.shizuku.Shizuku
@@ -140,29 +137,10 @@ object LocalContent {//TODO
         return true
     }
 
-    fun injectMotionEvent(motionEvent: MotionEvent, displayId: Int) {//TODO: check single tap
+    fun injectMotionEvent(motionEvent: MotionEvent, displayId: Int) {
         try {
-            val pointerCount = motionEvent.pointerCount
-            val pointerProperties = arrayOfNulls<PointerProperties>(pointerCount)
-            val pointerCoords = arrayOfNulls<PointerCoords>(pointerCount)
-            for (i in 0 until pointerCount) {
-                val properties = PointerProperties()
-                properties.id = motionEvent.getPointerId(i)
-                properties.toolType = motionEvent.getToolType(i)
-                pointerProperties[i] = properties
-                val pointerCoord = PointerCoords()
-                motionEvent.getPointerCoords(i, pointerCoord)
-                pointerCoords[i] = pointerCoord
-            }
-            val now = SystemClock.uptimeMillis()
-            val injectMotionEvent = MotionEvent.obtain(now, now,
-                motionEvent.actionMasked or (motionEvent.actionIndex shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
-                pointerCount, pointerProperties, pointerCoords, motionEvent.metaState, motionEvent.buttonState, motionEvent.xPrecision,
-                motionEvent.yPrecision, motionEvent.deviceId, motionEvent.edgeFlags, motionEvent.source, motionEvent.flags
-            )
-            InputManagerWrapper.setDisplayId(injectMotionEvent, displayId)
-            InputManagerWrapper.injectInputEvent(injectMotionEvent, InputManagerWrapper.INJECT_INPUT_EVENT_MODE_ASYNC)
-            injectMotionEvent.recycle()
+            InputManagerWrapper.setDisplayId(motionEvent, displayId)
+            InputManagerWrapper.injectInputEvent(motionEvent, InputManagerWrapper.INJECT_INPUT_EVENT_MODE_ASYNC)
         } catch (throwable: Throwable) {
             Timber.e(throwable, "injectMotionEvent failed")
         }

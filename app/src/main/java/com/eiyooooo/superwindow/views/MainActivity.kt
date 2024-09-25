@@ -1,10 +1,12 @@
 package com.eiyooooo.superwindow.views
 
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
+import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -59,6 +61,12 @@ class MainActivity : AppCompatActivity() {
                     it.controlPanelCreator.post {
                         bindingExpanded.controlPanelCreator.removeAllViews()
                         controlPanelExpandedInitialized.update { true }
+                        val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+                        windowManager.updateViewLayout(bindingExpanded.root.rootView, bindingExpanded.root.rootView.layoutParams.apply {
+                            val flagsField = this.javaClass.getDeclaredField("flags")
+                            val flags = flagsField.getInt(this)
+                            flagsField.set(this, flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+                        })
                     }
                     it.widgetContainer.addTargetView(it.leftSplitHandle)
                     it.widgetContainer.addTargetView(it.rightSplitHandle)
