@@ -39,7 +39,12 @@ public final class DisplayManagerWrapper {
     }
 
     public static VirtualDisplay createVirtualDisplay(String name, int width, int height, int densityDpi, Surface surface) {
-        return displayManager.createVirtualDisplay(name, width, height, densityDpi, surface, getDisplayFlags());
+        try {
+            return displayManager.createVirtualDisplay(name, width, height, densityDpi, surface, getDisplayFlags());
+        } catch (Exception e) {
+            Timber.e(e, "Error in createVirtualDisplay");
+            return null;
+        }
     }
 
     private static int getDisplayFlags() {
