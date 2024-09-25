@@ -1,69 +1,110 @@
 package com.eiyooooo.superwindow.wrappers
 
-import android.app.ActivityOptions
-import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.content.res.AssetManager
+import android.content.res.Resources
+import android.graphics.drawable.Drawable
 import android.hardware.display.VirtualDisplay
-import android.os.Build
 import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.MotionEvent.PointerCoords
 import android.view.MotionEvent.PointerProperties
 import android.view.Surface
-import androidx.core.view.InputDeviceCompat
+import androidx.core.content.res.ResourcesCompat
 import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuRemoteProcess
 import timber.log.Timber
 
 object LocalContent {//TODO
 
+    private var init = false//TODO: UI
+
     fun init() {
-        ServiceManager.setupManagers()
+        if (init) {
+            Timber.d("Managers already init")
+            return
+        } else {
+            init = ServiceManager.setupManagers()
+            Timber.d("Managers init: $init")
+        }
     }
 
     fun destroy() {
-        ServiceManager.destroy()
+        if (init) {
+            ServiceManager.destroy()
+            init = false
+        }
     }
 
     private val virtualDisplayHolder = mutableMapOf<String, VirtualDisplay>()
 
-    fun createContainerForPackage(context: Context? = null, packageName: String, width: Int, height: Int, densityDpi: Int, surface: Surface): Int {
-        val vd = DisplayManagerWrapper.createVirtualDisplay(packageName, width, height, densityDpi, surface)
-        val displayId = vd.display.displayId
-        openApp(context, packageName, displayId = displayId)
-        virtualDisplayHolder[packageName] = vd
-        return displayId
+    fun getVirtualDisplayIdForPackage(packageName: String, width: Int, height: Int, densityDpi: Int, surface: Surface): Int? {
+        virtualDisplayHolder[packageName]?.let {
+            val displayId = it.display.displayId
+            if (true) {//TODO: check if app in this vd
+                it.resize(width, height, densityDpi)
+                it.surface = surface
+                Timber.d("$packageName is already in vd: $displayId")
+                return displayId
+            } else {
+                openApp(displayId, packageName)
+                Timber.d("$packageName is opened in vd: $displayId")
+            }
+        }
+        DisplayManagerWrapper.createVirtualDisplay(packageName, width, height, densityDpi, surface)?.let {
+            val displayId = it.display.displayId
+            Timber.d("Create new vd: $displayId for: $packageName")
+            if (openApp(displayId, packageName)) {
+                virtualDisplayHolder[packageName] = it
+                Timber.d("$packageName is opened in vd: $displayId")
+                return displayId
+            } else {
+                it.release()
+            }
+        }
+        return null
     }
 
-    fun getPackageInfo(context: Context? = null, packageName: String?, flag: Int): PackageInfo? {
+    @Suppress("DEPRECATION")
+    fun getPackageIcon(packageName: String): Drawable? {
+        return try {
+            val applicationInfo = getPackageInfo(packageName)?.applicationInfo ?: throw Exception("applicationInfo == null")
+            val assetManager = AssetManager::class.java.getDeclaredConstructor().newInstance().also {
+                it.javaClass.getMethod("addAssetPath", String::class.java).invoke(it, applicationInfo.sourceDir)
+            } ?: throw Exception("assetManager == null")
+            val resources = Resources(assetManager, null, null)
+            ResourcesCompat.getDrawable(resources, applicationInfo.icon, null) ?: throw Exception("icon == null")
+        } catch (e: Exception) {
+            Timber.e(e, "getPackageIcon")
+            null
+        }
+    }
+
+    private fun getPackageInfo(packageName: String, flag: Int = 0): PackageInfo? {
         try {
-            if (context != null) {
-                val pm = context.packageManager
-                val info: PackageInfo? = pm.getPackageInfo(packageName!!, flag)
-                info?.let {
-                    return it
-                }
+            FakeContext.get().packageManager?.getPackageInfo(packageName, flag)?.let {
+                return it
             }
         } catch (e: Exception) {
-            Timber.w("$packageName get package info by context failed", e)
+            Timber.w(e, "$packageName get package info by context failed")
         }
         return IPackageManager.getPackageInfo(packageName, flag, 0)
     }
 
-    private fun getAppMainActivity(context: Context? = null, packageName: String): String {
-        if (context != null) {
-            val pm = context.packageManager
-            val launchIntent = pm.getLaunchIntentForPackage(packageName)
-            launchIntent?.component?.className?.let {
+    private fun getAppMainActivity(packageName: String): String? {
+        try {
+            FakeContext.get().packageManager?.getLaunchIntentForPackage(packageName)?.component?.className?.let {
                 return it
             }
+        } catch (e: Exception) {
+            Timber.w(e, "$packageName get launch intent by context failed")
         }
-        val mainIntent = Intent(Intent.ACTION_MAIN, null)
-        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER)
-        IPackageManager.queryIntentActivities(mainIntent, null, 0, 0)?.let {
+        val intent = Intent(Intent.ACTION_MAIN, null).apply {
+            addCategory(Intent.CATEGORY_LAUNCHER)
+        }
+        IPackageManager.queryIntentActivities(intent, null, 0, 0)?.let {
             for (resolveInfo in it) {
                 val packageStr = resolveInfo.activityInfo.packageName
                 if (packageStr == packageName) {
@@ -71,82 +112,54 @@ object LocalContent {//TODO
                 }
             }
         }
-        return ""
+        return null
     }
 
-    fun getAppPackages(context: Context? = null): List<String> {
-        if (context != null) {
-            val pm = context.packageManager
-            val packages: MutableList<String> = ArrayList()
-            val infos = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES)
-            for (info in infos) {
-                packages.add(info.packageName)
+    @Suppress("DEPRECATION")
+    fun getAllPackages(): List<String>? {
+        try {
+            FakeContext.get().packageManager?.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES)?.map { it.packageName }?.let {
+                if (it.isNotEmpty()) return it
             }
-            if (packages.isNotEmpty()) {
-                return packages
-            }
+        } catch (e: Exception) {
+            Timber.w(e, "getAllPackages by context failed")
         }
         return IPackageManager.getAllPackages()
     }
 
-    private fun openApp(context: Context? = null, packageName: String, activity: String? = null, displayId: Int): String? {
-        val startActivity = activity ?: getAppMainActivity(context, packageName)
-        if (context == null) {
-            val cmd = if (displayId != 0) "am start --display $displayId -n $packageName/$startActivity" else "am start -n $packageName/$startActivity"
-            Timber.d("start activity cmd: $cmd")
-            try {
-                execReadOutput(cmd)
-            } catch (e: Exception) {
-                Timber.e(e, "openApp")
-                return e.toString()
-            }
-            return null
-        }
+    private fun openApp(displayId: Int, packageName: String, activity: String? = null): Boolean {
+        val startActivity = activity ?: getAppMainActivity(packageName) ?: return false
+        val cmd = if (displayId != 0) "am start --display $displayId -n $packageName/$startActivity" else "am start -n $packageName/$startActivity"
+        Timber.d("start activity cmd: $cmd")
         try {
-            val intent = Intent()
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
-            intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT or Intent.FLAG_ACTIVITY_NEW_TASK)
-            var options: ActivityOptions? = null
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && displayId != 0) {
-                options = ActivityOptions.makeBasic().setLaunchDisplayId(displayId)
-            }
-            val cName = ComponentName(packageName, startActivity)
-            intent.setComponent(cName)
-            if (options != null) {
-                context.startActivity(intent, options.toBundle())
-            } else {
-                context.startActivity(intent)
-            }
+            execReadOutput(cmd)
         } catch (e: Exception) {
             Timber.e(e, "openApp")
+            return false
         }
-        return null
+        return true
     }
 
-    fun injectMotionEvent(motionEvent: MotionEvent, displayId: Int) {
+    fun injectMotionEvent(motionEvent: MotionEvent, displayId: Int) {//TODO: check single tap
         try {
-            val pointerProperties = arrayOfNulls<PointerProperties>(1)
-            val properties = PointerProperties()
-            properties.id = motionEvent.getPointerId(0)
-            properties.toolType = MotionEvent.TOOL_TYPE_FINGER
-            pointerProperties[0] = properties
-
-            val pointerCoords = arrayOfNulls<PointerCoords>(1)
-            val pointerCoord = PointerCoords()
-            pointerCoord.x = motionEvent.x
-            pointerCoord.y = motionEvent.y
-            pointerCoord.pressure = motionEvent.pressure
-            pointerCoord.size = motionEvent.size
-            pointerCoord.toolMajor = motionEvent.toolMajor
-            pointerCoord.toolMinor = motionEvent.toolMinor
-            pointerCoord.touchMajor = motionEvent.touchMajor
-            pointerCoord.touchMinor = motionEvent.touchMinor
-            pointerCoords[0] = pointerCoord
-
+            val pointerCount = motionEvent.pointerCount
+            val pointerProperties = arrayOfNulls<PointerProperties>(pointerCount)
+            val pointerCoords = arrayOfNulls<PointerCoords>(pointerCount)
+            for (i in 0 until pointerCount) {
+                val properties = PointerProperties()
+                properties.id = motionEvent.getPointerId(i)
+                properties.toolType = motionEvent.getToolType(i)
+                pointerProperties[i] = properties
+                val pointerCoord = PointerCoords()
+                motionEvent.getPointerCoords(i, pointerCoord)
+                pointerCoords[i] = pointerCoord
+            }
             val now = SystemClock.uptimeMillis()
-            val injectMotionEvent = MotionEvent.obtain(now, now, motionEvent.action, 1, pointerProperties, pointerCoords, 0, 0, 1.0f, 1.0f, 0, 0, 0, 0)
-            injectMotionEvent.source = InputDeviceCompat.SOURCE_TOUCHSCREEN
+            val injectMotionEvent = MotionEvent.obtain(now, now,
+                motionEvent.actionMasked or (motionEvent.actionIndex shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+                pointerCount, pointerProperties, pointerCoords, motionEvent.metaState, motionEvent.buttonState, motionEvent.xPrecision,
+                motionEvent.yPrecision, motionEvent.deviceId, motionEvent.edgeFlags, motionEvent.source, motionEvent.flags
+            )
             InputManagerWrapper.setDisplayId(injectMotionEvent, displayId)
             InputManagerWrapper.injectInputEvent(injectMotionEvent, InputManagerWrapper.INJECT_INPUT_EVENT_MODE_ASYNC)
             injectMotionEvent.recycle()

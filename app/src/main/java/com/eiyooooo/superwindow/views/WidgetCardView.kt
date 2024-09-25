@@ -39,14 +39,6 @@ class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
         }
     }
 
-    fun getContentView(): View? {//TODO: check if need to remove
-        return widgetCard.contentContainer.getChildAt(0)
-    }
-
-    fun setIcon(icon: Int) {//TODO: load icon
-        widgetCard.icon.setImageResource(icon)
-    }
-
     fun getRootView(): View {
         return widgetCard.root
     }
@@ -113,6 +105,9 @@ class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
         if (widgetCardData.identifier.contains("@")) {
             val packageName = widgetCardData.identifier.split("@")[0]
             val providerName = widgetCardData.identifier.split("@")[1]
+            LocalContent.getPackageIcon(packageName)?.let {
+                widgetCard.icon.setImageDrawable(it)
+            }
             val textureView = TextureView(context).apply {
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -122,13 +117,15 @@ class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
                     var surface: Surface? = null
 
                     override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-                        surface = Surface(surfaceTexture).apply {//TODO: do not reload when activity recreate
-                            displayId = LocalContent.createContainerForPackage(null, packageName, width, height, context.resources.displayMetrics.densityDpi, this)
+                        surface = Surface(surfaceTexture).also {
+                            displayId = LocalContent.getVirtualDisplayIdForPackage(packageName, width, height, context.resources.displayMetrics.densityDpi, it)
                         }
                     }
 
                     override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-                        //TODO: handle size change
+                        surface?.let {
+                            displayId = LocalContent.getVirtualDisplayIdForPackage(packageName, width, height, context.resources.displayMetrics.densityDpi, it)
+                        }
                     }
 
                     override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
