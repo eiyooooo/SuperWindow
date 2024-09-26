@@ -1,8 +1,9 @@
 package com.eiyooooo.superwindow.wrappers;
 
-import android.annotation.SuppressLint;
+import android.hardware.input.IInputManager;
 import android.os.IBinder;
 import android.os.IInterface;
+import android.view.MotionEvent;
 
 import java.lang.reflect.Method;
 
@@ -12,10 +13,35 @@ import timber.log.Timber;
 
 public class ServiceManager {
 
-    @SuppressLint({"DiscouragedPrivateApi", "PrivateApi"})
+    private static Method setDisplayIdMethod;
+
+    /** @noinspection JavaReflectionMemberAccess*/
+    public static Method getSetDisplayIdMethod() {
+        if (setDisplayIdMethod == null) {
+            try {
+                setDisplayIdMethod = MotionEvent.class.getMethod("setDisplayId", int.class);
+            } catch (Exception e) {
+                Timber.e(e, "Error in ServiceManager.getSetDisplayIdMethod");
+            }
+        }
+        return setDisplayIdMethod;
+    }
+
+    private static IInputManager inputManager;
+
+    public static IInputManager getInputManager() {
+        if (inputManager == null) {
+            try {
+                inputManager = IInputManager.Stub.asInterface(new ShizukuBinderWrapper(SystemServiceHelper.getSystemService("input")));
+            } catch (Exception e) {
+                Timber.e(e, "Error in ServiceManager.getInputManager");
+            }
+        }
+        return inputManager;
+    }
+
     public static Boolean setupManagers() {
         try {
-            InputManagerWrapper.init(getService("input", "android.hardware.input.IInputManager"));
             IPackageManager.init(getService("package", "android.content.pm.IPackageManager"));
             DisplayManagerWrapper.init(getService("display", "android.hardware.display.IDisplayManager"));
             return true;
@@ -27,7 +53,7 @@ public class ServiceManager {
     }
 
     public static void destroy() {
-        InputManagerWrapper.destroy();
+        inputManager = null;
         IPackageManager.destroy();
         DisplayManagerWrapper.destroy();
     }

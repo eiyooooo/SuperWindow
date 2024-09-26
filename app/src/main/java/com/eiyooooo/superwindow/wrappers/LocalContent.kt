@@ -139,8 +139,8 @@ object LocalContent {//TODO
 
     fun injectMotionEvent(motionEvent: MotionEvent, displayId: Int) {
         try {
-            InputManagerWrapper.setDisplayId(motionEvent, displayId)
-            InputManagerWrapper.injectInputEvent(motionEvent, InputManagerWrapper.INJECT_INPUT_EVENT_MODE_ASYNC)
+            ServiceManager.getSetDisplayIdMethod().invoke(motionEvent, displayId)
+            ServiceManager.getInputManager().injectInputEvent(motionEvent, 0)
         } catch (throwable: Throwable) {
             Timber.e(throwable, "injectMotionEvent failed")
         }
