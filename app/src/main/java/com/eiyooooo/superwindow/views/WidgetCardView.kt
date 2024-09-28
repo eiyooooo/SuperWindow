@@ -14,6 +14,7 @@ import android.view.View
 import android.view.View.OnTouchListener
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.animation.PathInterpolatorCompat
 import com.eiyooooo.superwindow.databinding.ItemWidgetCardBinding
 import com.eiyooooo.superwindow.entities.WidgetCardData
@@ -47,7 +48,8 @@ class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
         return widgetCard.controlBar
     }
 
-    var displayId: Int? = null
+    private var displayId: Int? = null
+    private var textureView: TextureView? = null
 
     private val textureViewTouchListener by lazy {
         object : OnTouchListener {
@@ -108,7 +110,7 @@ class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
             LocalContent.getPackageIcon(packageName)?.let {
                 widgetCard.icon.setImageDrawable(it)
             }
-            val textureView = TextureView(context).apply {
+            textureView = TextureView(context).apply {
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
@@ -201,7 +203,12 @@ class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
     fun makeBlur() {
         if (covering.get()) return
         cancelBlurTransitAnimations()
-        BlurUtils.blurView(widgetCard.contentContainer)?.let {
+        textureView?.let { textureView ->
+            BlurUtils.blurBitmap(textureView.bitmap)?.let {
+                widgetCard.blurLayer.foreground = it.toDrawable(textureView.resources)
+                widgetCard.blurLayer.foreground.alpha = 255
+            }
+        } ?: BlurUtils.blurView(widgetCard.contentContainer)?.let {
             widgetCard.blurLayer.foreground = it
             widgetCard.blurLayer.foreground.alpha = 255
         }

@@ -41,7 +41,7 @@ object BlurUtils {
         }
     }
 
-    private fun blurBitmap(input: Bitmap?, blurRadius: Float = 10F, scaleRatio: Int = 15): Bitmap? {
+    fun blurBitmap(input: Bitmap?, blurRadius: Float = 10F, scaleRatio: Int = 15): Bitmap? {
         if (input == null || input.width <= 1 || input.height <= 1 || input.isRecycled) {
             return null
         }
