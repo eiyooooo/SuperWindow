@@ -165,10 +165,11 @@ class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
     fun startCoverTransitAnimation() {
         if (blurring.get()) return
         if (covering.get()) {
-            val contentContainerAnimation = ObjectAnimator.ofFloat(widgetCard.contentContainer, "alpha", 0F, 1F).apply {
+            ObjectAnimator.ofFloat(widgetCard.contentContainer, "alpha", 0F, 1F).apply {
                 duration = 300
                 addListener(object : Animator.AnimatorListener {
                     override fun onAnimationStart(animation: Animator) {
+                        widgetCard.iconContainer.visibility = View.GONE
                     }
 
                     override fun onAnimationEnd(animation: Animator) {
@@ -185,11 +186,11 @@ class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
                     }
                 })
                 interpolator = PathInterpolatorCompat.create(0.35f, 0f, 0.35f, 1f)
+                widgetCard.contentContainer.visibility = View.VISIBLE
+                startDelay = 250
+                start()
+                coverTransitAnimationList.add(this)
             }
-            widgetCard.iconContainer.visibility = View.GONE
-            widgetCard.contentContainer.visibility = View.VISIBLE
-            contentContainerAnimation.start()
-            coverTransitAnimationList.add(contentContainerAnimation)
         }
     }
 
@@ -246,6 +247,7 @@ class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
                 duration = 300
                 addListener(object : Animator.AnimatorListener {
                     override fun onAnimationStart(animation: Animator) {
+                        widgetCard.iconContainer.visibility = View.GONE
                     }
 
                     override fun onAnimationEnd(animation: Animator) {
@@ -268,16 +270,15 @@ class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
                 })
                 interpolator = PathInterpolatorCompat.create(0.35f, 0f, 0.35f, 1f)
             }
-            widgetCard.iconContainer.visibility = View.GONE
             widgetCard.contentContainer.visibility = View.VISIBLE
-            val animSet = AnimatorSet()
-            if (blurLayerAnimation != null) {
-                animSet.playTogether(blurLayerAnimation, contentContainerAnimation)
-            } else {
-                animSet.play(contentContainerAnimation)
+            AnimatorSet().apply {
+                blurLayerAnimation?.let {
+                    playTogether(it, contentContainerAnimation)
+                } ?: play(contentContainerAnimation)
+                startDelay = 250
+                start()
+                blurTransitAnimationList.add(this)
             }
-            animSet.start()
-            blurTransitAnimationList.add(animSet)
         }
     }
 
