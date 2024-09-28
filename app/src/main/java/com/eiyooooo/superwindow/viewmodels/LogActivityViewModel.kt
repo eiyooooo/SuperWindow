@@ -46,8 +46,8 @@ class LogActivityViewModel : ViewModel() {
                             currentLogEntry.append(it.substringBefore(FLog.SUFFIX))
                             try {
                                 mItems.value += LogItem(currentLogEntry.toString())
-                            } catch (e: Exception) {
-                                Log.w("ReadLog", e)
+                            } catch (t: Throwable) {
+                                Log.w("ReadLog", t)
                             }
                             currentLogEntry = StringBuilder()
                         } else {
@@ -55,8 +55,8 @@ class LogActivityViewModel : ViewModel() {
                         }
                     }
                 }
-            } catch (e: Exception) {
-                Timber.e(e)
+            } catch (t: Throwable) {
+                Timber.e(t)
             } finally {
                 reader?.close()
             }

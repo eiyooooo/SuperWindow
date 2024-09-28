@@ -99,8 +99,8 @@ object FLog {
                     }
 
                     writeFLogImmediately.update { false }
-                } catch (e: Exception) {
-                    Log.e("FLog", "Error in log writer coroutine", e)
+                } catch (t: Throwable) {
+                    Log.e("FLog", "Error in log writer coroutine", t)
                     delay(1000)
                 }
             }
@@ -131,8 +131,8 @@ object FLog {
                         writer.write(logMessage)
                     }
                 }
-            } catch (e: Exception) {
-                Log.e("FLog", "Error writing log to file", e)
+            } catch (t: Throwable) {
+                Log.e("FLog", "Error writing log to file", t)
             }
         }
     }

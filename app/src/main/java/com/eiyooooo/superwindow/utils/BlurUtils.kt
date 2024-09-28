@@ -11,6 +11,7 @@ import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicBlur
 import android.view.View
 import androidx.core.graphics.drawable.toDrawable
+import timber.log.Timber
 
 object BlurUtils {
 
@@ -36,7 +37,8 @@ object BlurUtils {
         try {
             val output = blurBitmap(inputBitmap, blurRadius, scaleRatio)
             return if (output == null || output.isRecycled) null else output.toDrawable(input.context.resources)
-        } catch (e: Exception) {
+        } catch (t: Throwable) {
+            Timber.e(t, "Blur view failed")
             return null
         }
     }
@@ -63,7 +65,8 @@ object BlurUtils {
             mBlur!!.forEach(mOutput)
             mOutput!!.copyTo(bitmap)
             return if (bitmap.isRecycled) null else bitmap
-        } catch (e: Exception) {
+        } catch (t: Throwable) {
+            Timber.e(t, "Blur bitmap failed")
             return null
         }
     }
@@ -75,7 +78,7 @@ object BlurUtils {
                 mRenderScript!!.destroy()
                 mRenderScript = null
             }
-        } catch (e: Exception) {
+        } catch (_: Throwable) {
             mRenderScript = null
         }
 
@@ -84,7 +87,7 @@ object BlurUtils {
                 mBlur!!.destroy()
                 mBlur = null
             }
-        } catch (e: Exception) {
+        } catch (_: Throwable) {
             mBlur = null
         }
 
@@ -93,7 +96,7 @@ object BlurUtils {
                 mInput!!.destroy()
                 mInput = null
             }
-        } catch (e: Exception) {
+        } catch (_: Throwable) {
             mInput = null
         }
 
@@ -102,7 +105,7 @@ object BlurUtils {
                 mOutput!!.destroy()
                 mOutput = null
             }
-        } catch (e: Exception) {
+        } catch (_: Throwable) {
             mOutput = null
         }
     }

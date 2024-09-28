@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -132,7 +133,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
                             activity.showSnackBar(getString(R.string.export_log_success))
                             return@launch
                         }
-                    } catch (_: Exception) {
+                    } catch (t: Throwable) {
+                        Timber.e(t, "Export log failed")
                     }
                     activity.showSnackBar(getString(R.string.export_log_fail))
                 }

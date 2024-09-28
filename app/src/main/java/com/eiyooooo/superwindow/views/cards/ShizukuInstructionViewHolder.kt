@@ -16,6 +16,7 @@ import com.eiyooooo.superwindow.views.MainActivity
 import rikka.recyclerview.BaseViewHolder
 import rikka.recyclerview.BaseViewHolder.Creator
 import rikka.shizuku.Shizuku
+import timber.log.Timber
 
 class ShizukuInstructionViewHolder(private val binding: ItemTitleDetailCardBinding, root: View) : BaseViewHolder<ShizukuStatus>(root), View.OnClickListener {
 
@@ -51,7 +52,8 @@ class ShizukuInstructionViewHolder(private val binding: ItemTitleDetailCardBindi
                     }
                     intent.setData(Uri.parse(url))
                     context.startActivity(intent)
-                } catch (ignored: Exception) {
+                } catch (t: Throwable) {
+                    Timber.e(t, "Open Shizuku instruction failed")
                     (context as? MainActivity)?.showSnackBar(context.getString(R.string.no_browser))
                 }
             } else {

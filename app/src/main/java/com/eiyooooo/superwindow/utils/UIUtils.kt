@@ -13,7 +13,7 @@ fun Context.dp2px(dp: Int): Int {
 fun View.getBitmap(): Bitmap? {
     return try {
         this.drawToBitmap()
-    } catch (e: Exception) {
+    } catch (_: Throwable) {
         null
     }
 }

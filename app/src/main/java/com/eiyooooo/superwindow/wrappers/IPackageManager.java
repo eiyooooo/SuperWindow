@@ -46,7 +46,7 @@ public class IPackageManager {
             }
             try {
                 getPackageInfoMethod = CLASS.getDeclaredMethod("getPackageInfo", String.class, long.class, int.class);
-            } catch (Exception ignored) {
+            } catch (Throwable ignored) {
                 getPackageInfoMethod = CLASS.getDeclaredMethod("getPackageInfo", String.class, int.class, int.class);
             }
         }
@@ -61,7 +61,7 @@ public class IPackageManager {
             }
             try {
                 queryIntentActivitiesMethod = CLASS.getMethod("queryIntentActivities", Intent.class, String.class, long.class, int.class);
-            } catch (Exception ignored) {
+            } catch (Throwable ignored) {
                 queryIntentActivitiesMethod = CLASS.getMethod("queryIntentActivities", Intent.class, String.class, int.class, int.class);
             }
         }
@@ -82,8 +82,8 @@ public class IPackageManager {
     public static PackageInfo getPackageInfo(String packageName, int flag, int userId) {
         try {
             return (PackageInfo) Objects.requireNonNull(getGetPackageInfoMethod()).invoke(manager, packageName, flag, userId);
-        } catch (Exception e) {
-            Timber.e(e, "Error in getPackageInfo");
+        } catch (Throwable t) {
+            Timber.e(t, "Error in getPackageInfo");
         }
         return null;
     }
@@ -97,8 +97,8 @@ public class IPackageManager {
             } catch (ClassCastException ignored) {
                 return (List<ResolveInfo>) object.getClass().getMethod("getList").invoke(object);
             }
-        } catch (Exception e) {
-            Timber.e(e, "Error in queryIntentActivities");
+        } catch (Throwable t) {
+            Timber.e(t, "Error in queryIntentActivities");
         }
         return null;
     }
@@ -107,8 +107,8 @@ public class IPackageManager {
     public static List<String> getAllPackages() {
         try {
             return (List<String>) Objects.requireNonNull(getGetAllPackagesMethod()).invoke(manager);
-        } catch (Exception e) {
-            Timber.e(e, "Error in getAllPackages");
+        } catch (Throwable t) {
+            Timber.e(t, "Error in getAllPackages");
         }
         return null;
     }
