@@ -20,11 +20,7 @@ import android.app.ActivityManager;
 
 interface ITaskStackListener {
 
-    void onTaskCreated(int taskId, in ComponentName componentName);
-
-    void onTaskRemovalStarted(in ActivityManager.RunningTaskInfo taskInfo);
-
     void onTaskDisplayChanged(int taskId, int newDisplayId);
 
-    void onTaskMovedToFront(in ActivityManager.RunningTaskInfo taskInfo);
+    void onTaskRemovalStarted(in ActivityManager.RunningTaskInfo taskInfo);
 }

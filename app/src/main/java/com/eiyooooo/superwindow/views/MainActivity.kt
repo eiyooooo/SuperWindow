@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
                             val flagsField = this.javaClass.getDeclaredField("flags")
                             val flags = flagsField.getInt(this)
                             flagsField.set(this, flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
-                        })
+                        })//TODO: only add when localContent is presented
                     }
                     it.widgetContainer.addTargetView(it.leftSplitHandle)
                     it.widgetContainer.addTargetView(it.rightSplitHandle)
@@ -93,9 +93,15 @@ class MainActivity : AppCompatActivity() {
         mainModel.checkShizukuPermission()
     }
 
+    override fun recreate() {
+        widgetCardManager.destroy()
+        super.recreate()
+    }
+
     override fun onDestroy() {
-        super.onDestroy()
+        widgetCardManager.destroy()
         mainModel.removeShizukuListener()
+        super.onDestroy()
     }
 
     private fun setupControlPanel() {

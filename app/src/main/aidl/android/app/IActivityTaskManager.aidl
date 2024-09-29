@@ -24,4 +24,7 @@ interface IActivityTaskManager {
     void registerTaskStackListener(ITaskStackListener iTaskStackListener);
 
     void unregisterTaskStackListener(ITaskStackListener iTaskStackListener);
+
+    List<ActivityManager.RunningTaskInfo> getTasks(int maxNum, boolean filterOnlyVisibleRecents,
+              boolean keepIntentExtra, int displayId);
 }

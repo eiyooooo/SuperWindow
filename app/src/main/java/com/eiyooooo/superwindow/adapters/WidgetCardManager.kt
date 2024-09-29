@@ -68,13 +68,46 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                     }
                 }
             }
+
+            mainActivity.lifecycleScope.launch {
+                LocalContent.runningTasksInVD.collect { runningTasksInVD ->
+                    widgetCards.values.filter { !runningTasksInVD.containsKey(it.displayId) }.forEach { card ->
+                        card.release()
+                        mainModel.updateWidgetCardGroup { currentGroup ->
+                            when (card.widgetCardData.identifier) {
+                                currentGroup.firstWidgetCard.identifier -> {
+                                    if (secondWidgetCard != null) {
+                                        currentGroup.copy(firstWidgetCard = currentGroup.secondWidgetCard!!, secondWidgetCard = currentGroup.thirdWidgetCard, thirdWidgetCard = null)
+                                    } else {
+                                        currentGroup.copy(firstWidgetCard = controlPanelWidgetCard.widgetCardData)
+                                    }
+                                }
+
+                                currentGroup.secondWidgetCard?.identifier -> {
+                                    currentGroup.copy(secondWidgetCard = currentGroup.thirdWidgetCard, thirdWidgetCard = null)
+                                }
+
+                                currentGroup.thirdWidgetCard?.identifier -> {
+                                    currentGroup.copy(thirdWidgetCard = null)
+                                }
+
+                                else -> {
+                                    currentGroup.copy(backgroundWidgetCard = currentGroup.backgroundWidgetCard.filter { it.identifier != card.widgetCardData.identifier })
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         //TODO: remove this test module
         mainActivity.lifecycleScope.launch {
             mainModel.shizukuStatus.filter { it == ShizukuStatus.HAVE_PERMISSION }.first()
             delay(2000)
-            mainModel.lastWidgetCardGroup?.copy(secondWidgetCard = WidgetCardData(false, "com.tencent.mm@local"), thirdWidgetCard = null)?.let { mainModel.updateWidgetCardGroup(it) }
+            mainModel.updateWidgetCardGroup {
+                it.copy(secondWidgetCard = WidgetCardData(false, "com.coloros.note@local"), thirdWidgetCard = null)
+            }
 //            while (true) {
 //                delay(2000)
 //                mainModel.lastWidgetCardGroup?.copy(secondWidgetCard = WidgetCardData(false, "test1"))?.let { mainModel.updateWidgetCardGroup(it) }
@@ -86,6 +119,13 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
 //                mainModel.lastWidgetCardGroup?.copy(secondWidgetCard = null)?.let { mainModel.updateWidgetCardGroup(it) }
 //            }
         }
+    }
+
+    fun destroy() {
+        firstWidgetCard?.release()
+        secondWidgetCard?.release()
+        thirdWidgetCard?.release()
+        widgetCards.clear()
     }
 
     private var firstWidgetCard: WidgetCardView? = null
@@ -199,10 +239,16 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
 
         constraintSet.clone(mainActivity.bindingExpanded.widgetContainer)
 
-        if (oldWidgetCardCount != -1) {
-            firstWidgetCard?.makeCover()
-            secondWidgetCard?.makeCover()
-            thirdWidgetCard?.makeCover()
+        firstWidgetCard?.makeCover()
+        secondWidgetCard?.makeCover()
+        thirdWidgetCard?.makeCover()
+        if (oldWidgetCardCount == -1) {
+            mainActivity.bindingExpanded.widgetContainer.postDelayed({
+                firstWidgetCard?.startCoverTransitAnimation()
+                secondWidgetCard?.startCoverTransitAnimation()
+                thirdWidgetCard?.startCoverTransitAnimation()
+            }, 250)
+        } else {
             TransitionManager.beginDelayedTransition(mainActivity.bindingExpanded.widgetContainer, onWidgetCardCountChangedTransition)
         }
 

@@ -57,7 +57,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 onSelected = {
                     Preferences.darkTheme = if (it == 0) AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM else it
                     AppCompatDelegate.setDefaultNightMode(Preferences.darkTheme)
-                    requireActivity().recreate()
+                    activity.recreate()
                 }
             )
 
@@ -70,7 +70,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         systemColorPreference?.apply {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 setOnPreferenceChangeListener { _, _ ->
-                    requireActivity().recreate()
+                    activity.recreate()
                     true
                 }
             } else {

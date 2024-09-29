@@ -24,7 +24,7 @@ import com.eiyooooo.superwindow.wrappers.LocalContent
 import java.util.concurrent.atomic.AtomicBoolean
 
 @SuppressLint("ClickableViewAccessibility")
-class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
+class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
 
     private val widgetCard: ItemWidgetCardBinding = ItemWidgetCardBinding.inflate(LayoutInflater.from(context), null, false)
 
@@ -33,7 +33,7 @@ class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
     private val blurring = AtomicBoolean(false)
     private val blurTransitAnimationList = mutableListOf<AnimatorSet>()
 
-    fun setContentView(view: View?) {
+    fun setContentView(view: View? = null) {
         widgetCard.contentContainer.removeAllViews()
         view?.let {
             widgetCard.contentContainer.addView(view)
@@ -48,7 +48,12 @@ class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
         return widgetCard.controlBar
     }
 
-    private var displayId: Int? = null
+    var displayId: Int? = null
+        private set
+    lateinit var packageName: String
+        private set
+    lateinit var providerName: String
+        private set
     private var textureView: TextureView? = null
 
     private val textureViewTouchListener by lazy {
@@ -105,8 +110,8 @@ class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
         widgetCard.controlBar.setOnTouchListener(controlBarListener)
 
         if (widgetCardData.identifier.contains("@")) {
-            val packageName = widgetCardData.identifier.split("@")[0]
-            val providerName = widgetCardData.identifier.split("@")[1]
+            packageName = widgetCardData.identifier.split("@")[0]
+            providerName = widgetCardData.identifier.split("@")[1]
             LocalContent.getPackageIcon(packageName)?.let {
                 widgetCard.icon.setImageDrawable(it)
             }
@@ -141,6 +146,14 @@ class WidgetCardView(context: Context, widgetCardData: WidgetCardData) {
                 setOnTouchListener(textureViewTouchListener)
             }
             setContentView(textureView)
+        }
+    }
+
+    fun release() {
+        setContentView()
+        makeCover()
+        if (::packageName.isInitialized) {
+            LocalContent.releaseVirtualDisplayForPackage(packageName)
         }
     }
 

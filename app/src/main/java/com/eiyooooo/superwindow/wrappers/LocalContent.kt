@@ -3,7 +3,6 @@ package com.eiyooooo.superwindow.wrappers
 import android.annotation.SuppressLint
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.TaskStackListener
-import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -16,8 +15,8 @@ import android.view.MotionEvent
 import android.view.Surface
 import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
-import com.eiyooooo.superwindow.entities.RunningTask
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuRemoteProcess
@@ -53,42 +52,56 @@ object LocalContent {//TODO
         }
     }
 
-    private val runningTaskList: MutableStateFlow<MutableList<RunningTask>> by lazy { MutableStateFlow(mutableListOf()) }
-
     @SuppressLint("NewApi")
     private val runningTaskStackListener = object : TaskStackListener() {
-        override fun onTaskCreated(taskId: Int, componentName: ComponentName) {
-            Timber.d("onTaskCreated -> taskId: $taskId, packageName: ${componentName.packageName}")
-            runningTaskList.update { it.apply { add(RunningTask(taskId, componentName.packageName)) } }
+        override fun onTaskDisplayChanged(taskId: Int, newDisplayId: Int) {
+            mRunningTasksInVD.update {
+                if (virtualDisplayHolder.containsKey(newDisplayId)) {
+                    Timber.d("Task: $taskId is moved to vd: $newDisplayId")
+                    it.apply { get(newDisplayId)?.add(taskId) ?: put(newDisplayId, mutableSetOf(taskId)) }
+                } else {
+                    it.filter { (displayId, tasks) ->
+                        if (tasks.remove(taskId)) {
+                            Timber.d("Task: $taskId is removed from vd: $displayId")
+                        }
+                        tasks.isNotEmpty()
+                    }.toMutableMap()
+                }
+            }
         }
 
         override fun onTaskRemovalStarted(taskInfo: RunningTaskInfo) {
-            Timber.d("onTaskRemovalStarted -> taskId: ${taskInfo.taskId}, packageName: ${taskInfo.baseIntent.component?.packageName}")
-            runningTaskList.update { list -> list.apply { removeIf { it.taskId == taskInfo.taskId } } }
-        }
-
-        override fun onTaskDisplayChanged(taskId: Int, newDisplayId: Int) {
-            Timber.d("onTaskDisplayChanged -> taskId: $taskId, newDisplayId: $newDisplayId")
-            runningTaskList.update { list -> list.apply { find { it.taskId == taskId }?.let { task -> task.displayId = newDisplayId } } }
+            mRunningTasksInVD.update {
+                it.filter { (displayId, tasks) ->
+                    tasks.remove(taskInfo.taskId)
+                    if (tasks.remove(taskInfo.taskId)) {
+                        Timber.d("Task: $taskInfo.taskId is removed from vd: $displayId")
+                    }
+                    tasks.isNotEmpty()
+                }.toMutableMap()
+            }
         }
     }
 
-    private val virtualDisplayHolder = mutableMapOf<String, VirtualDisplay>()//TODO: need destroy
+    private val packageContainer = mutableMapOf<String, Int>()
+    private val virtualDisplayHolder = mutableMapOf<Int, VirtualDisplay>()
+    private val mRunningTasksInVD: MutableStateFlow<MutableMap<Int, MutableSet<Int>>> by lazy { MutableStateFlow(mutableMapOf()) }
+    val runningTasksInVD: StateFlow<Map<Int, Set<Int>>> = mRunningTasksInVD
 
     fun getVirtualDisplayIdForPackage(packageName: String, width: Int, height: Int, densityDpi: Int, surface: Surface): Int? {
-        virtualDisplayHolder[packageName]?.let { vd ->
+        virtualDisplayHolder[packageContainer[packageName]]?.let { vd ->
             val displayId = vd.display.displayId
             vd.resize(width, height, densityDpi)
             vd.surface = surface
             Timber.d("Resize vd: $displayId for: $packageName, width: $width, height: $height, densityDpi: $densityDpi")
-            showAPP(packageName, displayId)//TODO: handle failure
             return displayId
         }
         DisplayManagerWrapper.createVirtualDisplay(packageName, width, height, densityDpi, surface)?.let {
             val displayId = it.display.displayId
             Timber.d("Create new vd: $displayId for: $packageName, width: $width, height: $height, densityDpi: $densityDpi")
             if (showAPP(packageName, displayId)) {
-                virtualDisplayHolder[packageName] = it
+                packageContainer[packageName] = displayId
+                virtualDisplayHolder[displayId] = it
                 Timber.d("$packageName is opened in vd: $displayId")
                 return displayId
             } else {
@@ -98,37 +111,40 @@ object LocalContent {//TODO
         return null
     }
 
+    fun releaseVirtualDisplayForPackage(packageName: String) {
+        packageContainer.remove(packageName)?.let { displayId ->
+            Timber.d("Release vd: $displayId")
+            virtualDisplayHolder.remove(displayId)?.release()
+        }
+    }
+
+    @SuppressLint("NewApi")
     private fun showAPP(packageName: String, displayId: Int): Boolean {
-        return runningTaskList.value.run {
-            find { it.packageName == packageName }?.let {
-                if (it.displayId == displayId) {
-                    Timber.d("$packageName is already in vd: $displayId")
-                    true
-                } else {
+        ServiceManager.getActivityTaskManager()?.getTasks(25, false, false, -1)?.let {
+            for (taskInfo in it) {
+                if (packageName == (taskInfo.baseIntent.component?.packageName ?: taskInfo.baseActivity?.packageName)) {
                     Timber.d("Try move $packageName to vd: $displayId")
-                    val cmd = "am display move-stack ${it.taskId} $displayId"
+                    val cmd = "am display move-stack ${taskInfo.taskId} $displayId"
                     try {
                         execReadOutput(cmd)
                         Timber.d("Move stack success, cmd: $cmd")
-                        true
                     } catch (t: Throwable) {
                         Timber.e(t, "Move stack failed, cmd: $cmd")
-                        false
                     }
-                }
-            } ?: let {
-                Timber.d("Try open $packageName in vd: $displayId")
-                val startActivity = getAppMainActivity(packageName) ?: return false
-                val cmd = "am start --display $displayId -n $packageName/$startActivity"
-                try {
-                    execReadOutput(cmd)
-                    Timber.d("Start activity success, cmd: $cmd")
-                    true
-                } catch (t: Throwable) {
-                    Timber.e(t, "Start activity failed, cmd: $cmd")
-                    false
+                    return true
                 }
             }
+        }
+        Timber.d("Try open $packageName in vd: $displayId")
+        val startActivity = getAppMainActivity(packageName) ?: return false
+        val cmd = "am start --display $displayId -n $packageName/$startActivity"
+        try {
+            execReadOutput(cmd)
+            Timber.d("Start activity success, cmd: $cmd")
+            return true
+        } catch (t: Throwable) {
+            Timber.e(t, "Start activity failed, cmd: $cmd")
+            return false
         }
     }
 
@@ -213,7 +229,7 @@ object LocalContent {//TODO
             val result = process.inputStream.bufferedReader().use { it.readText() }
             val exitCode = process.waitFor()
             if (exitCode != 0) {
-                throw Exception("Error: Execution failed with exit code: $exitCode")
+                throw Exception("Error: Execution failed with exit code: $exitCode, output: $result")
             }
             return result
         } else {

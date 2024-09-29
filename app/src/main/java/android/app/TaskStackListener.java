@@ -16,20 +16,9 @@
 
 package android.app;
 
-import android.content.ComponentName;
 import android.os.RemoteException;
 
 public class TaskStackListener extends ITaskStackListener.Stub {
-
-    @Override
-    public void onTaskCreated(int taskId, ComponentName componentName) throws RemoteException {
-
-    }
-
-    @Override
-    public void onTaskRemovalStarted(ActivityManager.RunningTaskInfo taskInfo) throws RemoteException {
-
-    }
 
     @Override
     public void onTaskDisplayChanged(int taskId, int newDisplayId) throws RemoteException {
@@ -37,7 +26,7 @@ public class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) throws RemoteException {
+    public void onTaskRemovalStarted(ActivityManager.RunningTaskInfo taskInfo) throws RemoteException {
 
     }
 }

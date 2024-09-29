@@ -26,8 +26,8 @@ class MainActivityViewModel : ViewModel() {
     private val mWidgetCardGroup: MutableStateFlow<WidgetCardGroup> by lazy { MutableStateFlow(WidgetCardGroup(firstWidgetCard = WidgetCardData(true, "controlPanel"))) }
     val widgetCardGroup: LiveData<WidgetCardGroup> = mWidgetCardGroup.asLiveData()
 
-    fun updateWidgetCardGroup(widgetCardGroup: WidgetCardGroup) {
-        mWidgetCardGroup.update { widgetCardGroup }
+    fun updateWidgetCardGroup(function: (WidgetCardGroup) -> WidgetCardGroup) {
+        mWidgetCardGroup.update(function)
     }
 
     var lastWidgetCardGroup: WidgetCardGroup? = null
