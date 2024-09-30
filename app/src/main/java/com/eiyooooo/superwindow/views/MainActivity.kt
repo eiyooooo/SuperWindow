@@ -67,8 +67,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 lifecycleScope.launch {
                     Preferences.topBottomPaddingFlow.collect {
-                        val padding = getResources().displayMetrics.heightPixels * it / 100
-                        bindingExpanded.root.setPadding(0, padding, 0, padding)
+                        bindingExpanded.root.setPadding(0, it, 0, it)
                     }
                 }
                 true

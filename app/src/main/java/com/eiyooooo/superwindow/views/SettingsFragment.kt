@@ -81,9 +81,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
             this.showSliderPreferenceOnClick(
                 setupDialog = { setIcon(R.drawable.padding) },
                 initialValue = { Preferences.topBottomPadding.toFloat() },
-                valueRange = 0f to 25f,
+                valueRange = 0f to (resources.displayMetrics.heightPixels / 4).toFloat(),
                 step = 1f,
-                labelFormatter = { "${it.toInt()}%" },
+                labelFormatter = { "${it.toInt()}px" },
                 onValueChanged = {
                     Preferences.topBottomPadding = it.toInt()
                 })
