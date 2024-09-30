@@ -26,16 +26,12 @@ import kotlinx.coroutines.launch
 class WidgetCardManager(private val mainActivity: MainActivity, private val mainModel: MainActivityViewModel) {
 
     private var forceRefreshUI = true
-    private val controlPanelWidgetCard = WidgetCardView(mainActivity, WidgetCardData(true, "controlPanel"))
+    private val controlPanelWidgetCard by lazy { WidgetCardView(mainActivity.bindingControlPanelExpanded.root, WidgetCardData(true, "controlPanel")) }
     private val widgetCards: MutableMap<String, WidgetCardView> = mutableMapOf()
 
     fun init() {
         forceRefreshUI = true
         BlurUtils.init(mainActivity.applicationContext)
-
-        mainActivity.lifecycleScope.launch {
-            controlPanelWidgetCard.setContentView(mainActivity.getControlPanelExpandedView())
-        }
 
         mainModel.widgetCardGroup.observe(mainActivity) {//TODO: handle pendingWidgetCard
             mainModel.dualSplitHandlePosition.removeObserver(dualSplitHandlePositionObserver)

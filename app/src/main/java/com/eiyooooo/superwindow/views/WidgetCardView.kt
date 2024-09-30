@@ -26,6 +26,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 @SuppressLint("ClickableViewAccessibility")
 class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
 
+    constructor(view: View, widgetCardData: WidgetCardData) : this(view.context, widgetCardData) {
+        widgetCard.contentContainer.addView(view)
+    }
+
     private val widgetCard: ItemWidgetCardBinding = ItemWidgetCardBinding.inflate(LayoutInflater.from(context), null, false)
 
     private val covering = AtomicBoolean(false)
@@ -33,7 +37,7 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
     private val blurring = AtomicBoolean(false)
     private val blurTransitAnimationList = mutableListOf<AnimatorSet>()
 
-    fun setContentView(view: View? = null) {
+    private fun setContentView(view: View? = null) {
         widgetCard.contentContainer.removeAllViews()
         view?.let {
             widgetCard.contentContainer.addView(view)

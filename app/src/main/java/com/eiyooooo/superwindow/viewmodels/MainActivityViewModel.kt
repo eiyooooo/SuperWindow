@@ -103,6 +103,8 @@ class MainActivityViewModel : ViewModel() {
         checkShizukuPermissionJob = null
     }
 
+    var currentControlPanelPage = 0
+
     val homeData = MediatorLiveData<HomeData>().apply {
         addSource(mShizukuStatus.asLiveData()) {
             value = HomeData(it)

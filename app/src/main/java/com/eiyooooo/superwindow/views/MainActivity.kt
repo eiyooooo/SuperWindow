@@ -11,21 +11,16 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
-import com.eiyooooo.superwindow.R
+import com.eiyooooo.superwindow.adapters.ControlPanelAdapter
 import com.eiyooooo.superwindow.adapters.WidgetCardManager
 import com.eiyooooo.superwindow.databinding.ActivityMainCompactBinding
 import com.eiyooooo.superwindow.databinding.ActivityMainExpandedBinding
 import com.eiyooooo.superwindow.databinding.ControlPanelCompactBinding
 import com.eiyooooo.superwindow.databinding.ControlPanelExpandedBinding
 import com.eiyooooo.superwindow.entities.Preferences
+import com.eiyooooo.superwindow.utils.setupWithViewPager
 import com.eiyooooo.superwindow.viewmodels.MainActivityViewModel
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -33,12 +28,11 @@ class MainActivity : AppCompatActivity() {
     private var isExpanded: Boolean = false
     private lateinit var bindingCompact: ActivityMainCompactBinding
     internal lateinit var bindingExpanded: ActivityMainExpandedBinding
-
-    private val controlPanelExpandedInitialized = MutableStateFlow(false)
     private lateinit var bindingControlPanelCompact: ControlPanelCompactBinding
     internal lateinit var bindingControlPanelExpanded: ControlPanelExpandedBinding
 
     private val mainModel: MainActivityViewModel by viewModels()
+    private val controlPanelAdapter: ControlPanelAdapter by lazy { ControlPanelAdapter(this) }
     private val widgetCardManager: WidgetCardManager by lazy { WidgetCardManager(this, mainModel) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,10 +51,8 @@ class MainActivity : AppCompatActivity() {
             else -> {
                 setupFullScreen()
                 bindingExpanded = ActivityMainExpandedBinding.inflate(layoutInflater).also {
-                    bindingControlPanelExpanded = ControlPanelExpandedBinding.inflate(layoutInflater, it.controlPanelCreator, true)
-                    it.controlPanelCreator.post {
-                        bindingExpanded.controlPanelCreator.removeAllViews()
-                        controlPanelExpandedInitialized.update { true }
+                    bindingControlPanelExpanded = ControlPanelExpandedBinding.inflate(layoutInflater, null, false)
+                    it.root.post {
                         val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
                         windowManager.updateViewLayout(bindingExpanded.root.rootView, bindingExpanded.root.rootView.layoutParams.apply {
                             val flagsField = this.javaClass.getDeclaredField("flags")
@@ -105,20 +97,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupControlPanel() {
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         if (isExpanded) {
-            bindingControlPanelExpanded.navigationRail.setupWithNavController(navHostFragment.navController)
-            bindingControlPanelExpanded.bottomNavigation.setupWithNavController(navHostFragment.navController)
+            bindingControlPanelExpanded.viewPager.apply {
+                adapter = controlPanelAdapter
+                offscreenPageLimit = 2
+                setCurrentItem(mainModel.currentControlPanelPage, false)
+                bindingControlPanelExpanded.bottomNavigation.setupWithViewPager(this) {
+                    mainModel.currentControlPanelPage = it
+                }
+                bindingControlPanelExpanded.navigationRail.setupWithViewPager(this) {
+                    mainModel.currentControlPanelPage = it
+                }
+            }
             setSupportActionBar(bindingControlPanelExpanded.toolbar)
         } else {
-            bindingControlPanelCompact.bottomNavigation.setupWithNavController(navHostFragment.navController)
+            bindingControlPanelCompact.viewPager.apply {
+                adapter = controlPanelAdapter
+                offscreenPageLimit = 2
+                setCurrentItem(mainModel.currentControlPanelPage, false)
+                bindingControlPanelCompact.bottomNavigation.setupWithViewPager(this) {
+                    mainModel.currentControlPanelPage = it
+                }
+            }
             setSupportActionBar(bindingControlPanelCompact.toolbar)
         }
-    }
-
-    suspend fun getControlPanelExpandedView(): View {
-        controlPanelExpandedInitialized.filter { it }.first()
-        return bindingControlPanelExpanded.root
     }
 
     @Suppress("DEPRECATION")
