@@ -124,6 +124,18 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         widgetCards.clear()
     }
 
+    fun makeCardsBlur(blur: Boolean) {
+        if (blur) {
+            firstWidgetCard?.makeBlur()
+            secondWidgetCard?.makeBlur()
+            thirdWidgetCard?.makeBlur()
+        } else {
+            firstWidgetCard?.startBlurTransitAnimation()
+            secondWidgetCard?.startBlurTransitAnimation()
+            thirdWidgetCard?.startBlurTransitAnimation()
+        }
+    }
+
     private var firstWidgetCard: WidgetCardView? = null
     private var secondWidgetCard: WidgetCardView? = null
     private var thirdWidgetCard: WidgetCardView? = null

@@ -50,7 +50,9 @@ fun Preference.showListPreferenceOnClick(
     setupDialog: MaterialAlertDialogBuilder.() -> Unit,
     items: Array<String>,
     selected: () -> Int,
-    onSelected: (Int) -> Unit
+    onSelected: (Int) -> Unit,
+    onShowDialog: (() -> Unit)? = null,
+    onDismissDialog: (() -> Unit)? = null
 ) =
     setOnPreferenceClickListener {
         MaterialAlertDialogBuilder(context)
@@ -60,8 +62,10 @@ fun Preference.showListPreferenceOnClick(
                 onSelected(which)
             }
             .setPositiveButton(R.string.cancel, null)
+            .setOnDismissListener { onDismissDialog?.invoke() }
             .apply(setupDialog)
             .show()
+        onShowDialog?.invoke()
         return@setOnPreferenceClickListener true
     }
 
@@ -71,7 +75,9 @@ fun Preference.showSliderPreferenceOnClick(
     valueRange: Pair<Float, Float>,
     step: Float = 1f,
     labelFormatter: ((Float) -> String)? = null,
-    onValueChanged: (Float) -> Unit
+    onValueChanged: (Float) -> Unit,
+    onShowDialog: (() -> Unit)? = null,
+    onDismissDialog: (() -> Unit)? = null
 ) =
     setOnPreferenceClickListener {
         val slider = Slider(context).apply {
@@ -96,7 +102,9 @@ fun Preference.showSliderPreferenceOnClick(
             .setTitle(title)
             .setView(linearLayout)
             .setPositiveButton(R.string.confirm, null)
+            .setOnDismissListener { onDismissDialog?.invoke() }
             .apply(setupDialog)
             .show()
+        onShowDialog?.invoke()
         return@setOnPreferenceClickListener true
     }

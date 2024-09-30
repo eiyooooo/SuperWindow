@@ -58,7 +58,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     Preferences.darkTheme = if (it == 0) AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM else it
                     AppCompatDelegate.setDefaultNightMode(Preferences.darkTheme)
                     activity.recreate()
-                }
+                },
+                onShowDialog = { activity.makeCardsBlur(true) },
+                onDismissDialog = { activity.makeCardsBlur(false) }
             )
 
             lifecycleScope.launch {
@@ -84,9 +86,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 valueRange = 0f to (resources.displayMetrics.heightPixels / 4).toFloat(),
                 step = 1f,
                 labelFormatter = { "${it.toInt()}px" },
-                onValueChanged = {
-                    Preferences.topBottomPadding = it.toInt()
-                })
+                onValueChanged = { Preferences.topBottomPadding = it.toInt() },
+                onShowDialog = { activity.makeCardsBlur(true) },
+                onDismissDialog = { activity.makeCardsBlur(false) }
+            )
         }
 
         enableLogPreference?.setOnPreferenceChangeListener { _, newValue ->

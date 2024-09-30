@@ -150,4 +150,6 @@ class MainActivity : AppCompatActivity() {
             Snackbar.make(bindingCompact.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingControlPanelCompact.bottomNavigation).show()
         }
     }
+
+    internal fun makeCardsBlur(blur: Boolean) = widgetCardManager.makeCardsBlur(blur)
 }
