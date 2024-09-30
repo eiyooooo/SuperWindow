@@ -96,16 +96,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupControlPanel() {
+        val lastControlPanelPage = mainModel.currentControlPanelPage
         if (isExpanded) {
             bindingControlPanelExpanded.viewPager.apply {
                 adapter = controlPanelAdapter
                 offscreenPageLimit = 2
-                setCurrentItem(mainModel.currentControlPanelPage, false)
                 bindingControlPanelExpanded.bottomNavigation.setupWithViewPager(this) {
                     mainModel.currentControlPanelPage = it
                 }
-                bindingControlPanelExpanded.navigationRail.setupWithViewPager(this) {
-                    mainModel.currentControlPanelPage = it
+                bindingControlPanelExpanded.navigationRail.setupWithViewPager(this)
+                post {
+                    setCurrentItem(lastControlPanelPage, false)
                 }
             }
             setSupportActionBar(bindingControlPanelExpanded.toolbar)
@@ -113,9 +114,11 @@ class MainActivity : AppCompatActivity() {
             bindingControlPanelCompact.viewPager.apply {
                 adapter = controlPanelAdapter
                 offscreenPageLimit = 2
-                setCurrentItem(mainModel.currentControlPanelPage, false)
                 bindingControlPanelCompact.bottomNavigation.setupWithViewPager(this) {
                     mainModel.currentControlPanelPage = it
+                }
+                post {
+                    setCurrentItem(lastControlPanelPage, false)
                 }
             }
             setSupportActionBar(bindingControlPanelCompact.toolbar)
