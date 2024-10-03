@@ -5,7 +5,6 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.app.TaskStackListener
 import android.content.Intent
 import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
@@ -193,19 +192,8 @@ object LocalContent {//TODO
                 }
             }
         }
+        Timber.e("$packageName get launch intent failed")
         return null
-    }
-
-    @Suppress("DEPRECATION")
-    fun getAllPackages(): List<String>? {
-        try {
-            FakeContext.get().packageManager?.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES)?.map { it.packageName }?.let {
-                if (it.isNotEmpty()) return it
-            }
-        } catch (t: Throwable) {
-            Timber.w(t, "getAllPackages by context failed")
-        }
-        return IPackageManager.getAllPackages()
     }
 
     fun injectMotionEvent(motionEvent: MotionEvent, displayId: Int) {
