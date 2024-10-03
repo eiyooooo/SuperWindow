@@ -77,4 +77,8 @@ dependencies {
     implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
     implementation "dev.rikka.shizuku:api:13.1.5"
     implementation "dev.rikka.shizuku:provider:13.1.5"
+
+    implementation 'io.github.biezhi:TinyPinyin:2.0.3.RELEASE'
+
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
 }

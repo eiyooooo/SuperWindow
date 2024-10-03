@@ -17,6 +17,8 @@
     <string name="Shizuku_setup_instruction">Shizuku is not running, click to view Shizuku setup instructions</string>
     <string name="Shizuku_authorization_instruction">Once Shizuku permissions are granted, the app will have elevated privileges beyond regular apps, please be mindful of your device\'s security, click to grant Shizuku permission to this app</string>
 
+    <string name="local_content_panel">Local Applications</string>
+
     <string name="appearance">Appearance</string>
     <string name="dark_theme">Dark theme</string>
     <string name="follow_system">Follow system</string>
@@ -48,4 +50,33 @@
         <item>Error</item>
         <item>Assert</item>
     </string-array>
+
+    <array name="side_bar_letters">
+        <item>A</item>
+        <item>B</item>
+        <item>C</item>
+        <item>D</item>
+        <item>E</item>
+        <item>F</item>
+        <item>G</item>
+        <item>H</item>
+        <item>I</item>
+        <item>J</item>
+        <item>K</item>
+        <item>L</item>
+        <item>M</item>
+        <item>N</item>
+        <item>O</item>
+        <item>P</item>
+        <item>Q</item>
+        <item>R</item>
+        <item>S</item>
+        <item>T</item>
+        <item>U</item>
+        <item>V</item>
+        <item>W</item>
+        <item>X</item>
+        <item>Y</item>
+        <item>Z</item>
+    </array>
 </resources>
