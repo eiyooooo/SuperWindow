@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.eiyooooo.superwindow.R
+import com.eiyooooo.superwindow.utils.packageManager
 import com.github.promeg.pinyinhelper.Pinyin
 import timber.log.Timber
 
@@ -19,8 +20,6 @@ class AllAppsAdapter(
     private val allAppsList: ArrayList<LauncherActivityInfo>,
     private val callback: (String) -> Unit
 ) : RecyclerView.Adapter<AllAppsAdapter.ViewHolder>() {
-
-    private val packageManager by lazy { context.packageManager }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val icon: ImageView = itemView.findViewById(R.id.icon)

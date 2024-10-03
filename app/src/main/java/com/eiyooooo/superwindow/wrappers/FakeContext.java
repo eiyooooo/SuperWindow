@@ -1,5 +1,7 @@
 package com.eiyooooo.superwindow.wrappers;
 
+import static com.eiyooooo.superwindow.MyApplicationKt.getApplication;
+
 import android.annotation.TargetApi;
 import android.content.AttributionSource;
 import android.content.Context;
@@ -7,32 +9,22 @@ import android.content.MutableContextWrapper;
 import android.os.Build;
 import android.os.Process;
 
-import timber.log.Timber;
-
 public final class FakeContext extends MutableContextWrapper {
 
     public static final String PACKAGE_NAME = "com.android.shell";
     public static final int ROOT_UID = 0; // Like android.os.Process.ROOT_UID, but before API 29
 
     private static FakeContext INSTANCE = null;
-    private static final FakeContext INSTANCE_NOT_FILLED = new FakeContext();
 
     public static FakeContext get() {
-        if (INSTANCE == null) return INSTANCE_NOT_FILLED;
-        else return INSTANCE;
-    }
-
-    public static void set(Context context) {
-        INSTANCE = new FakeContext(context);
-        Timber.d("FakeContext initialized");
+        if (INSTANCE == null) {
+            INSTANCE = new FakeContext(getApplication());
+        }
+        return INSTANCE;
     }
 
     private FakeContext(Context context) {
         super(context);
-    }
-
-    private FakeContext() {
-        super(null);
     }
 
     @Override

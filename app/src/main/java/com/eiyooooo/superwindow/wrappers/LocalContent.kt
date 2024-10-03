@@ -14,6 +14,7 @@ import android.view.MotionEvent
 import android.view.Surface
 import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
+import com.eiyooooo.superwindow.utils.packageManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -164,7 +165,7 @@ object LocalContent {//TODO
 
     private fun getPackageInfo(packageName: String, flag: Int = 0): PackageInfo? {
         try {
-            FakeContext.get().packageManager?.getPackageInfo(packageName, flag)?.let {
+            packageManager.getPackageInfo(packageName, flag)?.let {
                 return it
             }
         } catch (t: Throwable) {
@@ -175,7 +176,7 @@ object LocalContent {//TODO
 
     private fun getAppMainActivity(packageName: String): String? {
         try {
-            FakeContext.get().packageManager?.getLaunchIntentForPackage(packageName)?.component?.className?.let {
+            packageManager.getLaunchIntentForPackage(packageName)?.component?.className?.let {
                 return it
             }
         } catch (t: Throwable) {

@@ -1,11 +1,8 @@
 package com.eiyooooo.superwindow.views.dialogs
 
 import android.app.Dialog
-import android.content.Context
 import android.content.pm.LauncherActivityInfo
-import android.content.pm.LauncherApps
 import android.os.Bundle
-import android.os.UserManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +13,8 @@ import com.eiyooooo.superwindow.R
 import com.eiyooooo.superwindow.adapters.AllAppsAdapter
 import com.eiyooooo.superwindow.databinding.LocalContentPanelBinding
 import com.eiyooooo.superwindow.utils.dp2px
+import com.eiyooooo.superwindow.utils.launcherApps
+import com.eiyooooo.superwindow.utils.userManager
 import com.github.promeg.pinyinhelper.Pinyin
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
@@ -45,8 +44,6 @@ class LocalContentPanelDialog : AppCompatDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val context = context ?: return
-        val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as? LauncherApps ?: return
-        val userManager = context.getSystemService(Context.USER_SERVICE) as? UserManager ?: return
 
         lifecycleScope.launch {
             withContext(Dispatchers.IO) {

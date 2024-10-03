@@ -1,6 +1,5 @@
 package com.eiyooooo.superwindow.views
 
-import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -53,7 +52,6 @@ class MainActivity : AppCompatActivity() {
                 bindingExpanded = ActivityMainExpandedBinding.inflate(layoutInflater).also {
                     bindingControlPanelExpanded = ControlPanelExpandedBinding.inflate(layoutInflater, null, false)
                     it.root.post {
-                        val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
                         windowManager.updateViewLayout(bindingExpanded.root.rootView, bindingExpanded.root.rootView.layoutParams.apply {
                             val flagsField = this.javaClass.getDeclaredField("flags")
                             val flags = flagsField.getInt(this)

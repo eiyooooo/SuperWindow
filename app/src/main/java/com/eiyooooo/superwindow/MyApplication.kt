@@ -6,12 +6,13 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
 import com.eiyooooo.superwindow.entities.Preferences
 import com.eiyooooo.superwindow.utils.FLog
-import com.eiyooooo.superwindow.wrappers.FakeContext
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
 import org.lsposed.hiddenapibypass.HiddenApiBypass
 import timber.log.Timber
 import java.util.Date
+
+lateinit var application: MyApplication private set
 
 class MyApplication : Application() {
 
@@ -29,6 +30,7 @@ class MyApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        application = this
         appStartTime = Date()
 
         Preferences.init(this)
@@ -43,7 +45,5 @@ class MyApplication : Application() {
                 .setPrecondition { _, _ -> Preferences.systemColor }
                 .build()
         )
-
-        FakeContext.set(this)
     }
 }
