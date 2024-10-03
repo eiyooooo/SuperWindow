@@ -19,7 +19,7 @@ import androidx.core.view.animation.PathInterpolatorCompat
 import com.eiyooooo.superwindow.databinding.ItemWidgetCardBinding
 import com.eiyooooo.superwindow.entities.WidgetCardData
 import com.eiyooooo.superwindow.utils.BlurUtils
-import com.eiyooooo.superwindow.views.animations.AnimExecutor
+import com.eiyooooo.superwindow.utils.startPressHandleAnimation
 import com.eiyooooo.superwindow.wrappers.LocalContent
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -77,7 +77,7 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
                 return when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
                         //TODO: handle X, Y
-                        AnimExecutor.pressHandleAnimation(widgetCard.controlBar, true)
+                        widgetCard.controlBar.startPressHandleAnimation(true)
                         true
                     }
 
@@ -87,12 +87,12 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
                     }
 
                     MotionEvent.ACTION_UP -> {
-                        AnimExecutor.pressHandleAnimation(widgetCard.controlBar, false)
+                        widgetCard.controlBar.startPressHandleAnimation(false)
                         true
                     }
 
                     MotionEvent.ACTION_CANCEL -> {
-                        AnimExecutor.pressHandleAnimation(widgetCard.controlBar, false)
+                        widgetCard.controlBar.startPressHandleAnimation(false)
                         false
                     }
 

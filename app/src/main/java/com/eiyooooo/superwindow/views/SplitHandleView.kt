@@ -5,7 +5,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import com.eiyooooo.superwindow.views.animations.AnimExecutor
+import com.eiyooooo.superwindow.utils.startPressHandleAnimation
 
 class SplitHandleView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
 
@@ -43,7 +43,7 @@ class SplitHandleView @JvmOverloads constructor(context: Context, attrs: Attribu
                         }
                         X = v.x
                         touchX = event.rawX
-                        AnimExecutor.pressHandleAnimation(this@SplitHandleView, true)
+                        startPressHandleAnimation(true)
                         true
                     }
 
@@ -58,7 +58,7 @@ class SplitHandleView @JvmOverloads constructor(context: Context, attrs: Attribu
                         for (widgetCard in widgetCards!!) {
                             widgetCard.startBlurTransitAnimation()
                         }
-                        AnimExecutor.pressHandleAnimation(this@SplitHandleView, false)
+                        startPressHandleAnimation(false)
                         true
                     }
 
@@ -66,7 +66,7 @@ class SplitHandleView @JvmOverloads constructor(context: Context, attrs: Attribu
                         for (widgetCard in widgetCards!!) {
                             widgetCard.startBlurTransitAnimation()
                         }
-                        AnimExecutor.pressHandleAnimation(this@SplitHandleView, false)
+                        startPressHandleAnimation(false)
                         false
                     }
 
