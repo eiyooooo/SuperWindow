@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <com.eiyooooo.superwindow.views.ExpandTargetViewsTouchAreaConstraintLayout
+    <com.eiyooooo.superwindow.ui.view.ExpandTargetViewsTouchAreaConstraintLayout
         android:id="@+id/widget_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -25,7 +25,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.eiyooooo.superwindow.views.SplitHandleView
+        <com.eiyooooo.superwindow.ui.view.SplitHandleView
             android:id="@+id/left_split_handle"
             android:layout_width="5dp"
             android:layout_height="80dp"
@@ -50,7 +50,7 @@
             app:layout_constraintStart_toEndOf="@+id/left_split_handle"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.eiyooooo.superwindow.views.SplitHandleView
+        <com.eiyooooo.superwindow.ui.view.SplitHandleView
             android:id="@+id/right_split_handle"
             android:layout_width="5dp"
             android:layout_height="80dp"
@@ -75,7 +75,7 @@
             app:layout_constraintStart_toEndOf="@+id/right_split_handle"
             app:layout_constraintTop_toTopOf="parent" />
 
-    </com.eiyooooo.superwindow.views.ExpandTargetViewsTouchAreaConstraintLayout>
+    </com.eiyooooo.superwindow.ui.view.ExpandTargetViewsTouchAreaConstraintLayout>
 
     <LinearLayout
         android:id="@+id/bar"

@@ -5,7 +5,6 @@
     <string name="introduction_detail">1. 大屏设备多分屏解决方案\n2. 致力于为大屏设备提供最佳体验\n3. 本机使用需安卓12L以上及Shizuku授权\n4. 跨设备使用需目标设备安卓12L以上及打开ADB</string>
 
     <string name="home">主页</string>
-    <string name="manager">管理</string>
     <string name="settings">设置</string>
 
     <string name="local_use_not_supported">当前系统安卓版本不支持在本机使用超级视窗</string>

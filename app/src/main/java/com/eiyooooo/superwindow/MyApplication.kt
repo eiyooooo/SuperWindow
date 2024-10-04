@@ -4,8 +4,8 @@ import android.app.Application
 import android.content.Context
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
-import com.eiyooooo.superwindow.entities.Preferences
-import com.eiyooooo.superwindow.utils.FLog
+import com.eiyooooo.superwindow.entity.Preferences
+import com.eiyooooo.superwindow.util.FLog
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
 import org.lsposed.hiddenapibypass.HiddenApiBypass
