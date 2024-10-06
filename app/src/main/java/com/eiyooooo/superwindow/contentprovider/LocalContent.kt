@@ -123,7 +123,7 @@ object LocalContent {//TODO
 
     @SuppressLint("NewApi")
     private fun showAPP(packageName: String, displayId: Int): Boolean {
-        ServiceManager.getActivityTaskManager()?.getTasks(25, false, false, -1)?.let {
+        ServiceManager.getActivityTaskManager()?.getAllRootTaskInfos()?.let {
             for (taskInfo in it) {
                 if (packageName == (taskInfo.baseIntent.component?.packageName ?: taskInfo.baseActivity?.packageName)) {
                     Timber.d("Try move $packageName to vd: $displayId")
