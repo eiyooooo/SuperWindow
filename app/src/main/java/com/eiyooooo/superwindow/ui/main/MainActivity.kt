@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
 
     private val mainModel: MainActivityViewModel by viewModels()
     private val controlPanelAdapter: ControlPanelAdapter by lazy { ControlPanelAdapter(this) }
-    private val widgetCardManager: WidgetCardManager by lazy { WidgetCardManager(this, mainModel) }
+    internal val widgetCardManager: WidgetCardManager by lazy { WidgetCardManager(this, mainModel) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

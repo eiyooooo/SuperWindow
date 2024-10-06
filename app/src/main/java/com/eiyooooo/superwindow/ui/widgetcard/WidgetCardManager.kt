@@ -67,29 +67,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 LocalContent.runningTasksInVD.collect { runningTasksInVD ->
                     widgetCards.values.filter { !runningTasksInVD.containsKey(it.displayId) }.forEach { card ->
                         card.release()
-                        mainModel.updateWidgetCardGroup { currentGroup ->
-                            when (card.widgetCardData.identifier) {
-                                currentGroup.firstWidgetCard.identifier -> {
-                                    if (secondWidgetCard != null) {
-                                        currentGroup.copy(firstWidgetCard = currentGroup.secondWidgetCard!!, secondWidgetCard = currentGroup.thirdWidgetCard, thirdWidgetCard = null)
-                                    } else {
-                                        currentGroup.copy(firstWidgetCard = controlPanelWidgetCard.widgetCardData)
-                                    }
-                                }
-
-                                currentGroup.secondWidgetCard?.identifier -> {
-                                    currentGroup.copy(secondWidgetCard = currentGroup.thirdWidgetCard, thirdWidgetCard = null)
-                                }
-
-                                currentGroup.thirdWidgetCard?.identifier -> {
-                                    currentGroup.copy(thirdWidgetCard = null)
-                                }
-
-                                else -> {
-                                    currentGroup.copy(backgroundWidgetCard = currentGroup.backgroundWidgetCard.filter { it.identifier != card.widgetCardData.identifier })
-                                }
-                            }
-                        }
+                        removeWidgetCard(card)
                     }
                 }
             }
@@ -100,7 +78,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             mainModel.shizukuStatus.filter { it == ShizukuStatus.HAVE_PERMISSION }.first()
             delay(2000)
             mainModel.updateWidgetCardGroup {
-                it.copy(secondWidgetCard = WidgetCardData(false, "com.coloros.note@local"), thirdWidgetCard = null)
+                it.copy(secondWidgetCard = WidgetCardData("com.coloros.note", "local"), thirdWidgetCard = WidgetCardData("com.samsung.android.app.notes", "local"))
             }
 //            while (true) {
 //                delay(2000)
@@ -205,6 +183,33 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         } else {
             widgetCards[widgetCard.identifier]!!
         }
+    }
+
+    fun removeWidgetCard(target: WidgetCardView) {
+        mainModel.updateWidgetCardGroup { currentGroup ->
+            when (target.widgetCardData.identifier) {
+                currentGroup.firstWidgetCard.identifier -> {
+                    if (secondWidgetCard != null) {
+                        currentGroup.copy(firstWidgetCard = currentGroup.secondWidgetCard!!, secondWidgetCard = currentGroup.thirdWidgetCard, thirdWidgetCard = null)
+                    } else {
+                        currentGroup.copy(firstWidgetCard = controlPanelWidgetCard.widgetCardData)
+                    }
+                }
+
+                currentGroup.secondWidgetCard?.identifier -> {
+                    currentGroup.copy(secondWidgetCard = currentGroup.thirdWidgetCard, thirdWidgetCard = null)
+                }
+
+                currentGroup.thirdWidgetCard?.identifier -> {
+                    currentGroup.copy(thirdWidgetCard = null)
+                }
+
+                else -> {
+                    currentGroup.copy(backgroundWidgetCard = currentGroup.backgroundWidgetCard.filter { it.identifier != target.widgetCardData.identifier })
+                }
+            }
+        }
+        widgetCards.remove(target.widgetCardData.identifier)
     }
 
     private val constraintSet = ConstraintSet()

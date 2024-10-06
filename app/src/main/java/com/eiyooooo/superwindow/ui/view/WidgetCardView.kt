@@ -18,6 +18,7 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.animation.PathInterpolatorCompat
 import com.eiyooooo.superwindow.contentprovider.LocalContent
 import com.eiyooooo.superwindow.databinding.ItemWidgetCardBinding
+import com.eiyooooo.superwindow.ui.main.MainActivity
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
 import com.eiyooooo.superwindow.util.BlurUtils
 import com.eiyooooo.superwindow.util.startPressHandleAnimation
@@ -53,10 +54,6 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
     }
 
     var displayId: Int? = null
-        private set
-    lateinit var packageName: String
-        private set
-    lateinit var providerName: String
         private set
     private var textureView: TextureView? = null
 
@@ -113,51 +110,63 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
         }
         widgetCard.controlBar.setOnTouchListener(controlBarListener)
 
-        if (widgetCardData.identifier.contains("@")) {
-            packageName = widgetCardData.identifier.split("@")[0]
-            providerName = widgetCardData.identifier.split("@")[1]
-            LocalContent.getPackageIcon(packageName)?.let {
-                widgetCard.icon.setImageDrawable(it)
-            }
-            textureView = TextureView(context).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                surfaceTextureListener = object : TextureView.SurfaceTextureListener {
-                    var surface: Surface? = null
-
-                    override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-                        surface = Surface(surfaceTexture).also {
-                            displayId = LocalContent.getVirtualDisplayIdForPackage(packageName, width, height, context.resources.displayMetrics.densityDpi, it)
-                        }
-                    }
-
-                    override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-                        surface?.let {
-                            displayId = LocalContent.getVirtualDisplayIdForPackage(packageName, width, height, context.resources.displayMetrics.densityDpi, it)
-                        }
-                    }
-
-                    override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
-                        surface?.release()
-                        return true
-                    }
-
-                    override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) {
-                    }
+        if (widgetCardData.identifierValidated) {
+            if (widgetCardData.isLocalProvider) {
+                LocalContent.getPackageIcon(widgetCardData.packageName)?.let {//TODO: remove after add widgetCardData via ContentPanel ready
+                    widgetCard.icon.setImageDrawable(it)
                 }
-                setOnTouchListener(textureViewTouchListener)
+                textureView = TextureView(context).apply {
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                    surfaceTextureListener = object : TextureView.SurfaceTextureListener {
+                        var surface: Surface? = null
+
+                        override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
+                            surface = Surface(surfaceTexture).also { surface ->
+                                LocalContent.getVirtualDisplayIdForPackage(widgetCardData.packageName, width, height, context.resources.displayMetrics.densityDpi, surface)?.let {
+                                    displayId = it
+                                } ?: widgetCard.root.post {
+                                    release()
+                                    (context as? MainActivity)?.widgetCardManager?.removeWidgetCard(this@WidgetCardView)
+                                }
+                            }
+                        }
+
+                        override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
+                            surface?.let { surface ->
+                                LocalContent.getVirtualDisplayIdForPackage(widgetCardData.packageName, width, height, context.resources.displayMetrics.densityDpi, surface)?.let {
+                                    displayId = it
+                                } ?: widgetCard.root.post {
+                                    release()
+                                    (context as? MainActivity)?.widgetCardManager?.removeWidgetCard(this@WidgetCardView)
+                                }
+                            }
+                        }
+
+                        override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
+                            surface?.release()
+                            return true
+                        }
+
+                        override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) {
+                        }
+                    }
+                    setOnTouchListener(textureViewTouchListener)
+                }
+                setContentView(textureView)
             }
-            setContentView(textureView)
         }
     }
 
     fun release() {
         setContentView()
         makeCover()
-        if (::packageName.isInitialized) {
-            LocalContent.releaseVirtualDisplayForPackage(packageName)
+        if (widgetCardData.identifierValidated) {
+            if (widgetCardData.isLocalProvider) {
+                LocalContent.releaseVirtualDisplayForPackage(widgetCardData.packageName)
+            }
         }
     }
 
