@@ -35,35 +35,8 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
 
     private val widgetCard: ItemWidgetCardBinding = ItemWidgetCardBinding.inflate(LayoutInflater.from(context), this, true)
 
-    private val covering = AtomicBoolean(false)
-    private val coverTransitAnimationList = mutableListOf<ObjectAnimator>()
-    private val blurring = AtomicBoolean(false)
-    private val blurTransitAnimationList = mutableListOf<AnimatorSet>()
-
-    private fun setContentView(view: View? = null) {
-        widgetCard.contentContainer.removeAllViews()
-        view?.let {
-            widgetCard.contentContainer.addView(view)
-        }
-    }
-
-    fun getControlBar(): View {
-        return widgetCard.controlBar
-    }
-
-    var displayId: Int? = null
-        private set
-    private var textureView: TextureView? = null
-
-    private val textureViewTouchListener by lazy {
-        object : OnTouchListener {
-            override fun onTouch(v: View, event: MotionEvent): Boolean {
-                displayId?.let {
-                    LocalContent.injectMotionEvent(event, it)
-                }
-                return true
-            }
-        }
+    fun setControlBarVisibility(visibility: Int) {
+        widgetCard.controlBar.visibility = visibility
     }
 
     private val controlBarListener by lazy {
@@ -153,6 +126,28 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
         return false
     }
 
+    var displayId: Int? = null
+        private set
+    private var textureView: TextureView? = null
+
+    private val textureViewTouchListener by lazy {
+        object : OnTouchListener {
+            override fun onTouch(v: View, event: MotionEvent): Boolean {
+                displayId?.let {
+                    LocalContent.injectMotionEvent(event, it)
+                }
+                return true
+            }
+        }
+    }
+
+    private fun setContentView(view: View? = null) {
+        widgetCard.contentContainer.removeAllViews()
+        view?.let {
+            widgetCard.contentContainer.addView(view)
+        }
+    }
+
     init {
         layoutParams = LayoutParams(
             LayoutParams.MATCH_PARENT,
@@ -226,6 +221,11 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
             }
         }
     }
+
+    private val covering = AtomicBoolean(false)
+    private val coverTransitAnimationList = mutableListOf<ObjectAnimator>()
+    private val blurring = AtomicBoolean(false)
+    private val blurTransitAnimationList = mutableListOf<AnimatorSet>()
 
     fun makeCover() {
         if (blurring.get()) return

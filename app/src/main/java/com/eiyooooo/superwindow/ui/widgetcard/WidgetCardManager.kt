@@ -121,7 +121,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         this.firstWidgetCard = firstWidgetCard
         this.secondWidgetCard = null
         this.thirdWidgetCard = null
-        firstWidgetCard.getControlBar().visibility = View.GONE
+        firstWidgetCard.setControlBarVisibility(View.GONE)
         mainActivity.bindingExpanded.firstView.removeAllViews()
         mainActivity.bindingExpanded.secondView.removeAllViews()
         mainActivity.bindingExpanded.thirdView.removeAllViews()
@@ -138,8 +138,8 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         this.firstWidgetCard = firstWidgetCard
         this.secondWidgetCard = secondWidgetCard
         this.thirdWidgetCard = null
-        firstWidgetCard.getControlBar().visibility = View.VISIBLE
-        secondWidgetCard.getControlBar().visibility = View.VISIBLE
+        firstWidgetCard.setControlBarVisibility(View.VISIBLE)
+        secondWidgetCard.setControlBarVisibility(View.VISIBLE)
         mainActivity.bindingExpanded.firstView.removeAllViews()
         mainActivity.bindingExpanded.secondView.removeAllViews()
         mainActivity.bindingExpanded.thirdView.removeAllViews()
@@ -158,9 +158,9 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         this.firstWidgetCard = firstWidgetCard
         this.secondWidgetCard = secondWidgetCard
         this.thirdWidgetCard = thirdWidgetCard
-        firstWidgetCard.getControlBar().visibility = View.VISIBLE
-        secondWidgetCard.getControlBar().visibility = View.VISIBLE
-        thirdWidgetCard.getControlBar().visibility = View.VISIBLE
+        firstWidgetCard.setControlBarVisibility(View.VISIBLE)
+        secondWidgetCard.setControlBarVisibility(View.VISIBLE)
+        thirdWidgetCard.setControlBarVisibility(View.VISIBLE)
         mainActivity.bindingExpanded.firstView.removeAllViews()
         mainActivity.bindingExpanded.secondView.removeAllViews()
         mainActivity.bindingExpanded.thirdView.removeAllViews()
