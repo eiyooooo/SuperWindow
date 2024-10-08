@@ -5,6 +5,7 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Rect
 import android.graphics.SurfaceTexture
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -13,7 +14,7 @@ import android.view.Surface
 import android.view.TextureView
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
+import androidx.cardview.widget.CardView
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.animation.PathInterpolatorCompat
 import com.eiyooooo.superwindow.contentprovider.LocalContent
@@ -21,11 +22,12 @@ import com.eiyooooo.superwindow.databinding.ItemWidgetCardBinding
 import com.eiyooooo.superwindow.ui.main.MainActivity
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
 import com.eiyooooo.superwindow.util.BlurUtils
+import com.eiyooooo.superwindow.util.dp2px
 import com.eiyooooo.superwindow.util.startPressHandleAnimation
 import java.util.concurrent.atomic.AtomicBoolean
 
 @SuppressLint("ClickableViewAccessibility")
-class WidgetCardView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0, val widgetCardData: WidgetCardData = WidgetCardData()) : FrameLayout(context, attrs, defStyleAttr) {
+class WidgetCardView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0, val widgetCardData: WidgetCardData = WidgetCardData()) : CardView(context, attrs, defStyleAttr) {
 
     constructor(view: View, widgetCardData: WidgetCardData) : this(view.context, widgetCardData = widgetCardData) {
         widgetCard.contentContainer.addView(view)
@@ -95,16 +97,75 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
         }
     }
 
+    private var expandTouchPx = 0
+    private var touchingTargetView = false
+    private var targetView: View? = null
+
+    private fun setTargetView(view: View?, expandTouchDp: Int = 10) {
+        this.targetView = view
+        this.expandTouchPx = context.dp2px(expandTouchDp)
+    }
+
+    override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
+        val view = targetView ?: return super.dispatchTouchEvent(event)
+        when (event?.action) {
+            MotionEvent.ACTION_DOWN -> {
+                if (isTouchingTargetViewRegion(event)) {
+                    touchingTargetView = true
+                    return view.dispatchTouchEvent(event)
+                }
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                if (touchingTargetView) {
+                    return view.dispatchTouchEvent(event)
+                }
+            }
+
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> {
+                if (touchingTargetView) {
+                    touchingTargetView = false
+                    return view.dispatchTouchEvent(event)
+                } else {
+                    touchingTargetView = false
+                }
+            }
+        }
+        return super.dispatchTouchEvent(event)
+    }
+
+    private fun isTouchingTargetViewRegion(event: MotionEvent?): Boolean {
+        targetView?.let {
+            if (!it.isShown) return false
+            val rect = Rect()
+            it.getHitRect(rect)
+            rect.left -= expandTouchPx
+            rect.right += expandTouchPx
+            rect.top -= expandTouchPx
+            rect.bottom += expandTouchPx
+            val touchX: Int = event?.x?.toInt() ?: 0
+            val touchY: Int = event?.y?.toInt() ?: 0
+            if (rect.contains(touchX, touchY)) {
+                return true
+            }
+        }
+        return false
+    }
+
     init {
-        widgetCard.widgetView.setTargetView(widgetCard.controlBar)
-        widgetCard.root.layoutParams = LayoutParams(
+        layoutParams = LayoutParams(
             LayoutParams.MATCH_PARENT,
             LayoutParams.MATCH_PARENT
         )
-        widgetCardData.icon?.let {
+        radius = 8F
+
+        setTargetView(widgetCard.controlBar)
+        widgetCard.controlBar.setOnTouchListener(controlBarListener)
+
+        widgetCardData.icon?.let {//TODO: use this instead of get icon again
             widgetCard.icon.setImageDrawable(it)
         }
-        widgetCard.controlBar.setOnTouchListener(controlBarListener)
 
         if (widgetCardData.identifierValidated) {
             if (widgetCardData.isLocalProvider) {
@@ -123,7 +184,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                             surface = Surface(surfaceTexture).also { surface ->
                                 LocalContent.getVirtualDisplayIdForPackage(widgetCardData.packageName, width, height, context.resources.displayMetrics.densityDpi, surface)?.let {
                                     displayId = it
-                                } ?: widgetCard.root.post {
+                                } ?: post {
                                     release()
                                     (context as? MainActivity)?.widgetCardManager?.removeWidgetCard(this@WidgetCardView)
                                 }
@@ -134,7 +195,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                             surface?.let { surface ->
                                 LocalContent.getVirtualDisplayIdForPackage(widgetCardData.packageName, width, height, context.resources.displayMetrics.densityDpi, surface)?.let {
                                     displayId = it
-                                } ?: widgetCard.root.post {
+                                } ?: post {
                                     release()
                                     (context as? MainActivity)?.widgetCardManager?.removeWidgetCard(this@WidgetCardView)
                                 }

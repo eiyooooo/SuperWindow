@@ -1,55 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.eiyooooo.superwindow.ui.view.ExpandTargetViewTouchAreaCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/widget_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:cardCornerRadius="8dp">
+    android:background="?attr/colorSurface">
 
     <FrameLayout
+        android:id="@+id/content_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <FrameLayout
+        android:id="@+id/blur_layer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?attr/colorSurface">
+        android:visibility="gone" />
 
-        <FrameLayout
-            android:id="@+id/content_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+    <View
+        android:id="@+id/control_bar"
+        android:layout_width="50dp"
+        android:layout_height="6dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="12dp"
+        android:alpha="0.4"
+        android:background="@drawable/top_handle_background" />
 
-        <FrameLayout
-            android:id="@+id/blur_layer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
+    <androidx.cardview.widget.CardView
+        android:id="@+id/icon_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp">
 
-        <View
-            android:id="@+id/control_bar"
-            android:layout_width="50dp"
-            android:layout_height="6dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="12dp"
-            android:alpha="0.4"
-            android:background="@drawable/top_handle_background" />
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:contentDescription="@string/icon"
+            android:src="@mipmap/ic_launcher" />
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/icon_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="gone"
-            app:cardBackgroundColor="@android:color/transparent"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="0dp">
+    </androidx.cardview.widget.CardView>
 
-            <ImageView
-                android:id="@+id/icon"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:contentDescription="@string/icon"
-                android:src="@mipmap/ic_launcher" />
-
-        </androidx.cardview.widget.CardView>
-
-    </FrameLayout>
-
-</com.eiyooooo.superwindow.ui.view.ExpandTargetViewTouchAreaCardView>
+</FrameLayout>
