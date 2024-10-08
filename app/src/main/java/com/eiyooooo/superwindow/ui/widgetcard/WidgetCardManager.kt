@@ -177,7 +177,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         return if (widgetCard.isControlPanel) {
             controlPanelWidgetCard
         } else if (widgetCards[widgetCard.identifier] == null) {
-            val newWidgetCard = WidgetCardView(mainActivity, widgetCard)
+            val newWidgetCard = WidgetCardView(mainActivity, widgetCardData = widgetCard)
             widgetCards[widgetCard.identifier] = newWidgetCard
             newWidgetCard
         } else {

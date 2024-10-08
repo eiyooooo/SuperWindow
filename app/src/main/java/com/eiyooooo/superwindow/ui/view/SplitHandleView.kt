@@ -13,6 +13,7 @@ class SplitHandleView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     fun setWidgetCards(vararg widgetCards: WidgetCardView) {
         for (widgetCard in widgetCards) {
+            widgetCard.removeCoverImmediately()
             widgetCard.removeBlurImmediately()
         }
         if (widgetCards.isEmpty()) {

@@ -6,12 +6,12 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.SurfaceTexture
+import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.Surface
 import android.view.TextureView
 import android.view.View
-import android.view.View.OnTouchListener
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.graphics.drawable.toDrawable
@@ -25,13 +25,13 @@ import com.eiyooooo.superwindow.util.startPressHandleAnimation
 import java.util.concurrent.atomic.AtomicBoolean
 
 @SuppressLint("ClickableViewAccessibility")
-class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
+class WidgetCardView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0, val widgetCardData: WidgetCardData = WidgetCardData()) : FrameLayout(context, attrs, defStyleAttr) {
 
-    constructor(view: View, widgetCardData: WidgetCardData) : this(view.context, widgetCardData) {
+    constructor(view: View, widgetCardData: WidgetCardData) : this(view.context, widgetCardData = widgetCardData) {
         widgetCard.contentContainer.addView(view)
     }
 
-    private val widgetCard: ItemWidgetCardBinding = ItemWidgetCardBinding.inflate(LayoutInflater.from(context), null, false)
+    private val widgetCard: ItemWidgetCardBinding = ItemWidgetCardBinding.inflate(LayoutInflater.from(context), this, true)
 
     private val covering = AtomicBoolean(false)
     private val coverTransitAnimationList = mutableListOf<ObjectAnimator>()
@@ -43,10 +43,6 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
         view?.let {
             widgetCard.contentContainer.addView(view)
         }
-    }
-
-    fun getRootView(): View {
-        return widgetCard.root
     }
 
     fun getControlBar(): View {
@@ -101,9 +97,9 @@ class WidgetCardView(context: Context, val widgetCardData: WidgetCardData) {
 
     init {
         widgetCard.widgetView.setTargetView(widgetCard.controlBar)
-        widgetCard.root.layoutParams = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT,
-            FrameLayout.LayoutParams.MATCH_PARENT
+        widgetCard.root.layoutParams = LayoutParams(
+            LayoutParams.MATCH_PARENT,
+            LayoutParams.MATCH_PARENT
         )
         widgetCardData.icon?.let {
             widgetCard.icon.setImageDrawable(it)

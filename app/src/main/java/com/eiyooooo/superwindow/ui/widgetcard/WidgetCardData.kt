@@ -7,6 +7,8 @@ data class WidgetCardData(
     val identifier: String,
     val icon: Drawable? = null,
 ) {
+    constructor() : this(false, "placeholder")
+
     constructor(packageName: String, providerName: String, icon: Drawable? = null) : this(false, "$packageName@$providerName", icon)
 
     val identifierValidated = identifier.count { it == '@' } == 1
