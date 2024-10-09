@@ -3,13 +3,16 @@ package com.eiyooooo.superwindow.ui.main
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.eiyooooo.superwindow.R
 import com.eiyooooo.superwindow.databinding.ActivityMainCompactBinding
 import com.eiyooooo.superwindow.databinding.ActivityMainExpandedBinding
 import com.eiyooooo.superwindow.databinding.ControlPanelCompactBinding
@@ -18,6 +21,7 @@ import com.eiyooooo.superwindow.entity.Preferences
 import com.eiyooooo.superwindow.ui.controlpanel.ControlPanelAdapter
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardManager
 import com.eiyooooo.superwindow.util.setupWithViewPager
+import com.eiyooooo.superwindow.util.startShowElevatedViewAnimation
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 
@@ -40,7 +44,8 @@ class MainActivity : AppCompatActivity() {
         isExpanded = when (resources.configuration.screenWidthDp) {
             in 0..599 -> {
                 bindingCompact = ActivityMainCompactBinding.inflate(layoutInflater).also {
-                    bindingControlPanelCompact = ControlPanelCompactBinding.inflate(layoutInflater, it.root, true)
+                    bindingControlPanelCompact = ControlPanelCompactBinding.inflate(layoutInflater, it.widgetContainer, true)
+                    it.overlay.setOnClickListener { hideElevatedView { makeCardsBlur(false) } }
                     setContentView(it.root)
                 }
                 false
@@ -59,6 +64,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     it.widgetContainer.addTargetView(it.leftSplitHandle)
                     it.widgetContainer.addTargetView(it.rightSplitHandle)
+                    it.overlay.setOnClickListener { hideElevatedView { makeCardsBlur(false) } }
                     widgetCardManager.init()
                     setContentView(it.root)
                 }
@@ -149,6 +155,47 @@ class MainActivity : AppCompatActivity() {
         } else {
             Snackbar.make(bindingCompact.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingControlPanelCompact.bottomNavigation).show()
         }
+    }
+
+    internal fun showElevatedFragment(fragment: Fragment) {
+        showElevatedView()
+        supportFragmentManager.beginTransaction().replace(R.id.elevated_view_container, fragment).commit()
+    }
+
+    internal fun showElevatedView(view: View) {
+        showElevatedView()
+        view.parent?.let {
+            (it as? ViewGroup)?.removeView(view)
+        }
+        bindingExpanded.elevatedViewContainer.addView(view)
+    }
+
+    private fun showElevatedView() {
+        val overlay = if (isExpanded) bindingExpanded.overlay else bindingCompact.overlay
+        val elevatedViewContainer = if (isExpanded) bindingExpanded.elevatedViewContainer else bindingCompact.elevatedViewContainer
+
+        elevatedViewContainer.layoutParams = elevatedViewContainer.layoutParams.also {
+            it.width = (resources.displayMetrics.widthPixels * 0.8).toInt()
+            it.height = (resources.displayMetrics.heightPixels * 0.8).toInt()
+        }
+
+        startShowElevatedViewAnimation(elevatedViewContainer, overlay, true)
+        makeCardsBlur(true)
+
+        elevatedViewContainer.removeAllViews()
+    }
+
+    internal fun hideElevatedView(onAnimationEnd: (() -> Unit)? = null) {
+        val overlay = if (isExpanded) bindingExpanded.overlay else bindingCompact.overlay
+        val elevatedViewContainer = if (isExpanded) bindingExpanded.elevatedViewContainer else bindingCompact.elevatedViewContainer
+
+        startShowElevatedViewAnimation(elevatedViewContainer, overlay, false, onAnimationEnd)
+
+        supportFragmentManager.findFragmentById(R.id.elevated_view_container)?.let {
+            supportFragmentManager.beginTransaction().remove(it).commit()
+        }
+
+        elevatedViewContainer.removeAllViews()
     }
 
     internal fun makeCardsBlur(blur: Boolean) = widgetCardManager.makeCardsBlur(blur)

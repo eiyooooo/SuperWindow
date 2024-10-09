@@ -1,5 +1,6 @@
 package com.eiyooooo.superwindow.util
 
+import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Context
@@ -74,3 +75,71 @@ fun View.startPressHandleAnimation(isPress: Boolean) = startAlphaScaleAnimation(
     scaleInterpolator = PathInterpolatorCompat.create(0.25f, 1f, 0.5f, 1f),
     duration = 200L
 )
+
+fun startShowElevatedViewAnimation(elevatedViewContainer: View, overlay: View, isShow: Boolean, onAnimationEnd: (() -> Unit)? = null) {
+    if (isShow) {
+        elevatedViewContainer.visibility = View.VISIBLE
+        overlay.visibility = View.VISIBLE
+    }
+
+    val duration = if (isShow) 500L else 250L
+    val listener = object : Animator.AnimatorListener {
+        override fun onAnimationStart(animation: Animator) {
+        }
+
+        override fun onAnimationEnd(animation: Animator) {
+            onAnimationEnd?.invoke()
+            if (!isShow) {
+                elevatedViewContainer.visibility = View.GONE
+                overlay.visibility = View.GONE
+            }
+        }
+
+        override fun onAnimationCancel(animation: Animator) {
+        }
+
+        override fun onAnimationRepeat(animation: Animator) {
+        }
+    }
+
+    val containerAlphaStart = if (isShow) 0f else 1f
+    val containerAlphaEnd = if (isShow) 1f else 0f
+    val containerAlphaInterpolator =
+        if (isShow) PathInterpolatorCompat.create(0f, 0.2f, 0.6f, 1f)
+        else PathInterpolatorCompat.create(0.2f, 0f, 1f, 0.6f)
+
+    val containerScaleStart = if (isShow) 0.8f else 1f
+    val containerScaleEnd = if (isShow) 1f else 0.8f
+    val containerScaleInterpolator =
+        if (isShow) PathInterpolatorCompat.create(0.3f, 0.5f, 0.5f, 1f)
+        else PathInterpolatorCompat.create(0.5f, 0.3f, 1f, 0.5f)
+
+    val overlayAlphaStart = if (isShow) 0f else 0.5f
+    val overlayAlphaEnd = if (isShow) 0.5f else 0f
+    val overlayAlphaInterpolator =
+        if (isShow) PathInterpolatorCompat.create(0.6f, 0f, 0.75f, 1f)
+        else PathInterpolatorCompat.create(0f, 0.6f, 1f, 0.75f)
+
+    val containerAlphaAnimation = ObjectAnimator.ofFloat(elevatedViewContainer, "alpha", containerAlphaStart, containerAlphaEnd).apply {
+        this.duration = duration
+        this.interpolator = containerAlphaInterpolator
+    }
+    val containerScaleXAnimation = ObjectAnimator.ofFloat(elevatedViewContainer, "scaleX", containerScaleStart, containerScaleEnd).apply {
+        this.duration = duration
+        this.interpolator = containerScaleInterpolator
+    }
+    val containerScaleYAnimation = ObjectAnimator.ofFloat(elevatedViewContainer, "scaleY", containerScaleStart, containerScaleEnd).apply {
+        this.duration = duration
+        this.interpolator = containerScaleInterpolator
+    }
+    val overlayAlphaAnimation = ObjectAnimator.ofFloat(overlay, "alpha", overlayAlphaStart, overlayAlphaEnd).apply {
+        this.duration = duration
+        this.interpolator = overlayAlphaInterpolator
+    }
+
+    AnimatorSet().apply {
+        playTogether(containerAlphaAnimation, containerScaleXAnimation, containerScaleYAnimation, overlayAlphaAnimation)
+        addListener(listener)
+        start()
+    }
+}
