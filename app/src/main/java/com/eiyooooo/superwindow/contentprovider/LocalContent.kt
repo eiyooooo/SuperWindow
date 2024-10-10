@@ -105,20 +105,22 @@ object LocalContent {//TODO
             if (showAPP(packageName, displayId)) {
                 packageContainer[packageName] = displayId
                 virtualDisplayHolder[displayId] = it
-                Timber.d("$packageName is opened in vd: $displayId")
+                Timber.d("show app: $packageName successfully in vd: $displayId")
                 return displayId
             } else {
+                Timber.d("Failed to show app: $packageName, releasing vd: $displayId")
                 it.release()
             }
         }
         return null
     }
 
-    fun releaseVirtualDisplayForPackage(packageName: String) {
-        packageContainer.remove(packageName)?.let { displayId ->
-            Timber.d("Release vd: $displayId")
-            virtualDisplayHolder.remove(displayId)?.release()
+    fun releaseAllVirtualDisplays() {
+        virtualDisplayHolder.values.forEach {
+            it.release()
         }
+        virtualDisplayHolder.clear()
+        packageContainer.clear()
     }
 
     @SuppressLint("NewApi")

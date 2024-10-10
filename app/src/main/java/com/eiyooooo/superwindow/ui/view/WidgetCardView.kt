@@ -215,11 +215,6 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     fun release() {
         setContentView()
         makeCover()
-        if (widgetCardData.identifierValidated) {
-            if (widgetCardData.isLocalProvider) {
-                LocalContent.releaseVirtualDisplayForPackage(widgetCardData.packageName)
-            }
-        }
     }
 
     private val covering = AtomicBoolean(false)
