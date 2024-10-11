@@ -24,7 +24,7 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
         private const val ANGLE_R = Math.PI * 90 / 180
     }
 
-    private var letterChangeListener: ((String?) -> Unit)? = null
+    private var letterChangeListener: ((Char) -> Unit)? = null
 
     private val mLetters: List<String> by lazy { listOf<String>(*context.resources.getStringArray(R.array.side_bar_letters)) }
 
@@ -99,7 +99,7 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
         }
     }
 
-    fun setLetterChangeListener(listener: (String?) -> Unit) {
+    fun setLetterChangeListener(listener: (Char) -> Unit) {
         letterChangeListener = listener
     }
 
@@ -117,7 +117,7 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
                 mCenterY = event.y.toInt()
                 if (oldChoose != newChoose && newChoose in mLetters.indices) {
                     mChoose = newChoose
-                    letterChangeListener?.invoke(mLetters[newChoose])
+                    letterChangeListener?.invoke(mLetters[newChoose][0])
                 }
                 invalidate()
             }
@@ -126,7 +126,7 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
                 mCenterY = event.y.toInt()
                 if (oldChoose != newChoose && newChoose in mLetters.indices) {
                     mChoose = newChoose
-                    letterChangeListener?.invoke(mLetters[newChoose])
+                    letterChangeListener?.invoke(mLetters[newChoose][0])
                 }
                 invalidate()
             }

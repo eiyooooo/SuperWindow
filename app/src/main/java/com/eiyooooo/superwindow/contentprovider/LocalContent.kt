@@ -4,28 +4,40 @@ import android.annotation.SuppressLint
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.TaskStackListener
 import android.content.Intent
+import android.content.pm.LauncherActivityInfo
+import android.content.pm.LauncherApps
 import android.content.pm.PackageInfo
 import android.content.res.AssetManager
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.hardware.display.VirtualDisplay
 import android.os.Build
+import android.os.Handler
+import android.os.UserHandle
 import android.view.MotionEvent
 import android.view.Surface
 import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
+import com.eiyooooo.superwindow.application
 import com.eiyooooo.superwindow.entity.SystemServices
 import com.eiyooooo.superwindow.wrapper.DisplayManagerWrapper
 import com.eiyooooo.superwindow.wrapper.IPackageManager
 import com.eiyooooo.superwindow.wrapper.ServiceManager
+import com.github.promeg.pinyinhelper.Pinyin
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuRemoteProcess
 import timber.log.Timber
 
 object LocalContent {//TODO
+
+    private val ioScope = CoroutineScope(Dispatchers.IO)
 
     private var init = false//TODO: UI
 
@@ -38,6 +50,9 @@ object LocalContent {//TODO
             init = try {
                 ServiceManager.setupManagers()
                 ServiceManager.getActivityTaskManager().registerTaskStackListener(runningTaskStackListener)
+                ioScope.launch {
+                    initAppsMap()
+                }
                 true
             } catch (t: Throwable) {
                 Timber.e(t, "Managers init failed")
@@ -200,6 +215,71 @@ object LocalContent {//TODO
         }
         Timber.e("$packageName get launch intent failed")
         return null
+    }
+
+    private val appsMap: MutableMap<String, LauncherActivityInfo> = mutableMapOf()
+    private val appsCallback = object : LauncherApps.Callback() {
+        override fun onPackageRemoved(packageName: String?, user: UserHandle?) {
+            packageName?.let {
+                appsMap.remove(it)
+            }
+        }
+
+        override fun onPackageAdded(packageName: String?, user: UserHandle?) {
+            packageName?.let {
+                updateCachedApp(it, user)
+            }
+        }
+
+        override fun onPackageChanged(packageName: String?, user: UserHandle?) {
+            packageName?.let {
+                updateCachedApp(it, user)
+            }
+        }
+
+        override fun onPackagesAvailable(packageNames: Array<out String>?, user: UserHandle?, replacing: Boolean) {
+            packageNames?.forEach {
+                updateCachedApp(it, user)
+            }
+        }
+
+        override fun onPackagesUnavailable(packageNames: Array<out String>?, user: UserHandle?, replacing: Boolean) {
+            packageNames?.forEach {
+                appsMap.remove(it)
+            }
+        }
+
+        private fun updateCachedApp(packageName: String, user: UserHandle?) {
+            val currentPackageName = application.packageName
+            SystemServices.launcherApps.getActivityList(packageName, user)
+                .filter { it.applicationInfo.packageName != currentPackageName }
+                .forEach { appsMap[it.applicationInfo.packageName] = it }
+        }
+    }
+
+    private suspend fun initAppsMap() {
+        if (appsMap.isEmpty()) {
+            try {
+                withContext(Dispatchers.IO) {
+                    val currentPackageName = application.packageName
+                    SystemServices.userManager.userProfiles.flatMap { SystemServices.launcherApps.getActivityList(null, it) }
+                        .filter { it.applicationInfo.packageName != currentPackageName }
+                        .forEach { appsMap[it.applicationInfo.packageName] = it }
+                    SystemServices.launcherApps.unregisterCallback(appsCallback)
+                    SystemServices.launcherApps.registerCallback(appsCallback, Handler(application.mainLooper))
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "initAppsList failed")
+                SystemServices.launcherApps.unregisterCallback(appsCallback)
+            }
+        }
+    }
+
+    suspend fun getAppsList(): List<LauncherActivityInfo> {
+        return withContext(Dispatchers.IO) {
+            initAppsMap()
+            appsMap.values.sortedBy { Pinyin.toPinyin(it.label[0]) }
+        }
     }
 
     fun injectMotionEvent(motionEvent: MotionEvent, displayId: Int) {
