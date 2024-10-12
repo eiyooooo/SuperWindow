@@ -40,7 +40,7 @@ class LocalContentPanel : Fragment() {
             binding.recyclerView.setItemViewCacheSize(appsList.size)
             binding.recyclerView.layoutManager = layoutManager
 
-            val adapter = AppsAdapter(appsList, lifecycleScope) {
+            val adapter = AppsAdapter(appsList) {
                 // TODO: handle chose app
                 Timber.d(it)
             }
@@ -64,7 +64,6 @@ class LocalContentPanel : Fragment() {
                     }
                 }
                 layoutManager.findViewByPosition(position)?.let {
-                    binding.recyclerView.stopScroll()
                     binding.nestedScrollView.smoothScrollTo(0, it.top)
                 }
             }

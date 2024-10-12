@@ -222,30 +222,35 @@ object LocalContent {//TODO
     private val appsCallback = object : LauncherApps.Callback() {
         override fun onPackageRemoved(packageName: String?, user: UserHandle?) {
             packageName?.let {
+                Timber.d("onPackageRemoved: $packageName")
                 appsMap.remove(it)
             }
         }
 
         override fun onPackageAdded(packageName: String?, user: UserHandle?) {
             packageName?.let {
+                Timber.d("onPackageAdded: $packageName")
                 updateCachedApp(it, user)
             }
         }
 
         override fun onPackageChanged(packageName: String?, user: UserHandle?) {
             packageName?.let {
+                Timber.d("onPackageChanged: $packageName")
                 updateCachedApp(it, user)
             }
         }
 
         override fun onPackagesAvailable(packageNames: Array<out String>?, user: UserHandle?, replacing: Boolean) {
             packageNames?.forEach {
+                Timber.d("onPackagesAvailable: $it")
                 updateCachedApp(it, user)
             }
         }
 
         override fun onPackagesUnavailable(packageNames: Array<out String>?, user: UserHandle?, replacing: Boolean) {
             packageNames?.forEach {
+                Timber.d("onPackagesUnavailable: $it")
                 appsMap.remove(it)
             }
         }

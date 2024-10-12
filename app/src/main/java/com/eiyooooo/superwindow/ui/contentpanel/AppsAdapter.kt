@@ -7,14 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import com.eiyooooo.superwindow.R
-import kotlinx.coroutines.launch
 
 class AppsAdapter(
     private val appsList: List<Pair<LauncherActivityInfo, Drawable>>,
-    private val lifecycleScope: LifecycleCoroutineScope,
     private val callback: (String) -> Unit
 ) : RecyclerView.Adapter<AppsAdapter.ViewHolder>() {
 
@@ -32,13 +29,11 @@ class AppsAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val (activityInfo, drawable) = appsList[position]
         val applicationInfo = activityInfo.applicationInfo
-        lifecycleScope.launch {
-            with(holder) {
-                icon.setImageDrawable(drawable)
-                appName.text = activityInfo.label
-                click.setOnClickListener {
-                    callback.invoke(applicationInfo.packageName)
-                }
+        with(holder) {
+            icon.setImageDrawable(drawable)
+            appName.text = activityInfo.label
+            click.setOnClickListener {
+                callback.invoke(applicationInfo.packageName)
             }
         }
     }
