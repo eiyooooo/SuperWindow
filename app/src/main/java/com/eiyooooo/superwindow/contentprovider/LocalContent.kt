@@ -37,6 +37,7 @@ import timber.log.Timber
 
 object LocalContent {//TODO
 
+    private val currentPackageName by lazy { application.packageName }
     private val ioScope = CoroutineScope(Dispatchers.IO)
 
     private var init = false//TODO: UI
@@ -217,7 +218,7 @@ object LocalContent {//TODO
         return null
     }
 
-    private val appsMap: MutableMap<String, LauncherActivityInfo> = mutableMapOf()
+    private val appsMap: MutableMap<String, Pair<LauncherActivityInfo, Drawable>> = mutableMapOf()
     private val appsCallback = object : LauncherApps.Callback() {
         override fun onPackageRemoved(packageName: String?, user: UserHandle?) {
             packageName?.let {
@@ -250,10 +251,12 @@ object LocalContent {//TODO
         }
 
         private fun updateCachedApp(packageName: String, user: UserHandle?) {
-            val currentPackageName = application.packageName
             SystemServices.launcherApps.getActivityList(packageName, user)
                 .filter { it.applicationInfo.packageName != currentPackageName }
-                .forEach { appsMap[it.applicationInfo.packageName] = it }
+                .forEach {
+                    val icon = it.applicationInfo.loadIcon(SystemServices.packageManager)
+                    appsMap[it.applicationInfo.packageName] = it to icon
+                }
         }
     }
 
@@ -261,10 +264,13 @@ object LocalContent {//TODO
         if (appsMap.isEmpty()) {
             try {
                 withContext(Dispatchers.IO) {
-                    val currentPackageName = application.packageName
-                    SystemServices.userManager.userProfiles.flatMap { SystemServices.launcherApps.getActivityList(null, it) }
+                    SystemServices.userManager.userProfiles
+                        .flatMap { SystemServices.launcherApps.getActivityList(null, it) }
                         .filter { it.applicationInfo.packageName != currentPackageName }
-                        .forEach { appsMap[it.applicationInfo.packageName] = it }
+                        .forEach {
+                            val icon = it.applicationInfo.loadIcon(SystemServices.packageManager)
+                            appsMap[it.applicationInfo.packageName] = it to icon
+                        }
                     SystemServices.launcherApps.unregisterCallback(appsCallback)
                     SystemServices.launcherApps.registerCallback(appsCallback, Handler(application.mainLooper))
                 }
@@ -275,10 +281,10 @@ object LocalContent {//TODO
         }
     }
 
-    suspend fun getAppsList(): List<LauncherActivityInfo> {
+    suspend fun getAppsList(): List<Pair<LauncherActivityInfo, Drawable>> {
         return withContext(Dispatchers.IO) {
             initAppsMap()
-            appsMap.values.sortedBy { Pinyin.toPinyin(it.label[0]) }
+            appsMap.values.sortedBy { Pinyin.toPinyin(it.first.label[0]) }
         }
     }
 

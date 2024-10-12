@@ -49,8 +49,12 @@ class LocalContentPanel : Fragment() {
             val pinyinCache = mutableMapOf<Char, Int>()
             binding.waveSideBarView.setLetterChangeListener { letter ->
                 val position = pinyinCache[letter] ?: let {
-                    val foundPosition = appsList.binarySearch { app ->
-                        Pinyin.toPinyin(app.label[0])[0].compareTo(letter)
+                    var foundPosition = -1
+                    for ((index, app) in appsList.withIndex()) {
+                        if (Pinyin.toPinyin(app.first.label[0])[0] == letter) {
+                            foundPosition = index
+                            break
+                        }
                     }
                     if (foundPosition >= 0) {
                         pinyinCache[letter] = foundPosition
@@ -59,8 +63,10 @@ class LocalContentPanel : Fragment() {
                         return@setLetterChangeListener
                     }
                 }
-                binding.recyclerView.scrollToPosition(position)
-                layoutManager.scrollToPositionWithOffset(position, 0)
+                layoutManager.findViewByPosition(position)?.let {
+                    binding.recyclerView.stopScroll()
+                    binding.nestedScrollView.smoothScrollTo(0, it.top)
+                }
             }
         }
     }

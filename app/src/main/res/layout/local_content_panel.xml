@@ -6,12 +6,19 @@
     android:paddingTop="10dp"
     android:paddingBottom="10dp">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginEnd="32dp"
-        android:scrollbars="none" />
+        android:scrollbars="none">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </androidx.core.widget.NestedScrollView>
 
     <com.eiyooooo.superwindow.ui.view.WaveSideBarView
         android:id="@+id/waveSideBarView"
