@@ -3,7 +3,6 @@ package com.eiyooooo.superwindow.ui.main
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
@@ -158,19 +157,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     internal fun showElevatedFragment(fragment: Fragment) {
-        showElevatedView()
-        supportFragmentManager.beginTransaction().replace(R.id.elevated_view_container, fragment).commit()
-    }
-
-    internal fun showElevatedView(view: View) {
-        showElevatedView()
-        view.parent?.let {
-            (it as? ViewGroup)?.removeView(view)
-        }
-        bindingExpanded.elevatedViewContainer.addView(view)
-    }
-
-    private fun showElevatedView() {
         val overlay = if (isExpanded) bindingExpanded.overlay else bindingCompact.overlay
         val elevatedViewContainer = if (isExpanded) bindingExpanded.elevatedViewContainer else bindingCompact.elevatedViewContainer
 
@@ -179,10 +165,10 @@ class MainActivity : AppCompatActivity() {
             it.height = (resources.displayMetrics.heightPixels * 0.8).toInt()
         }
 
-        startShowElevatedViewAnimation(elevatedViewContainer, overlay, true)
         makeCardsBlur(true)
-
-        elevatedViewContainer.removeAllViews()
+        startShowElevatedViewAnimation(elevatedViewContainer, overlay, true) {
+            supportFragmentManager.beginTransaction().replace(R.id.elevated_view_container, fragment).commit()
+        }
     }
 
     internal fun hideElevatedView(onAnimationEnd: (() -> Unit)? = null) {

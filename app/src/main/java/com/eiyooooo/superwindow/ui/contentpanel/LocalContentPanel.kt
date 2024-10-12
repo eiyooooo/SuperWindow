@@ -30,6 +30,10 @@ class LocalContentPanel : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.waveSideBarView.visibility = View.GONE
+        binding.nestedScrollView.visibility = View.GONE
+        binding.progressBar.visibility = View.VISIBLE
+
         lifecycleScope.launch {
             val appsList = withContext(Dispatchers.IO) {
                 LocalContent.getAppsList()
@@ -45,6 +49,11 @@ class LocalContentPanel : Fragment() {
                 Timber.d(it)
             }
             binding.recyclerView.adapter = adapter
+            binding.recyclerView.post {
+                binding.waveSideBarView.visibility = View.VISIBLE
+                binding.nestedScrollView.visibility = View.VISIBLE
+                binding.progressBar.visibility = View.GONE
+            }
 
             val pinyinCache = mutableMapOf<Char, Int>()
             binding.waveSideBarView.setLetterChangeListener { letter ->

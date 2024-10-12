@@ -82,7 +82,7 @@ fun startShowElevatedViewAnimation(elevatedViewContainer: View, overlay: View, i
         overlay.visibility = View.VISIBLE
     }
 
-    val duration = if (isShow) 500L else 250L
+    val duration = if (isShow) 300L else 150L
     val listener = object : Animator.AnimatorListener {
         override fun onAnimationStart(animation: Animator) {
         }
