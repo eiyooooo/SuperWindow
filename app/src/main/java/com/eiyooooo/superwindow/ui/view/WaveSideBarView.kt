@@ -11,6 +11,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import com.eiyooooo.superwindow.R
+import com.eiyooooo.superwindow.entity.SystemServices
 import com.eiyooooo.superwindow.util.dp2px
 import com.eiyooooo.superwindow.util.sp2px
 import kotlin.math.abs
@@ -63,6 +64,9 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
     private var mPosY = 0f
     private var mBallCentreX = 0f
 
+    private var mFirstLetterPosY = 0f
+    private var mLastLetterPosY = 0f
+
     init {
         mOnBackgroundColor = Color.parseColor("#969696")
         mBackgroundColor = Color.parseColor("#F9F9F9")
@@ -114,18 +118,20 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
                 }
                 mRatioAnimator.cancel()
                 mRatio = 1.0f
-                mCenterY = event.y.toInt()
+                mCenterY = event.y.toInt().coerceIn(mFirstLetterPosY.toInt(), mLastLetterPosY.toInt())
                 if (oldChoose != newChoose && newChoose in mLetters.indices) {
                     mChoose = newChoose
+                    SystemServices.triggerVibration()
                     letterChangeListener?.invoke(mLetters[newChoose][0])
                 }
                 invalidate()
             }
 
             MotionEvent.ACTION_MOVE -> {
-                mCenterY = event.y.toInt()
+                mCenterY = event.y.toInt().coerceIn(mFirstLetterPosY.toInt(), mLastLetterPosY.toInt())
                 if (oldChoose != newChoose && newChoose in mLetters.indices) {
                     mChoose = newChoose
+                    SystemServices.triggerVibration()
                     letterChangeListener?.invoke(mLetters[newChoose][0])
                 }
                 invalidate()
@@ -196,6 +202,12 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
                 mPosY = posY
             } else {
                 canvas.drawText(mLetters[i], mPosX, posY, mLettersPaint)
+            }
+
+            if (i == 0) {
+                mFirstLetterPosY = posY
+            } else if (i == mLetters.size - 1) {
+                mLastLetterPosY = posY
             }
         }
     }
