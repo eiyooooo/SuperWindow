@@ -38,7 +38,7 @@ import timber.log.Timber
 object LocalContent {//TODO
 
     private val currentPackageName by lazy { application.packageName }
-    private val ioScope = CoroutineScope(Dispatchers.IO)
+    private val defaultScope = CoroutineScope(Dispatchers.Default)
 
     private var init = false//TODO: UI
 
@@ -51,7 +51,7 @@ object LocalContent {//TODO
             init = try {
                 ServiceManager.setupManagers()
                 ServiceManager.getActivityTaskManager().registerTaskStackListener(runningTaskStackListener)
-                ioScope.launch {
+                defaultScope.launch {
                     initAppsMap()
                 }
                 true
@@ -268,7 +268,7 @@ object LocalContent {//TODO
     private suspend fun initAppsMap() {
         if (appsMap.isEmpty()) {
             try {
-                withContext(Dispatchers.IO) {
+                withContext(Dispatchers.Default) {
                     SystemServices.userManager.userProfiles
                         .flatMap { SystemServices.launcherApps.getActivityList(null, it) }
                         .filter { it.applicationInfo.packageName != currentPackageName }
@@ -287,7 +287,7 @@ object LocalContent {//TODO
     }
 
     suspend fun getAppsList(): List<Pair<LauncherActivityInfo, Drawable>> {
-        return withContext(Dispatchers.IO) {
+        return withContext(Dispatchers.Default) {
             initAppsMap()
             appsMap.values.sortedBy { Pinyin.toPinyin(it.first.label[0]) }
         }

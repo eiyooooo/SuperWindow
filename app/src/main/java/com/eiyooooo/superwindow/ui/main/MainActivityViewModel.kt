@@ -11,7 +11,6 @@ import com.eiyooooo.superwindow.ui.controlpanel.HomeData
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardGroup
 import com.eiyooooo.superwindow.util.BlurUtils
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -73,7 +72,7 @@ class MainActivityViewModel : ViewModel() {
     }
 
     fun checkShizukuPermission() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             if (!Shizuku.pingBinder()) {
                 mShizukuStatus.update { ShizukuStatus.SHIZUKU_NOT_RUNNING }
                 return@launch
@@ -90,7 +89,7 @@ class MainActivityViewModel : ViewModel() {
     }
 
     fun startCheckingShizukuPermission() {
-        checkShizukuPermissionJob = viewModelScope.launch(Dispatchers.IO) {
+        checkShizukuPermissionJob = viewModelScope.launch {
             while (isActive) {
                 delay(1000)
                 checkShizukuPermission()

@@ -35,7 +35,7 @@ class LocalContentPanel : Fragment() {
         binding.progressBar.visibility = View.VISIBLE
 
         lifecycleScope.launch {
-            val appsList = withContext(Dispatchers.IO) {
+            val appsList = withContext(Dispatchers.Default) {
                 LocalContent.getAppsList()
             }
 
