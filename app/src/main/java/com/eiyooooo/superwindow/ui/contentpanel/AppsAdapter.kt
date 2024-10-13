@@ -26,10 +26,10 @@ class AppsAdapter(
         val appName: TextView = binding.appName
         val click: View = binding.viewClick
 
-        fun bindAlphaTransition(letter: Char?, selectedLetter: Char?) {
-            val targetAlpha = if (selectedLetter == null || letter == selectedLetter) 1f else 0.25f
+        fun updateItemAlphaForSelection(letter: Char?, selectedLetter: Char?) {
+            val targetAlpha = if (selectedLetter == null || letter == selectedLetter) 1f else 0.1f
             if (itemView.alpha != targetAlpha) {
-                itemView.animate().alpha(targetAlpha).setDuration(300).start()
+                itemView.animate().alpha(targetAlpha).setDuration(250).start()
             }
         }
     }
@@ -51,7 +51,7 @@ class AppsAdapter(
             }
             scope.launch {
                 selectingLetter.collect {
-                    bindAlphaTransition(letter, it)
+                    updateItemAlphaForSelection(letter, it)
                 }
             }
         }
