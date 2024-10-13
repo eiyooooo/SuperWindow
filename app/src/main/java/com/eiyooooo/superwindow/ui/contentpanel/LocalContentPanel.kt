@@ -44,7 +44,7 @@ class LocalContentPanel : Fragment() {
             binding.recyclerView.setItemViewCacheSize(appsList.size)
             binding.recyclerView.layoutManager = layoutManager
 
-            val adapter = AppsAdapter(appsList) {
+            val adapter = AppsAdapter(appsList, lifecycleScope, binding.waveSideBarView.selectingLetter) {
                 // TODO: handle chose app
                 Timber.d(it)
             }

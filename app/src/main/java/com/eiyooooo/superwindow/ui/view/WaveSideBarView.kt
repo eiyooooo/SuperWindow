@@ -14,6 +14,9 @@ import com.eiyooooo.superwindow.R
 import com.eiyooooo.superwindow.entity.SystemServices
 import com.eiyooooo.superwindow.util.dp2px
 import com.eiyooooo.superwindow.util.sp2px
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -32,6 +35,9 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
     private var mChoose = -1
     private var oldChoose = 0
     private var newChoose = 0
+
+    private val mSelectingLetter: MutableStateFlow<Char?> by lazy { MutableStateFlow(null) }
+    val selectingLetter: StateFlow<Char?> = mSelectingLetter
 
     private val mRatioAnimator: ValueAnimator = ValueAnimator()
 
@@ -123,6 +129,7 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
                     mChoose = newChoose
                     SystemServices.triggerVibration()
                     letterChangeListener?.invoke(mLetters[newChoose][0])
+                    mSelectingLetter.update { mLetters[newChoose][0] }
                 }
                 invalidate()
             }
@@ -133,6 +140,7 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
                     mChoose = newChoose
                     SystemServices.triggerVibration()
                     letterChangeListener?.invoke(mLetters[newChoose][0])
+                    mSelectingLetter.update { mLetters[newChoose][0] }
                 }
                 invalidate()
             }
@@ -146,6 +154,7 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
                 }
                 mRatioAnimator.start()
                 mChoose = -1
+                mSelectingLetter.update { null }
             }
         }
         return true
