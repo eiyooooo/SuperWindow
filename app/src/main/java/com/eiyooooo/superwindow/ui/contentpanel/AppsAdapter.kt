@@ -42,7 +42,7 @@ class AppsAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val (activityInfo, drawable) = appsList[position]
         val applicationInfo = activityInfo.applicationInfo
-        val letter = Pinyin.toPinyin(activityInfo.label[0])[0]
+        val letter = Pinyin.toPinyin(activityInfo.label[0]).firstOrNull()?.uppercaseChar()?.takeIf { it.isLetter() } ?: '#'
         with(holder) {
             icon.setImageDrawable(drawable)
             appName.text = activityInfo.label

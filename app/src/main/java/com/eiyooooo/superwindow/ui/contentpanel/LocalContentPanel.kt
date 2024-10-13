@@ -60,7 +60,13 @@ class LocalContentPanel : Fragment() {
                 val position = pinyinCache[letter] ?: let {
                     var foundPosition = -1
                     for ((index, app) in appsList.withIndex()) {
-                        if (Pinyin.toPinyin(app.first.label[0])[0] == letter) {
+                        val pinyinFirstLetter = Pinyin.toPinyin(app.first.label[0]).firstOrNull()
+                        if (letter == '#') {
+                            if (pinyinFirstLetter?.isLetter() != true) {
+                                foundPosition = index
+                                break
+                            }
+                        } else if (letter == pinyinFirstLetter?.uppercaseChar()) {
                             foundPosition = index
                             break
                         }

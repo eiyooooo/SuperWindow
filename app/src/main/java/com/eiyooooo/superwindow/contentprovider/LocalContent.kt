@@ -289,7 +289,7 @@ object LocalContent {//TODO
     suspend fun getAppsList(): List<Pair<LauncherActivityInfo, Drawable>> {
         return withContext(Dispatchers.Default) {
             initAppsMap()
-            appsMap.values.sortedBy { Pinyin.toPinyin(it.first.label[0]) }
+            appsMap.values.sortedWith(compareBy({ Pinyin.toPinyin(it.first.label[0]).firstOrNull()?.isLetter() != true }, { Pinyin.toPinyin(it.first.label[0]).uppercase() }))
         }
     }
 
