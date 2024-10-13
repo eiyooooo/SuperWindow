@@ -39,7 +39,7 @@ class LocalContentPanelFragment : Fragment() {
                 LocalContent.getAppsList()
             }
 
-            val spanCount = if (resources.configuration.screenWidthDp < 600) 3 else 4
+            val spanCount = (resources.configuration.screenWidthDp * 0.8 / 80).toInt().coerceAtMost(4)
             val layoutManager = GridLayoutManager(view.context, spanCount)
             binding.recyclerView.setItemViewCacheSize(appsList.size)
             binding.recyclerView.layoutManager = layoutManager
