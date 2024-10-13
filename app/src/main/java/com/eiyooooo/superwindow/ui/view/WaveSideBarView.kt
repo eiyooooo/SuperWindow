@@ -127,7 +127,7 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
                 mCenterY = event.y.toInt().coerceIn(mFirstLetterPosY.toInt(), mLastLetterPosY.toInt())
                 if (oldChoose != newChoose && newChoose in mLetters.indices) {
                     mChoose = newChoose
-                    SystemServices.triggerVibration()
+                    SystemServices.triggerVibration(50, 25)
                     letterChangeListener?.invoke(mLetters[newChoose][0])
                     mSelectingLetter.update { mLetters[newChoose][0] }
                 }
@@ -138,7 +138,7 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
                 mCenterY = event.y.toInt().coerceIn(mFirstLetterPosY.toInt(), mLastLetterPosY.toInt())
                 if (oldChoose != newChoose && newChoose in mLetters.indices) {
                     mChoose = newChoose
-                    SystemServices.triggerVibration()
+                    SystemServices.triggerVibration(50, 25)
                     letterChangeListener?.invoke(mLetters[newChoose][0])
                     mSelectingLetter.update { mLetters[newChoose][0] }
                 }

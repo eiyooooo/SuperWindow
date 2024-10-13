@@ -20,7 +20,7 @@ object SystemServices {
     private val vibrator: Vibrator by lazy { application.getSystemService()!! }
 
     @Suppress("DEPRECATION")
-    fun triggerVibration(ms: Long = 50, amplitude: Int = 100) {
+    fun triggerVibration(ms: Long = 50, amplitude: Int = 25) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val vibrationEffect = VibrationEffect.createOneShot(ms, amplitude)
             vibrator.vibrate(vibrationEffect)
