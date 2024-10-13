@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class LocalContentPanel : Fragment() {
+class LocalContentPanelFragment : Fragment() {
 
     private lateinit var binding: LocalContentPanelBinding
 
