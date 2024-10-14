@@ -8,10 +8,10 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import com.eiyooooo.superwindow.R
-import com.eiyooooo.superwindow.entity.SystemServices
 import com.eiyooooo.superwindow.util.dp2px
 import com.eiyooooo.superwindow.util.sp2px
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -107,6 +107,7 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
             textSize = mLargeTextSize
             textAlign = Paint.Align.CENTER
         }
+        isHapticFeedbackEnabled = true
     }
 
     fun setLetterChangeListener(listener: (Char) -> Unit) {
@@ -127,7 +128,7 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
                 mCenterY = event.y.toInt().coerceIn(mFirstLetterPosY.toInt(), mLastLetterPosY.toInt())
                 if (oldChoose != newChoose && newChoose in mLetters.indices) {
                     mChoose = newChoose
-                    SystemServices.triggerVibration(50, 25)
+                    performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                     letterChangeListener?.invoke(mLetters[newChoose][0])
                     mSelectingLetter.update { mLetters[newChoose][0] }
                 }
@@ -138,7 +139,7 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
                 mCenterY = event.y.toInt().coerceIn(mFirstLetterPosY.toInt(), mLastLetterPosY.toInt())
                 if (oldChoose != newChoose && newChoose in mLetters.indices) {
                     mChoose = newChoose
-                    SystemServices.triggerVibration(50, 25)
+                    performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                     letterChangeListener?.invoke(mLetters[newChoose][0])
                     mSelectingLetter.update { mLetters[newChoose][0] }
                 }
