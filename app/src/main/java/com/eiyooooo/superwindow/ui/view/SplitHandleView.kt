@@ -5,7 +5,9 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import com.eiyooooo.superwindow.util.startPressHandleAnimation
+import kotlin.math.abs
 
 class SplitHandleView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
 
@@ -31,8 +33,11 @@ class SplitHandleView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     private val touchListener by lazy {
         object : OnTouchListener {
-            private var X: Float = 0F
-            private var touchX: Float = 0F
+            private var initialViewX: Float = 0F
+            private var initialRawX: Float = 0F
+            private var initialX: Float = 0F
+            private var initialY: Float = 0F
+            val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
 
             @SuppressLint("ClickableViewAccessibility")
             override fun onTouch(v: View, event: MotionEvent): Boolean {
@@ -42,16 +47,20 @@ class SplitHandleView @JvmOverloads constructor(context: Context, attrs: Attribu
                         for (widgetCard in widgetCards!!) {
                             widgetCard.makeBlur()
                         }
-                        X = v.x
-                        touchX = event.rawX
+                        initialViewX = v.x
+                        initialRawX = event.rawX
+                        initialX = event.x
+                        initialY = event.y
                         startPressHandleAnimation(true)
                         true
                     }
 
                     MotionEvent.ACTION_MOVE -> {
-                        val deltaX = event.rawX - touchX
-                        val newX = X + deltaX
-                        onDragHandle?.invoke(newX)
+                        val deltaX = abs(event.x - initialX)
+                        val deltaY = abs(event.y - initialY)
+                        if (deltaX > touchSlop || deltaY > touchSlop) {
+                            onDragHandle?.invoke(initialViewX + event.rawX - initialRawX)
+                        }
                         true
                     }
 
