@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">超级视窗</string>
     <string name="introduction">应用简介</string>
-    <string name="introduction_detail">1. 大屏设备多分屏解决方案\n2. 致力于为大屏设备提供最佳体验\n3. 本机使用需安卓12L以上及Shizuku授权\n4. 跨设备使用需目标设备安卓12L以上及打开ADB</string>
+    <string name="introduction_detail">1. 大屏设备多分屏解决方案\n2. 致力于为大屏设备提供最佳体验\n3. 本机使用需安卓13或以上并授权Shizuku\n4. 跨设备使用需目标设备安卓13或以上并打开ADB</string>
 
     <string name="home">主页</string>
     <string name="settings">设置</string>
