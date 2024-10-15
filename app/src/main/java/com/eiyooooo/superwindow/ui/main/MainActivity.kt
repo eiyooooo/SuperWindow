@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
-import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -54,13 +53,6 @@ class MainActivity : AppCompatActivity() {
                 setupFullScreen()
                 bindingExpanded = ActivityMainExpandedBinding.inflate(layoutInflater).also {
                     bindingControlPanelExpanded = ControlPanelExpandedBinding.inflate(layoutInflater, null, false)
-                    it.root.post {
-                        windowManager.updateViewLayout(bindingExpanded.root.rootView, bindingExpanded.root.rootView.layoutParams.apply {
-                            val flagsField = this.javaClass.getDeclaredField("flags")
-                            val flags = flagsField.getInt(this)
-                            flagsField.set(this, flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
-                        })//TODO: only add when localContent is presented
-                    }
                     it.widgetContainer.addTargetView(it.leftSplitHandle)
                     it.widgetContainer.addTargetView(it.rightSplitHandle)
                     it.overlay.setOnClickListener { hideElevatedView { makeCardsBlur(false) } }
