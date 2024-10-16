@@ -52,7 +52,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             mainActivity.lifecycleScope.launch {
                 mainModel.shizukuStatus.collect {
                     if (it == ShizukuStatus.HAVE_PERMISSION) {

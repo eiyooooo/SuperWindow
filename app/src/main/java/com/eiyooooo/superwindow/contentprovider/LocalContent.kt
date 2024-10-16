@@ -42,7 +42,7 @@ object LocalContent {//TODO
 
     private var init = false//TODO: UI
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     fun init() {
         if (init) {
             Timber.d("Managers already init")

@@ -66,7 +66,7 @@ class ShizukuInstructionViewHolder(private val binding: ItemTitleDetailCardBindi
         val paddingCollapsed = context.dp2px(12)
         val paddingExpanded = context.dp2px(18)
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             clickMode = null
             configureCollapsedView(R.string.local_use_not_supported, paddingCollapsed)
             title.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.error, 0, 0, 0)
