@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 class WidgetCardManager(private val mainActivity: MainActivity, private val mainModel: MainActivityViewModel) {
 
     private var forceRefreshUI = true
-    private val controlPanelWidgetCard by lazy { WidgetCardView(mainActivity.bindingControlPanelExpanded.root, WidgetCardData(true, "controlPanel")) }
+    private lateinit var controlPanelWidgetCard: WidgetCardView
     private val widgetCards: MutableMap<String, WidgetCardView> = mutableMapOf()
 
     fun init() {
@@ -117,7 +117,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
     private var thirdWidgetCard: WidgetCardView? = null
 
     private fun showSingleWidgetCard(group: WidgetCardGroup) {
-        val firstWidgetCard = getWidgetCard(group.firstWidgetCard)
+        val firstWidgetCard = getWidgetCard(group.firstWidgetCard, 1)
         this.firstWidgetCard = firstWidgetCard
         this.secondWidgetCard = null
         this.thirdWidgetCard = null
@@ -133,8 +133,8 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
     }
 
     private fun showDualWidgetCard(group: WidgetCardGroup) {
-        val firstWidgetCard = getWidgetCard(group.firstWidgetCard)
-        val secondWidgetCard = getWidgetCard(group.secondWidgetCard!!)
+        val firstWidgetCard = getWidgetCard(group.firstWidgetCard, 1)
+        val secondWidgetCard = getWidgetCard(group.secondWidgetCard!!, 2)
         this.firstWidgetCard = firstWidgetCard
         this.secondWidgetCard = secondWidgetCard
         this.thirdWidgetCard = null
@@ -152,9 +152,9 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
     }
 
     private fun showTripleWidgetCard(group: WidgetCardGroup) {
-        val firstWidgetCard = getWidgetCard(group.firstWidgetCard)
-        val secondWidgetCard = getWidgetCard(group.secondWidgetCard!!)
-        val thirdWidgetCard = getWidgetCard(group.thirdWidgetCard!!)
+        val firstWidgetCard = getWidgetCard(group.firstWidgetCard, 1)
+        val secondWidgetCard = getWidgetCard(group.secondWidgetCard!!, 2)
+        val thirdWidgetCard = getWidgetCard(group.thirdWidgetCard!!, 3)
         this.firstWidgetCard = firstWidgetCard
         this.secondWidgetCard = secondWidgetCard
         this.thirdWidgetCard = thirdWidgetCard
@@ -173,15 +173,18 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         mainActivity.bindingExpanded.rightSplitHandle.setOnDragHandle(null)//TODO
     }
 
-    private fun getWidgetCard(widgetCard: WidgetCardData): WidgetCardView {
+    private fun getWidgetCard(widgetCard: WidgetCardData, position: Int): WidgetCardView {
         return if (widgetCard.isControlPanel) {
-            controlPanelWidgetCard
+            if (!this::controlPanelWidgetCard.isInitialized) {
+                controlPanelWidgetCard = WidgetCardView(mainActivity.bindingControlPanelExpanded.root, widgetCard)
+            }
+            controlPanelWidgetCard.updatePosition(position)
         } else if (widgetCards[widgetCard.identifier] == null) {
-            val newWidgetCard = WidgetCardView(mainActivity, widgetCardData = widgetCard)
+            val newWidgetCard = WidgetCardView(mainActivity, widgetCardData = widgetCard).updatePosition(position)
             widgetCards[widgetCard.identifier] = newWidgetCard
             newWidgetCard
         } else {
-            widgetCards[widgetCard.identifier]!!
+            widgetCards[widgetCard.identifier]!!.updatePosition(position)
         }
     }
 

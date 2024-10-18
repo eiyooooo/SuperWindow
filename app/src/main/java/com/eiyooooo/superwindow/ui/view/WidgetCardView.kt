@@ -35,6 +35,13 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
 
     private val widgetCard: ItemWidgetCardBinding = ItemWidgetCardBinding.inflate(LayoutInflater.from(context), this, true)
 
+    var position: Int = -1
+
+    fun updatePosition(position: Int): WidgetCardView {
+        this.position = position
+        return this
+    }
+
     fun setControlBarVisibility(visibility: Int) {
         widgetCard.controlBar.visibility = visibility
     }
