@@ -17,6 +17,8 @@ import com.eiyooooo.superwindow.databinding.ControlPanelCompactBinding
 import com.eiyooooo.superwindow.databinding.ControlPanelExpandedBinding
 import com.eiyooooo.superwindow.entity.Preferences
 import com.eiyooooo.superwindow.ui.controlpanel.ControlPanelAdapter
+import com.eiyooooo.superwindow.ui.view.WidgetCardView
+import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardDataGroup
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardManager
 import com.eiyooooo.superwindow.util.setupWithViewPager
 import com.eiyooooo.superwindow.util.startShowElevatedViewAnimation
@@ -33,7 +35,7 @@ class MainActivity : AppCompatActivity() {
 
     private val mainModel: MainActivityViewModel by viewModels()
     private val controlPanelAdapter: ControlPanelAdapter by lazy { ControlPanelAdapter(this) }
-    internal val widgetCardManager: WidgetCardManager by lazy { WidgetCardManager(this, mainModel) }
+    private val widgetCardManager: WidgetCardManager by lazy { WidgetCardManager(this, mainModel) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -133,9 +135,9 @@ class MainActivity : AppCompatActivity() {
 
     internal fun showSnackBar(text: String) {
         if (isExpanded) {
-            val widgetCardGroup = mainModel.widgetCardGroup.value!!
-            if (widgetCardGroup.isControlPanelForeground) {
-                if (widgetCardGroup.foregroundWidgetCardCount == 1) {
+            val widgetCardDataGroup = mainModel.widgetCardDataGroup.value!!
+            if (widgetCardDataGroup.isControlPanelForeground) {
+                if (widgetCardDataGroup.foregroundWidgetCardCount == 1) {
                     Snackbar.make(bindingExpanded.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingExpanded.bar).show()
                 } else {
                     Snackbar.make(bindingExpanded.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingControlPanelExpanded.bottomNavigation).show()
@@ -176,5 +178,9 @@ class MainActivity : AppCompatActivity() {
         elevatedViewContainer.removeAllViews()
     }
 
+    internal fun updateWidgetCardDataGroup(function: (WidgetCardDataGroup) -> WidgetCardDataGroup) = mainModel.updateWidgetCardDataGroup(function)
+
     internal fun makeCardsBlur(blur: Boolean) = widgetCardManager.makeCardsBlur(blur)
+
+    internal fun removeWidgetCard(target: WidgetCardView) = widgetCardManager.removeWidgetCard(target)
 }

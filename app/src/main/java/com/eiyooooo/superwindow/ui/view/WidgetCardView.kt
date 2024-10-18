@@ -188,7 +188,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                                     displayId = it
                                 } ?: post {
                                     release()
-                                    (context as? MainActivity)?.widgetCardManager?.removeWidgetCard(this@WidgetCardView)
+                                    (context as? MainActivity)?.removeWidgetCard(this@WidgetCardView)
                                 }
                             }
                         }
@@ -199,7 +199,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                                     displayId = it
                                 } ?: post {
                                     release()
-                                    (context as? MainActivity)?.widgetCardManager?.removeWidgetCard(this@WidgetCardView)
+                                    (context as? MainActivity)?.removeWidgetCard(this@WidgetCardView)
                                 }
                             }
                         }

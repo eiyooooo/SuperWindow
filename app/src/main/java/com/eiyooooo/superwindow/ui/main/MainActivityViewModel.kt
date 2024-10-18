@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.eiyooooo.superwindow.contentprovider.LocalContent
 import com.eiyooooo.superwindow.ui.controlpanel.HomeData
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
-import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardGroup
+import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardDataGroup
 import com.eiyooooo.superwindow.util.BlurUtils
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -22,14 +22,14 @@ import rikka.shizuku.Shizuku
 
 class MainActivityViewModel : ViewModel() {
 
-    private val mWidgetCardGroup: MutableStateFlow<WidgetCardGroup> by lazy { MutableStateFlow(WidgetCardGroup(firstWidgetCard = WidgetCardData(true, "controlPanel"))) }
-    val widgetCardGroup: LiveData<WidgetCardGroup> = mWidgetCardGroup.asLiveData()
+    private val mWidgetCardDataGroup: MutableStateFlow<WidgetCardDataGroup> by lazy { MutableStateFlow(WidgetCardDataGroup(firstWidgetCardData = WidgetCardData(true, "controlPanel"))) }
+    val widgetCardDataGroup: LiveData<WidgetCardDataGroup> = mWidgetCardDataGroup.asLiveData()
 
-    fun updateWidgetCardGroup(function: (WidgetCardGroup) -> WidgetCardGroup) {
-        mWidgetCardGroup.update(function)
+    fun updateWidgetCardDataGroup(function: (WidgetCardDataGroup) -> WidgetCardDataGroup) {
+        mWidgetCardDataGroup.update(function)
     }
 
-    var lastWidgetCardGroup: WidgetCardGroup? = null
+    var lastWidgetCardDataGroup: WidgetCardDataGroup? = null
 
     private val mDualSplitHandlePosition: MutableStateFlow<Float> by lazy { MutableStateFlow(-1f) }
     val dualSplitHandlePosition: LiveData<Float> = mDualSplitHandlePosition.asLiveData()
