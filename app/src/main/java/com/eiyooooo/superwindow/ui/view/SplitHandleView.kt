@@ -7,6 +7,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import com.eiyooooo.superwindow.util.startPressHandleAnimation
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.abs
 
 class SplitHandleView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
@@ -33,20 +34,19 @@ class SplitHandleView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     private val touchListener by lazy {
         object : OnTouchListener {
+            private var blurring = AtomicBoolean(false)
             private var initialViewX: Float = 0F
             private var initialRawX: Float = 0F
             private var initialX: Float = 0F
             private var initialY: Float = 0F
-            val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+            private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
 
             @SuppressLint("ClickableViewAccessibility")
             override fun onTouch(v: View, event: MotionEvent): Boolean {
                 if (widgetCards.isNullOrEmpty()) return false
                 return when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        for (widgetCard in widgetCards!!) {
-                            widgetCard.makeBlur()
-                        }
+                        blurring.set(false)
                         initialViewX = v.x
                         initialRawX = event.rawX
                         initialX = event.x
@@ -60,6 +60,12 @@ class SplitHandleView @JvmOverloads constructor(context: Context, attrs: Attribu
                         val deltaY = abs(event.y - initialY)
                         if (deltaX > touchSlop || deltaY > touchSlop) {
                             onDragHandle?.invoke(initialViewX + event.rawX - initialRawX)
+                            if (!blurring.get()) {
+                                blurring.set(true)
+                                for (widgetCard in widgetCards!!) {
+                                    widgetCard.makeBlur()
+                                }
+                            }
                         }
                         true
                     }
@@ -68,6 +74,7 @@ class SplitHandleView @JvmOverloads constructor(context: Context, attrs: Attribu
                         for (widgetCard in widgetCards!!) {
                             widgetCard.startBlurTransitAnimation()
                         }
+                        blurring.set(false)
                         startPressHandleAnimation(false)
                         true
                     }
@@ -76,6 +83,7 @@ class SplitHandleView @JvmOverloads constructor(context: Context, attrs: Attribu
                         for (widgetCard in widgetCards!!) {
                             widgetCard.startBlurTransitAnimation()
                         }
+                        blurring.set(false)
                         startPressHandleAnimation(false)
                         false
                     }
