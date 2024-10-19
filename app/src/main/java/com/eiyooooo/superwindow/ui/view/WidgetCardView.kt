@@ -230,7 +230,9 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     private val blurTransitAnimationList = mutableListOf<AnimatorSet>()
 
     fun makeCover() {
-        if (blurring.get()) return
+        if (blurring.get()) {
+            removeBlurImmediately()
+        }
         cancelCoverTransitAnimations()
         widgetCard.iconContainer.visibility = View.VISIBLE
         widgetCard.contentContainer.visibility = View.GONE
@@ -287,7 +289,9 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     fun makeBlur() {
-        if (covering.get()) return
+        if (covering.get()) {
+            removeCoverImmediately()
+        }
         cancelBlurTransitAnimations()
         textureView?.let { textureView ->
             BlurUtils.blurBitmap(textureView.bitmap)?.let {
