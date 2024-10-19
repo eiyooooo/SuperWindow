@@ -160,7 +160,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
             LayoutParams.MATCH_PARENT,
             LayoutParams.MATCH_PARENT
         )
-        radius = 8F
+        radius = context.dp2px(8).toFloat()
 
         setTargetView(widgetCard.controlBar)
         widgetCard.controlBar.setOnTouchListener(controlBarListener)
