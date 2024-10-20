@@ -160,9 +160,16 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
     }
 
     private fun refreshWidgetCardContainer(vararg widgetCards: WidgetCardView) {
-        mainActivity.bindingExpanded.widgetContainer.children.forEach {
-            if (it is WidgetCardView) {
+        widgetCards.forEach {
+            it.visibility = View.GONE
+        }
+        val widgetCardSet = widgetCards.toSet()
+        mainActivity.bindingExpanded.widgetContainer.children.filterIsInstance<WidgetCardView>().toList().forEach {
+            if (!widgetCardSet.contains(it)) {
+                it.visibility = View.GONE
                 mainActivity.bindingExpanded.widgetContainer.removeView(it)
+            } else {
+                it.visibility = View.VISIBLE
             }
         }
         widgetCards.forEach {
@@ -276,6 +283,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 constraintSet.connect(widgetCards[0].id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
                 constraintSet.connect(widgetCards[0].id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
                 constraintSet.constrainPercentWidth(widgetCards[0].id, 1f)
+                constraintSet.setVisibility(widgetCards[0].id, ConstraintSet.VISIBLE)
                 constraintSet.setVisibility(R.id.left_split_handle, ConstraintSet.GONE)
                 constraintSet.setVisibility(R.id.right_split_handle, ConstraintSet.GONE)
                 if (group.isControlPanelForeground) {
@@ -293,6 +301,8 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 constraintSet.connect(widgetCards[1].id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
                 constraintSet.constrainPercentWidth(widgetCards[0].id, 0.5f)
                 constraintSet.constrainPercentWidth(widgetCards[1].id, 0.5f)
+                constraintSet.setVisibility(widgetCards[0].id, ConstraintSet.VISIBLE)
+                constraintSet.setVisibility(widgetCards[1].id, ConstraintSet.VISIBLE)
                 constraintSet.setVisibility(R.id.left_split_handle, if (group.pendingPosition != 0) ConstraintSet.INVISIBLE else ConstraintSet.VISIBLE)
                 constraintSet.setVisibility(R.id.right_split_handle, ConstraintSet.GONE)
                 if (group.isControlPanelForeground) {
@@ -316,6 +326,9 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 constraintSet.constrainPercentWidth(widgetCards[0].id, 0.33f)
                 constraintSet.constrainPercentWidth(widgetCards[1].id, 0.33f)
                 constraintSet.constrainPercentWidth(widgetCards[2].id, 0.33f)
+                constraintSet.setVisibility(widgetCards[0].id, ConstraintSet.VISIBLE)
+                constraintSet.setVisibility(widgetCards[1].id, ConstraintSet.VISIBLE)
+                constraintSet.setVisibility(widgetCards[2].id, ConstraintSet.VISIBLE)
                 constraintSet.setVisibility(R.id.left_split_handle, if (group.pendingPosition != 0) ConstraintSet.INVISIBLE else ConstraintSet.VISIBLE)
                 constraintSet.setVisibility(R.id.right_split_handle, if (group.pendingPosition != 0) ConstraintSet.INVISIBLE else ConstraintSet.VISIBLE)
                 if (group.isControlPanelForeground) {
