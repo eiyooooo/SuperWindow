@@ -29,8 +29,6 @@ class MainActivityViewModel : ViewModel() {
         mWidgetCardDataGroup.update(function)
     }
 
-    var lastWidgetCardDataGroup: WidgetCardDataGroup? = null
-
     private val mDualSplitHandlePosition: MutableStateFlow<Float> by lazy { MutableStateFlow(-1f) }
     val dualSplitHandlePosition: LiveData<Float> = mDualSplitHandlePosition.asLiveData()
 

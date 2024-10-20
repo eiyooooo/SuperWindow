@@ -2,8 +2,10 @@ package com.eiyooooo.superwindow.ui.widgetcard
 
 import android.os.Build
 import android.view.View
+import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.animation.PathInterpolatorCompat
+import androidx.core.view.children
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.transition.AutoTransition
@@ -23,32 +25,17 @@ import kotlinx.coroutines.launch
 
 class WidgetCardManager(private val mainActivity: MainActivity, private val mainModel: MainActivityViewModel) {
 
-    private var forceRefreshUI = true
     private lateinit var controlPanelWidgetCard: WidgetCardView
     private val widgetCards: MutableMap<String, WidgetCardView> = mutableMapOf()
 
     fun init() {
-        forceRefreshUI = true
         BlurUtils.init(mainActivity.applicationContext)
 
-        mainModel.widgetCardDataGroup.observe(mainActivity) {//TODO: handle pendingWidgetCard
-            mainModel.dualSplitHandlePosition.removeObserver(dualSplitHandlePositionObserver)
+        mainModel.widgetCardDataGroup.observe(mainActivity) {
             when (it.foregroundWidgetCardCount) {
-                1 -> {
-                    showSingleWidgetCard(it)
-                    onWidgetCardCountChanged(it)
-                }
-
-                2 -> {
-                    showDualWidgetCard(it)
-                    onWidgetCardCountChanged(it)
-                    mainModel.dualSplitHandlePosition.observe(mainActivity, dualSplitHandlePositionObserver)
-                }
-
-                3 -> {
-                    showTripleWidgetCard(it)
-                    onWidgetCardCountChanged(it)
-                }
+                1 -> showSingleWidgetCard(it)
+                2 -> showDualWidgetCard(it)
+                3 -> showTripleWidgetCard(it)
             }
         }
 
@@ -80,87 +67,76 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             mainModel.updateWidgetCardDataGroup {
                 it.copy(secondWidgetCardData = WidgetCardData("com.coloros.note", "local"), thirdWidgetCardData = WidgetCardData("com.samsung.android.app.notes", "local"))
             }
+//            while (true) {
+//                delay(2000)
+//                mainModel.updateWidgetCardDataGroup {
+//                    it.copy(secondWidgetCardData = WidgetCardData(false, "test1"))
+//                }
+//                delay(2000)
+//                mainModel.updateWidgetCardDataGroup {
+//                    it.copy(thirdWidgetCardData = WidgetCardData(false, "test2"))
+//                }
+//                delay(2000)
+//                mainModel.updateWidgetCardDataGroup {
+//                    it.copy(thirdWidgetCardData = null)
+//                }
+//                delay(2000)
+//                mainModel.updateWidgetCardDataGroup {
+//                    it.copy(secondWidgetCardData = null)
+//                }
+//            }
         }
     }
 
     fun destroy() {
-        firstWidgetCard?.release()
-        secondWidgetCard?.release()
-        thirdWidgetCard?.release()
+        widgetCards.values.forEach {
+            it.release()
+        }
         widgetCards.clear()
     }
 
-    fun makeCardsBlur(blur: Boolean) {
-        if (blur) {
-            firstWidgetCard?.makeBlur()
-            secondWidgetCard?.makeBlur()
-            thirdWidgetCard?.makeBlur()
-        } else {
-            firstWidgetCard?.startBlurTransitAnimation()
-            secondWidgetCard?.startBlurTransitAnimation()
-            thirdWidgetCard?.startBlurTransitAnimation()
-        }
-    }
-
-    private var firstWidgetCard: WidgetCardView? = null
-    private var secondWidgetCard: WidgetCardView? = null
-    private var thirdWidgetCard: WidgetCardView? = null
+    private var foregroundWidgetCards: Array<out WidgetCardView>? = null
+    private var lastWidgetCardDataGroup: WidgetCardDataGroup? = null
 
     private fun showSingleWidgetCard(group: WidgetCardDataGroup) {
         val firstWidgetCard = group.getWidgetCard(1)
-        this.firstWidgetCard = firstWidgetCard
-        this.secondWidgetCard = null
-        this.thirdWidgetCard = null
         firstWidgetCard.setControlBarVisibility(View.GONE)
-        mainActivity.bindingExpanded.firstView.removeAllViews()
-        mainActivity.bindingExpanded.secondView.removeAllViews()
-        mainActivity.bindingExpanded.thirdView.removeAllViews()
-        mainActivity.bindingExpanded.firstView.addView(firstWidgetCard.getRootView())
+        refreshWidgetCardContainer(firstWidgetCard)
         mainActivity.bindingExpanded.leftSplitHandle.setWidgetCards()
         mainActivity.bindingExpanded.leftSplitHandle.setOnDragHandle(null)
         mainActivity.bindingExpanded.rightSplitHandle.setWidgetCards()
         mainActivity.bindingExpanded.rightSplitHandle.setOnDragHandle(null)
+        onWidgetCardCountChanged(group, firstWidgetCard)
     }
 
     private fun showDualWidgetCard(group: WidgetCardDataGroup) {
+        mainModel.dualSplitHandlePosition.removeObserver(dualSplitHandlePositionObserver)
         val firstWidgetCard = group.getWidgetCard(1)
         val secondWidgetCard = group.getWidgetCard(2)
-        this.firstWidgetCard = firstWidgetCard
-        this.secondWidgetCard = secondWidgetCard
-        this.thirdWidgetCard = null
         firstWidgetCard.setControlBarVisibility(View.VISIBLE)
         secondWidgetCard.setControlBarVisibility(View.VISIBLE)
-        mainActivity.bindingExpanded.firstView.removeAllViews()
-        mainActivity.bindingExpanded.secondView.removeAllViews()
-        mainActivity.bindingExpanded.thirdView.removeAllViews()
-        mainActivity.bindingExpanded.firstView.addView(firstWidgetCard.getRootView())
-        mainActivity.bindingExpanded.secondView.addView(secondWidgetCard.getRootView())
+        refreshWidgetCardContainer(firstWidgetCard, secondWidgetCard)
         mainActivity.bindingExpanded.leftSplitHandle.setWidgetCards(firstWidgetCard, secondWidgetCard)
         mainActivity.bindingExpanded.leftSplitHandle.setOnDragHandle { mainModel.updateDualSplitHandlePosition(it) }
         mainActivity.bindingExpanded.rightSplitHandle.setWidgetCards()
         mainActivity.bindingExpanded.rightSplitHandle.setOnDragHandle(null)
+        onWidgetCardCountChanged(group, firstWidgetCard, secondWidgetCard)
+        mainModel.dualSplitHandlePosition.observe(mainActivity, dualSplitHandlePositionObserver)
     }
 
     private fun showTripleWidgetCard(group: WidgetCardDataGroup) {
         val firstWidgetCard = group.getWidgetCard(1)
         val secondWidgetCard = group.getWidgetCard(2)
         val thirdWidgetCard = group.getWidgetCard(3)
-        this.firstWidgetCard = firstWidgetCard
-        this.secondWidgetCard = secondWidgetCard
-        this.thirdWidgetCard = thirdWidgetCard
         firstWidgetCard.setControlBarVisibility(View.VISIBLE)
         secondWidgetCard.setControlBarVisibility(View.VISIBLE)
         thirdWidgetCard.setControlBarVisibility(View.VISIBLE)
-        mainActivity.bindingExpanded.firstView.removeAllViews()
-        mainActivity.bindingExpanded.secondView.removeAllViews()
-        mainActivity.bindingExpanded.thirdView.removeAllViews()
-        mainActivity.bindingExpanded.firstView.addView(firstWidgetCard.getRootView())
-        mainActivity.bindingExpanded.secondView.addView(secondWidgetCard.getRootView())
-        mainActivity.bindingExpanded.thirdView.addView(thirdWidgetCard.getRootView())
+        refreshWidgetCardContainer(firstWidgetCard, secondWidgetCard, thirdWidgetCard)
         mainActivity.bindingExpanded.leftSplitHandle.setWidgetCards(firstWidgetCard, secondWidgetCard, thirdWidgetCard)
         mainActivity.bindingExpanded.leftSplitHandle.setOnDragHandle(null)//TODO
         mainActivity.bindingExpanded.rightSplitHandle.setWidgetCards(firstWidgetCard, secondWidgetCard, thirdWidgetCard)
         mainActivity.bindingExpanded.rightSplitHandle.setOnDragHandle(null)//TODO
+        onWidgetCardCountChanged(group, firstWidgetCard, secondWidgetCard, thirdWidgetCard)
     }
 
     private fun WidgetCardDataGroup.getWidgetCard(position: Int): WidgetCardView {
@@ -183,11 +159,23 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         }
     }
 
+    private fun refreshWidgetCardContainer(vararg widgetCards: WidgetCardView) {
+        mainActivity.bindingExpanded.widgetContainer.children.forEach {
+            if (it is WidgetCardView) {
+                mainActivity.bindingExpanded.widgetContainer.removeView(it)
+            }
+        }
+        widgetCards.forEach {
+            (it.parent as? ViewGroup)?.removeView(it)
+            mainActivity.bindingExpanded.widgetContainer.addView(it)
+        }
+    }
+
     fun removeWidgetCard(target: WidgetCardView) {
         mainModel.updateWidgetCardDataGroup { current ->
             when (target.widgetCardData.identifier) {
                 current.firstWidgetCardData.identifier -> {
-                    if (secondWidgetCard != null) {
+                    if (foregroundWidgetCards?.size == 2) {
                         current.copy(firstWidgetCardData = current.secondWidgetCardData!!, secondWidgetCardData = current.thirdWidgetCardData, thirdWidgetCardData = null)
                     } else {
                         current.copy(firstWidgetCardData = controlPanelWidgetCard.widgetCardData)
@@ -210,6 +198,18 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         widgetCards.remove(target.widgetCardData.identifier)
     }
 
+    fun makeCardsBlur(blur: Boolean) {
+        if (blur) {
+            foregroundWidgetCards?.forEach {
+                it.makeBlur()
+            }
+        } else {
+            foregroundWidgetCards?.forEach {
+                it.startBlurTransitAnimation()
+            }
+        }
+    }
+
     private val constraintSet = ConstraintSet()
 
     private val onWidgetCardCountChangedTransition = AutoTransition().apply {
@@ -220,15 +220,15 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             }
 
             override fun onTransitionEnd(transition: Transition) {
-                firstWidgetCard?.startCoverTransitAnimation()
-                secondWidgetCard?.startCoverTransitAnimation()
-                thirdWidgetCard?.startCoverTransitAnimation()
+                foregroundWidgetCards?.forEach {
+                    it.startCoverTransitAnimation()
+                }
             }
 
             override fun onTransitionCancel(transition: Transition) {
-                firstWidgetCard?.startCoverTransitAnimation()
-                secondWidgetCard?.startCoverTransitAnimation()
-                thirdWidgetCard?.startCoverTransitAnimation()
+                foregroundWidgetCards?.forEach {
+                    it.startCoverTransitAnimation()
+                }
             }
 
             override fun onTransitionPause(transition: Transition) {
@@ -244,24 +244,24 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)
     }
 
-    private fun onWidgetCardCountChanged(group: WidgetCardDataGroup) {
-        val lastWidgetCardDataGroup = mainModel.lastWidgetCardDataGroup
-        mainModel.lastWidgetCardDataGroup = group
-        val oldWidgetCardCount = if (forceRefreshUI) -1 else lastWidgetCardDataGroup?.foregroundWidgetCardCount ?: -1
-        val newWidgetCardCount = group.foregroundWidgetCardCount
-        if (newWidgetCardCount == oldWidgetCardCount && group.pendingPosition == 0 && lastWidgetCardDataGroup?.pendingPosition == 0) return
-        forceRefreshUI = false
+    private fun onWidgetCardCountChanged(group: WidgetCardDataGroup, vararg widgetCards: WidgetCardView) {
+        val lastGroup = lastWidgetCardDataGroup
+        foregroundWidgetCards = widgetCards
+        lastWidgetCardDataGroup = group
+        if (widgetCards.size == lastGroup?.foregroundWidgetCardCount && group.pendingPosition == 0 && lastGroup.pendingPosition == 0) {
+            return
+        }
 
         constraintSet.clone(mainActivity.bindingExpanded.widgetContainer)
 
-        firstWidgetCard?.makeCover()
-        secondWidgetCard?.makeCover()
-        thirdWidgetCard?.makeCover()
-        if (oldWidgetCardCount == -1) {
+        widgetCards.forEach {
+            it.makeCover()
+        }
+        if (lastGroup == null) {
             mainActivity.bindingExpanded.widgetContainer.postDelayed({
-                firstWidgetCard?.startCoverTransitAnimation()
-                secondWidgetCard?.startCoverTransitAnimation()
-                thirdWidgetCard?.startCoverTransitAnimation()
+                widgetCards.forEach {
+                    it.startCoverTransitAnimation()
+                }
             }, 250)
         } else {
             TransitionManager.beginDelayedTransition(
@@ -270,13 +270,12 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             )
         }
 
-        when (newWidgetCardCount) {
+        when (widgetCards.size) {
             1 -> {
                 mainModel.updateDualSplitHandlePosition(-1f)
-                constraintSet.constrainPercentWidth(R.id.first_view, 1.0f)
-                constraintSet.setVisibility(R.id.first_view, ConstraintSet.VISIBLE)
-                constraintSet.setVisibility(R.id.second_view, ConstraintSet.GONE)
-                constraintSet.setVisibility(R.id.third_view, ConstraintSet.GONE)
+                constraintSet.connect(widgetCards[0].id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+                constraintSet.connect(widgetCards[0].id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+                constraintSet.constrainPercentWidth(widgetCards[0].id, 1f)
                 constraintSet.setVisibility(R.id.left_split_handle, ConstraintSet.GONE)
                 constraintSet.setVisibility(R.id.right_split_handle, ConstraintSet.GONE)
                 if (group.isControlPanelForeground) {
@@ -286,11 +285,14 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             }
 
             2 -> {
-                constraintSet.constrainPercentWidth(R.id.first_view, 0.5f)
-                constraintSet.constrainPercentWidth(R.id.second_view, 0.5f)
-                constraintSet.setVisibility(R.id.first_view, ConstraintSet.VISIBLE)//TODO: pending widget card
-                constraintSet.setVisibility(R.id.second_view, ConstraintSet.VISIBLE)//TODO: pending widget card
-                constraintSet.setVisibility(R.id.third_view, ConstraintSet.GONE)
+                constraintSet.connect(widgetCards[0].id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+                constraintSet.connect(widgetCards[0].id, ConstraintSet.END, R.id.left_split_handle, ConstraintSet.START)
+                constraintSet.connect(R.id.left_split_handle, ConstraintSet.START, widgetCards[0].id, ConstraintSet.END)
+                constraintSet.connect(R.id.left_split_handle, ConstraintSet.END, widgetCards[1].id, ConstraintSet.START)
+                constraintSet.connect(widgetCards[1].id, ConstraintSet.START, R.id.left_split_handle, ConstraintSet.END)
+                constraintSet.connect(widgetCards[1].id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+                constraintSet.constrainPercentWidth(widgetCards[0].id, 0.5f)
+                constraintSet.constrainPercentWidth(widgetCards[1].id, 0.5f)
                 constraintSet.setVisibility(R.id.left_split_handle, if (group.pendingPosition != 0) ConstraintSet.INVISIBLE else ConstraintSet.VISIBLE)
                 constraintSet.setVisibility(R.id.right_split_handle, ConstraintSet.GONE)
                 if (group.isControlPanelForeground) {
@@ -301,12 +303,19 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
 
             3 -> {
                 mainModel.updateDualSplitHandlePosition(-1f)
-                constraintSet.constrainPercentWidth(R.id.first_view, 0.33f)
-                constraintSet.constrainPercentWidth(R.id.second_view, 0.33f)
-                constraintSet.constrainPercentWidth(R.id.third_view, 0.33f)
-                constraintSet.setVisibility(R.id.first_view, ConstraintSet.VISIBLE)//TODO: pending widget card
-                constraintSet.setVisibility(R.id.second_view, ConstraintSet.VISIBLE)//TODO: pending widget card
-                constraintSet.setVisibility(R.id.third_view, ConstraintSet.VISIBLE)//TODO: pending widget card
+                constraintSet.connect(widgetCards[0].id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+                constraintSet.connect(widgetCards[0].id, ConstraintSet.END, R.id.left_split_handle, ConstraintSet.START)
+                constraintSet.connect(R.id.left_split_handle, ConstraintSet.START, widgetCards[0].id, ConstraintSet.END)
+                constraintSet.connect(R.id.left_split_handle, ConstraintSet.END, widgetCards[1].id, ConstraintSet.START)
+                constraintSet.connect(widgetCards[1].id, ConstraintSet.START, R.id.left_split_handle, ConstraintSet.END)
+                constraintSet.connect(widgetCards[1].id, ConstraintSet.END, R.id.right_split_handle, ConstraintSet.START)
+                constraintSet.connect(R.id.right_split_handle, ConstraintSet.START, widgetCards[1].id, ConstraintSet.END)
+                constraintSet.connect(R.id.right_split_handle, ConstraintSet.END, widgetCards[2].id, ConstraintSet.START)
+                constraintSet.connect(widgetCards[2].id, ConstraintSet.START, R.id.right_split_handle, ConstraintSet.END)
+                constraintSet.connect(widgetCards[2].id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+                constraintSet.constrainPercentWidth(widgetCards[0].id, 0.33f)
+                constraintSet.constrainPercentWidth(widgetCards[1].id, 0.33f)
+                constraintSet.constrainPercentWidth(widgetCards[2].id, 0.33f)
                 constraintSet.setVisibility(R.id.left_split_handle, if (group.pendingPosition != 0) ConstraintSet.INVISIBLE else ConstraintSet.VISIBLE)
                 constraintSet.setVisibility(R.id.right_split_handle, if (group.pendingPosition != 0) ConstraintSet.INVISIBLE else ConstraintSet.VISIBLE)
                 if (group.isControlPanelForeground) {
@@ -320,12 +329,14 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
     }
 
     private val dualSplitHandlePositionObserver = Observer<Float> {
+        val firstWidgetCard = foregroundWidgetCards?.getOrNull(0) ?: return@Observer
+        val secondWidgetCard = foregroundWidgetCards?.getOrNull(1) ?: return@Observer
         if (it == -1f) return@Observer
         val windowWidth = mainActivity.getResources().displayMetrics.widthPixels
         val newPercent = (it / windowWidth).coerceIn(0.2f, 0.8f)
         constraintSet.clone(mainActivity.bindingExpanded.widgetContainer)
-        constraintSet.constrainPercentWidth(R.id.first_view, newPercent)
-        constraintSet.constrainPercentWidth(R.id.second_view, 1 - newPercent)
+        constraintSet.constrainPercentWidth(firstWidgetCard.id, newPercent)
+        constraintSet.constrainPercentWidth(secondWidgetCard.id, 1 - newPercent)
         constraintSet.applyTo(mainActivity.bindingExpanded.widgetContainer)
     }
 }

@@ -156,10 +156,8 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     init {
-        layoutParams = LayoutParams(
-            LayoutParams.MATCH_PARENT,
-            LayoutParams.MATCH_PARENT
-        )
+        id = View.generateViewId()
+        layoutParams = LayoutParams(0, LayoutParams.MATCH_PARENT)
         radius = context.dp2px(8).toFloat()
 
         setTargetView(widgetCard.controlBar)
