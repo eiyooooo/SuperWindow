@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.content.ClipData
 import android.content.Context
 import android.graphics.Rect
 import android.graphics.SurfaceTexture
@@ -13,6 +14,7 @@ import android.view.MotionEvent
 import android.view.Surface
 import android.view.TextureView
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import androidx.cardview.widget.CardView
 import androidx.core.graphics.drawable.toDrawable
@@ -21,10 +23,13 @@ import com.eiyooooo.superwindow.contentprovider.LocalContent
 import com.eiyooooo.superwindow.databinding.ItemWidgetCardBinding
 import com.eiyooooo.superwindow.ui.main.MainActivity
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
+import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardDragShadowBuilder
 import com.eiyooooo.superwindow.util.BlurUtils
 import com.eiyooooo.superwindow.util.dp2px
 import com.eiyooooo.superwindow.util.startPressHandleAnimation
+import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.abs
 
 @SuppressLint("ClickableViewAccessibility")
 class WidgetCardView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0, val widgetCardData: WidgetCardData = WidgetCardData()) : CardView(context, attrs, defStyleAttr) {
@@ -46,18 +51,38 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
         widgetCard.controlBar.visibility = visibility
     }
 
+    val dragging = AtomicBoolean(false)
+
     private val controlBarListener by lazy {
         object : OnTouchListener {
+            private var initialX: Float = 0F
+            private var initialY: Float = 0F
+            private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+            private val shadowBuilder = WidgetCardDragShadowBuilder(widgetCard, radius)
+
             override fun onTouch(v: View, event: MotionEvent): Boolean {
                 return when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        //TODO: handle X, Y
+                        initialX = event.x
+                        initialY = event.y
                         widgetCard.controlBar.startPressHandleAnimation(true)
                         true
                     }
 
                     MotionEvent.ACTION_MOVE -> {
-                        //TODO: handle X, Y
+                        val deltaX = abs(event.x - initialX)
+                        val deltaY = abs(event.y - initialY)
+                        if ((deltaX > touchSlop || deltaY > touchSlop) && !dragging.get()) {//TODO: 拖动过快时，收不到ACTION_DRAG_STARTED
+                            dragging.set(true)
+                            Timber.d("ACTION_MOVE -> startDragAndDrop -> $position!WidgetCardView@${widgetCardData.identifier}")
+                            makeCover()
+                            startDragAndDrop(ClipData.newPlainText("$position!WidgetCardView@${widgetCardData.identifier}", null), shadowBuilder, this@WidgetCardView, View.DRAG_FLAG_OPAQUE)
+                            ObjectAnimator.ofFloat(this@WidgetCardView, "alpha", 1F, 0.3F).apply {
+                                duration = 200
+                                interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)
+                            }.start()
+                            (context as? MainActivity)?.notifyDragging()
+                        }
                         true
                     }
 
@@ -75,6 +100,15 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                 }
             }
         }
+    }
+
+    fun onDragEnded() {
+        ObjectAnimator.ofFloat(this, "alpha", 0.3F, 1F).apply {
+            duration = 200
+            interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)
+        }.start()
+        startCoverTransitAnimation()
+        dragging.set(false)
     }
 
     private var expandTouchPx = 0

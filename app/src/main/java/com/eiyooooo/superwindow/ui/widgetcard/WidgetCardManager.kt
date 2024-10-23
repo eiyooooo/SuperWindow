@@ -1,6 +1,7 @@
 package com.eiyooooo.superwindow.ui.widgetcard
 
 import android.os.Build
+import android.view.DragEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintSet
@@ -22,16 +23,26 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import timber.log.Timber
+import java.util.concurrent.atomic.AtomicBoolean
 
 class WidgetCardManager(private val mainActivity: MainActivity, private val mainModel: MainActivityViewModel) {
 
     private lateinit var controlPanelWidgetCard: WidgetCardView
-    private val widgetCards: MutableMap<String, WidgetCardView> = mutableMapOf()
+    private val widgetCardMap: MutableMap<String, WidgetCardView> = mutableMapOf()
+
+    private val firstWidgetCard: WidgetCardView?
+        get() = mainModel.widgetCardDataGroup.value!!.getWidgetCard(1)
+    private val secondWidgetCard: WidgetCardView?
+        get() = mainModel.widgetCardDataGroup.value!!.getWidgetCard(2)
+    private val thirdWidgetCard: WidgetCardView?
+        get() = mainModel.widgetCardDataGroup.value!!.getWidgetCard(3)
 
     fun init() {
         BlurUtils.init(mainActivity.applicationContext)
 
         mainModel.widgetCardDataGroup.observe(mainActivity) {
+            mainModel.dualSplitHandlePosition.removeObserver(dualSplitHandlePositionObserver)
             when (it.foregroundWidgetCardCount) {
                 1 -> showSingleWidgetCard(it)
                 2 -> showDualWidgetCard(it)
@@ -52,15 +63,19 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
 
             mainActivity.lifecycleScope.launch {
                 LocalContent.runningTasksInVD.collect { runningTasksInVD ->
-                    widgetCards.values.filter { !runningTasksInVD.containsKey(it.displayId) }.forEach { card ->
-                        card.release()
-                        removeWidgetCard(card)
+                    widgetCardMap.values.filter { !runningTasksInVD.containsKey(it.displayId) }.forEach {
+                        it.release()
+                        removeWidgetCard(it)
                     }
                 }
             }
         }
 
         //TODO: remove this test module
+        test()
+    }
+
+    private fun test() {
         mainActivity.lifecycleScope.launch {
             mainModel.shizukuStatus.filter { it == ShizukuStatus.HAVE_PERMISSION }.first()
             delay(2000)
@@ -89,73 +104,90 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
     }
 
     fun destroy() {
-        widgetCards.values.forEach {
+        widgetCardMap.values.forEach {
             it.release()
         }
-        widgetCards.clear()
+        widgetCardMap.clear()
     }
 
-    private var foregroundWidgetCards: Array<out WidgetCardView>? = null
-    private var lastWidgetCardDataGroup: WidgetCardDataGroup? = null
-
     private fun showSingleWidgetCard(group: WidgetCardDataGroup) {
-        val firstWidgetCard = group.getWidgetCard(1)
-        firstWidgetCard.setControlBarVisibility(View.GONE)
+        val firstWidgetCard = group.getWidgetCard(1)!!
+
+        if (group.isControlPanelForeground) {
+            mainActivity.bindingControlPanelExpanded.bottomNavigation.visibility = View.GONE
+            mainActivity.bindingControlPanelExpanded.navigationRail.visibility = View.VISIBLE
+        }
+
         refreshWidgetCardContainer(firstWidgetCard)
+
         mainActivity.bindingExpanded.leftSplitHandle.setWidgetCards()
         mainActivity.bindingExpanded.leftSplitHandle.setOnDragHandle(null)
         mainActivity.bindingExpanded.rightSplitHandle.setWidgetCards()
         mainActivity.bindingExpanded.rightSplitHandle.setOnDragHandle(null)
-        onWidgetCardCountChanged(group, firstWidgetCard)
+
+        constrainWidgetCard(group, firstWidgetCard)
     }
 
     private fun showDualWidgetCard(group: WidgetCardDataGroup) {
-        mainModel.dualSplitHandlePosition.removeObserver(dualSplitHandlePositionObserver)
-        val firstWidgetCard = group.getWidgetCard(1)
-        val secondWidgetCard = group.getWidgetCard(2)
-        firstWidgetCard.setControlBarVisibility(View.VISIBLE)
-        secondWidgetCard.setControlBarVisibility(View.VISIBLE)
+        val firstWidgetCard = group.getWidgetCard(1)!!
+        val secondWidgetCard = group.getWidgetCard(2)!!
+
+        if (group.isControlPanelForeground) {
+            mainActivity.bindingControlPanelExpanded.bottomNavigation.visibility = View.VISIBLE
+            mainActivity.bindingControlPanelExpanded.navigationRail.visibility = View.GONE
+        }
+
         refreshWidgetCardContainer(firstWidgetCard, secondWidgetCard)
+
         mainActivity.bindingExpanded.leftSplitHandle.setWidgetCards(firstWidgetCard, secondWidgetCard)
         mainActivity.bindingExpanded.leftSplitHandle.setOnDragHandle { mainModel.updateDualSplitHandlePosition(it) }
         mainActivity.bindingExpanded.rightSplitHandle.setWidgetCards()
         mainActivity.bindingExpanded.rightSplitHandle.setOnDragHandle(null)
-        onWidgetCardCountChanged(group, firstWidgetCard, secondWidgetCard)
+
+        constrainWidgetCard(group, firstWidgetCard, secondWidgetCard)
+
         mainModel.dualSplitHandlePosition.observe(mainActivity, dualSplitHandlePositionObserver)
     }
 
     private fun showTripleWidgetCard(group: WidgetCardDataGroup) {
-        val firstWidgetCard = group.getWidgetCard(1)
-        val secondWidgetCard = group.getWidgetCard(2)
-        val thirdWidgetCard = group.getWidgetCard(3)
-        firstWidgetCard.setControlBarVisibility(View.VISIBLE)
-        secondWidgetCard.setControlBarVisibility(View.VISIBLE)
-        thirdWidgetCard.setControlBarVisibility(View.VISIBLE)
+        val firstWidgetCard = group.getWidgetCard(1)!!
+        val secondWidgetCard = group.getWidgetCard(2)!!
+        val thirdWidgetCard = group.getWidgetCard(3)!!
+
+        if (group.isControlPanelForeground) {
+            mainActivity.bindingControlPanelExpanded.bottomNavigation.visibility = View.VISIBLE
+            mainActivity.bindingControlPanelExpanded.navigationRail.visibility = View.GONE
+        }
+
         refreshWidgetCardContainer(firstWidgetCard, secondWidgetCard, thirdWidgetCard)
+
         mainActivity.bindingExpanded.leftSplitHandle.setWidgetCards(firstWidgetCard, secondWidgetCard, thirdWidgetCard)
         mainActivity.bindingExpanded.leftSplitHandle.setOnDragHandle(null)//TODO
         mainActivity.bindingExpanded.rightSplitHandle.setWidgetCards(firstWidgetCard, secondWidgetCard, thirdWidgetCard)
         mainActivity.bindingExpanded.rightSplitHandle.setOnDragHandle(null)//TODO
-        onWidgetCardCountChanged(group, firstWidgetCard, secondWidgetCard, thirdWidgetCard)
+
+        constrainWidgetCard(group, firstWidgetCard, secondWidgetCard, thirdWidgetCard)
     }
 
-    private fun WidgetCardDataGroup.getWidgetCard(position: Int): WidgetCardView {
-        val widgetCard = when (position) {
+    private fun WidgetCardDataGroup.getWidgetCard(position: Int): WidgetCardView? {
+        val widgetCardData = when (position) {
             1 -> firstWidgetCardData
             2 -> secondWidgetCardData
             else -> thirdWidgetCardData
-        }!!
-        return if (widgetCard.isControlPanel) {
+        } ?: return null
+        return if (widgetCardData.isControlPanel) {
             if (!this@WidgetCardManager::controlPanelWidgetCard.isInitialized) {
-                controlPanelWidgetCard = WidgetCardView(mainActivity.bindingControlPanelExpanded.root, widgetCard)
+                controlPanelWidgetCard = WidgetCardView(mainActivity.bindingControlPanelExpanded.root, widgetCardData).apply {
+                    setOnDragListener(dragListener)
+                }
             }
             controlPanelWidgetCard.updatePosition(position)
-        } else if (widgetCards[widgetCard.identifier] == null) {
-            val newWidgetCard = WidgetCardView(mainActivity, widgetCardData = widgetCard).updatePosition(position)
-            widgetCards[widgetCard.identifier] = newWidgetCard
-            newWidgetCard
-        } else {
-            widgetCards[widgetCard.identifier]!!.updatePosition(position)
+        } else widgetCardMap[widgetCardData.identifier]?.updatePosition(position) ?: let {
+            val newWidgetCardView = WidgetCardView(mainActivity, widgetCardData = widgetCardData).updatePosition(position).apply {
+                setOnDragListener(dragListener)
+            }
+            widgetCardMap[widgetCardData.identifier] = newWidgetCardView
+            newWidgetCardView
         }
     }
 
@@ -172,6 +204,9 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 it.visibility = View.VISIBLE
             }
         }
+        widgetCardMap.values.filter { !widgetCardSet.contains(it) }.forEach {
+            it.position = -1
+        }
         widgetCards.forEach {
             (it.parent as? ViewGroup)?.removeView(it)
             mainActivity.bindingExpanded.widgetContainer.addView(it)
@@ -182,8 +217,8 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         mainModel.updateWidgetCardDataGroup { current ->
             when (target.widgetCardData.identifier) {
                 current.firstWidgetCardData.identifier -> {
-                    if (foregroundWidgetCards?.size == 2) {
-                        current.copy(firstWidgetCardData = current.secondWidgetCardData!!, secondWidgetCardData = current.thirdWidgetCardData, thirdWidgetCardData = null)
+                    if (current.secondWidgetCardData != null) {
+                        current.copy(firstWidgetCardData = current.secondWidgetCardData, secondWidgetCardData = current.thirdWidgetCardData, thirdWidgetCardData = null)
                     } else {
                         current.copy(firstWidgetCardData = controlPanelWidgetCard.widgetCardData)
                     }
@@ -202,60 +237,28 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 }
             }
         }
-        widgetCards.remove(target.widgetCardData.identifier)
+        widgetCardMap.remove(target.widgetCardData.identifier)
     }
 
     fun makeCardsBlur(blur: Boolean) {
         if (blur) {
-            foregroundWidgetCards?.forEach {
-                it.makeBlur()
-            }
+            firstWidgetCard?.makeBlur()
+            secondWidgetCard?.makeBlur()
+            thirdWidgetCard?.makeBlur()
         } else {
-            foregroundWidgetCards?.forEach {
-                it.startBlurTransitAnimation()
-            }
+            firstWidgetCard?.startBlurTransitAnimation()
+            secondWidgetCard?.startBlurTransitAnimation()
+            thirdWidgetCard?.startBlurTransitAnimation()
         }
     }
 
     private val constraintSet = ConstraintSet()
+    private var lastWidgetCardDataGroup: WidgetCardDataGroup? = null
 
-    private val onWidgetCardCountChangedTransition = AutoTransition().apply {
-        duration = 250
-        interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)
-        addListener(object : Transition.TransitionListener {
-            override fun onTransitionStart(transition: Transition) {
-            }
-
-            override fun onTransitionEnd(transition: Transition) {
-                foregroundWidgetCards?.forEach {
-                    it.startCoverTransitAnimation()
-                }
-            }
-
-            override fun onTransitionCancel(transition: Transition) {
-                foregroundWidgetCards?.forEach {
-                    it.startCoverTransitAnimation()
-                }
-            }
-
-            override fun onTransitionPause(transition: Transition) {
-            }
-
-            override fun onTransitionResume(transition: Transition) {
-            }
-        })
-    }
-
-    private val onWidgetCardCountChangedHasPendingTransition = AutoTransition().apply {
-        duration = 250
-        interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)
-    }
-
-    private fun onWidgetCardCountChanged(group: WidgetCardDataGroup, vararg widgetCards: WidgetCardView) {
+    private fun constrainWidgetCard(group: WidgetCardDataGroup, vararg widgetCards: WidgetCardView) {
         val lastGroup = lastWidgetCardDataGroup
-        foregroundWidgetCards = widgetCards
         lastWidgetCardDataGroup = group
-        if (widgetCards.size == lastGroup?.foregroundWidgetCardCount && group.pendingPosition == 0 && lastGroup.pendingPosition == 0) {
+        if (group.foregroundWidgetCardCount == lastGroup?.foregroundWidgetCardCount && !group.dragging && !lastGroup.dragging) {
             return
         }
 
@@ -273,7 +276,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         } else {
             TransitionManager.beginDelayedTransition(
                 mainActivity.bindingExpanded.widgetContainer,
-                if (group.pendingPosition != 0) onWidgetCardCountChangedHasPendingTransition else onWidgetCardCountChangedTransition
+                if (group.dragging) cardDraggingTransition else cardChangedTransition
             )
         }
 
@@ -286,10 +289,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 constraintSet.setVisibility(widgetCards[0].id, ConstraintSet.VISIBLE)
                 constraintSet.setVisibility(R.id.left_split_handle, ConstraintSet.GONE)
                 constraintSet.setVisibility(R.id.right_split_handle, ConstraintSet.GONE)
-                if (group.isControlPanelForeground) {
-                    mainActivity.bindingControlPanelExpanded.bottomNavigation.visibility = View.GONE
-                    mainActivity.bindingControlPanelExpanded.navigationRail.visibility = View.VISIBLE
-                }
+                widgetCards[0].setControlBarVisibility(View.GONE)
             }
 
             2 -> {
@@ -303,12 +303,10 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 constraintSet.constrainPercentWidth(widgetCards[1].id, 0.5f)
                 constraintSet.setVisibility(widgetCards[0].id, ConstraintSet.VISIBLE)
                 constraintSet.setVisibility(widgetCards[1].id, ConstraintSet.VISIBLE)
-                constraintSet.setVisibility(R.id.left_split_handle, if (group.pendingPosition != 0) ConstraintSet.INVISIBLE else ConstraintSet.VISIBLE)
+                widgetCards[0].setControlBarVisibility(if (group.dragging) View.GONE else View.VISIBLE)
+                widgetCards[1].setControlBarVisibility(if (group.dragging) View.GONE else View.VISIBLE)
+                constraintSet.setVisibility(R.id.left_split_handle, if (group.dragging) ConstraintSet.INVISIBLE else ConstraintSet.VISIBLE)
                 constraintSet.setVisibility(R.id.right_split_handle, ConstraintSet.GONE)
-                if (group.isControlPanelForeground) {
-                    mainActivity.bindingControlPanelExpanded.bottomNavigation.visibility = View.VISIBLE
-                    mainActivity.bindingControlPanelExpanded.navigationRail.visibility = View.GONE
-                }
             }
 
             3 -> {
@@ -329,27 +327,127 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 constraintSet.setVisibility(widgetCards[0].id, ConstraintSet.VISIBLE)
                 constraintSet.setVisibility(widgetCards[1].id, ConstraintSet.VISIBLE)
                 constraintSet.setVisibility(widgetCards[2].id, ConstraintSet.VISIBLE)
-                constraintSet.setVisibility(R.id.left_split_handle, if (group.pendingPosition != 0) ConstraintSet.INVISIBLE else ConstraintSet.VISIBLE)
-                constraintSet.setVisibility(R.id.right_split_handle, if (group.pendingPosition != 0) ConstraintSet.INVISIBLE else ConstraintSet.VISIBLE)
-                if (group.isControlPanelForeground) {
-                    mainActivity.bindingControlPanelExpanded.bottomNavigation.visibility = View.VISIBLE
-                    mainActivity.bindingControlPanelExpanded.navigationRail.visibility = View.GONE
-                }
+                widgetCards[0].setControlBarVisibility(if (group.dragging) View.GONE else View.VISIBLE)
+                widgetCards[1].setControlBarVisibility(if (group.dragging) View.GONE else View.VISIBLE)
+                widgetCards[2].setControlBarVisibility(if (group.dragging) View.GONE else View.VISIBLE)
+                constraintSet.setVisibility(R.id.left_split_handle, if (group.dragging) ConstraintSet.INVISIBLE else ConstraintSet.VISIBLE)
+                constraintSet.setVisibility(R.id.right_split_handle, if (group.dragging) ConstraintSet.INVISIBLE else ConstraintSet.VISIBLE)
             }
         }
 
         constraintSet.applyTo(mainActivity.bindingExpanded.widgetContainer)
     }
 
+    private val cardChangedTransition = AutoTransition().apply {
+        duration = 250
+        interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)
+        addListener(object : Transition.TransitionListener {
+            override fun onTransitionStart(transition: Transition) {
+            }
+
+            override fun onTransitionEnd(transition: Transition) {
+                firstWidgetCard?.run {
+                    if (dragging.get()) onDragEnded()
+                    startCoverTransitAnimation()
+                }
+                secondWidgetCard?.run {
+                    if (dragging.get()) onDragEnded()
+                    startCoverTransitAnimation()
+                }
+                thirdWidgetCard?.run {
+                    if (dragging.get()) onDragEnded()
+                    startCoverTransitAnimation()
+                }
+            }
+
+            override fun onTransitionCancel(transition: Transition) {
+                firstWidgetCard?.run {
+                    if (dragging.get()) onDragEnded()
+                    startCoverTransitAnimation()
+                }
+                secondWidgetCard?.run {
+                    if (dragging.get()) onDragEnded()
+                    startCoverTransitAnimation()
+                }
+                thirdWidgetCard?.run {
+                    if (dragging.get()) onDragEnded()
+                    startCoverTransitAnimation()
+                }
+            }
+
+            override fun onTransitionPause(transition: Transition) {
+            }
+
+            override fun onTransitionResume(transition: Transition) {
+            }
+        })
+    }
+
+    private val cardDraggingTransition = AutoTransition().apply {
+        duration = 250
+        interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)
+    }
+
     private val dualSplitHandlePositionObserver = Observer<Float> {
-        val firstWidgetCard = foregroundWidgetCards?.getOrNull(0) ?: return@Observer
-        val secondWidgetCard = foregroundWidgetCards?.getOrNull(1) ?: return@Observer
+        val first = firstWidgetCard ?: return@Observer
+        val second = secondWidgetCard ?: return@Observer
         if (it == -1f) return@Observer
         val windowWidth = mainActivity.getResources().displayMetrics.widthPixels
         val newPercent = (it / windowWidth).coerceIn(0.2f, 0.8f)
         constraintSet.clone(mainActivity.bindingExpanded.widgetContainer)
-        constraintSet.constrainPercentWidth(firstWidgetCard.id, newPercent)
-        constraintSet.constrainPercentWidth(secondWidgetCard.id, 1 - newPercent)
+        constraintSet.constrainPercentWidth(first.id, newPercent)
+        constraintSet.constrainPercentWidth(second.id, 1 - newPercent)
         constraintSet.applyTo(mainActivity.bindingExpanded.widgetContainer)
+    }
+
+    val dragging = AtomicBoolean(false)
+
+    private val dragListener = View.OnDragListener { view, event ->
+        val cardView = view as? WidgetCardView ?: return@OnDragListener false
+        val draggingView = event.localState as? WidgetCardView ?: return@OnDragListener false
+        when (event.action) {
+            DragEvent.ACTION_DRAG_STARTED -> {
+                if (event.clipDescription.label.contains("WidgetCardView") && cardView.position != -1) {
+                    Timber.d("ACTION_DRAG_STARTED, DragEvent handling: ${cardView.widgetCardData.identifier}")
+                    true
+                } else {
+                    Timber.d("ACTION_DRAG_STARTED, not a valid widget card")
+                    false
+                }
+            }
+
+            DragEvent.ACTION_DRAG_ENTERED -> {
+                Timber.d("ACTION_DRAG_ENTERED, position: ${cardView.position}")
+                if (cardView != draggingView) {
+                    mainModel.updateWidgetCardDataGroup {
+                        it.swap(draggingView.position, cardView.position)
+                    }
+                }
+                true
+            }
+
+            DragEvent.ACTION_DROP -> {//TODO: 交换位置过快时，会出现卡片位置不对的情况；交换位置时宽度没交换
+                if (dragging.get()) {
+                    dragging.set(false)
+                    mainModel.updateWidgetCardDataGroup { it.copy(dragging = false) }
+                    Timber.d("ACTION_DROP, WidgetCardDataGroup dragging ended")
+                }
+                true
+            }
+
+            DragEvent.ACTION_DRAG_ENDED -> {
+                Timber.d("ACTION_DRAG_ENDED, ${cardView.widgetCardData.identifier}")
+                if (dragging.get()) {
+                    dragging.set(false)
+                    mainActivity.bindingExpanded.widgetContainer.post {
+                        mainModel.updateWidgetCardDataGroup { it.copy(dragging = false) }
+                        Timber.d("ACTION_DRAG_ENDED, WidgetCardDataGroup dragging ended")
+                    }
+                }
+                true
+            }
+
+            else -> false
+        }
     }
 }

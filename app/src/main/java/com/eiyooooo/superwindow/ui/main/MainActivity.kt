@@ -18,7 +18,6 @@ import com.eiyooooo.superwindow.databinding.ControlPanelExpandedBinding
 import com.eiyooooo.superwindow.entity.Preferences
 import com.eiyooooo.superwindow.ui.controlpanel.ControlPanelAdapter
 import com.eiyooooo.superwindow.ui.view.WidgetCardView
-import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardDataGroup
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardManager
 import com.eiyooooo.superwindow.util.setupWithViewPager
 import com.eiyooooo.superwindow.util.startShowElevatedViewAnimation
@@ -178,7 +177,12 @@ class MainActivity : AppCompatActivity() {
         elevatedViewContainer.removeAllViews()
     }
 
-    internal fun updateWidgetCardDataGroup(function: (WidgetCardDataGroup) -> WidgetCardDataGroup) = mainModel.updateWidgetCardDataGroup(function)
+    internal fun notifyDragging() {
+        mainModel.updateWidgetCardDataGroup {
+            it.copy(dragging = true)
+        }
+        widgetCardManager.dragging.set(true)
+    }
 
     internal fun makeCardsBlur(blur: Boolean) = widgetCardManager.makeCardsBlur(blur)
 
