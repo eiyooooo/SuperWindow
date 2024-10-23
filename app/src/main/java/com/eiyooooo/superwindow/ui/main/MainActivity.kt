@@ -80,12 +80,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun recreate() {
-        widgetCardManager.destroy()
+        if (isExpanded) widgetCardManager.destroy()
         super.recreate()
     }
 
     override fun onDestroy() {
-        widgetCardManager.destroy()
+        if (isExpanded) widgetCardManager.destroy()
         mainModel.removeShizukuListener()
         super.onDestroy()
     }
@@ -181,10 +181,10 @@ class MainActivity : AppCompatActivity() {
         mainModel.updateWidgetCardDataGroup {
             it.copy(dragging = true)
         }
-        widgetCardManager.dragging.set(true)
+        if (isExpanded) widgetCardManager.dragging.set(true)
     }
 
-    internal fun makeCardsBlur(blur: Boolean) = widgetCardManager.makeCardsBlur(blur)
+    internal fun makeCardsBlur(blur: Boolean) = if (isExpanded) widgetCardManager.makeCardsBlur(blur) else Unit
 
-    internal fun removeWidgetCard(target: WidgetCardView) = widgetCardManager.removeWidgetCard(target)
+    internal fun removeWidgetCard(target: WidgetCardView) = if (isExpanded) widgetCardManager.removeWidgetCard(target) else Unit
 }
