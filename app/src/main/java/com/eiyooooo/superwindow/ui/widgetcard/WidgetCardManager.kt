@@ -43,10 +43,23 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
 
         mainModel.widgetCardDataGroup.observe(mainActivity) {
             mainModel.dualSplitHandlePosition.removeObserver(dualSplitHandlePositionObserver)
-            when (it.foregroundWidgetCardCount) {
-                1 -> showSingleWidgetCard(it)
-                2 -> showDualWidgetCard(it)
-                3 -> showTripleWidgetCard(it)
+
+            val first = it.getWidgetCard(1)
+            val second = it.getWidgetCard(2)
+            val third = it.getWidgetCard(3)
+
+            when {
+                third != null && second != null && first != null -> {
+                    showTripleWidgetCard(it, first, second, third)
+                }
+
+                second != null && first != null -> {
+                    showDualWidgetCard(it, first, second)
+                }
+
+                first != null -> {
+                    showSingleWidgetCard(it, first)
+                }
             }
         }
 
@@ -110,63 +123,54 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         widgetCardMap.clear()
     }
 
-    private fun showSingleWidgetCard(group: WidgetCardDataGroup) {
-        val firstWidgetCard = group.getWidgetCard(1)!!
-
+    private fun showSingleWidgetCard(group: WidgetCardDataGroup, first: WidgetCardView) {
         if (group.isControlPanelForeground) {
             mainActivity.bindingControlPanelExpanded.bottomNavigation.visibility = View.GONE
             mainActivity.bindingControlPanelExpanded.navigationRail.visibility = View.VISIBLE
         }
 
-        refreshWidgetCardContainer(firstWidgetCard)
+        refreshWidgetCardContainer(first)
 
         mainActivity.bindingExpanded.leftSplitHandle.setWidgetCards()
         mainActivity.bindingExpanded.leftSplitHandle.setOnDragHandle(null)
         mainActivity.bindingExpanded.rightSplitHandle.setWidgetCards()
         mainActivity.bindingExpanded.rightSplitHandle.setOnDragHandle(null)
 
-        constrainWidgetCard(group, firstWidgetCard)
+        constrainWidgetCard(group, first)
     }
 
-    private fun showDualWidgetCard(group: WidgetCardDataGroup) {
-        val firstWidgetCard = group.getWidgetCard(1)!!
-        val secondWidgetCard = group.getWidgetCard(2)!!
-
+    private fun showDualWidgetCard(group: WidgetCardDataGroup, first: WidgetCardView, second: WidgetCardView) {
         if (group.isControlPanelForeground) {
             mainActivity.bindingControlPanelExpanded.bottomNavigation.visibility = View.VISIBLE
             mainActivity.bindingControlPanelExpanded.navigationRail.visibility = View.GONE
         }
 
-        refreshWidgetCardContainer(firstWidgetCard, secondWidgetCard)
+        refreshWidgetCardContainer(first, second)
 
-        mainActivity.bindingExpanded.leftSplitHandle.setWidgetCards(firstWidgetCard, secondWidgetCard)
+        mainActivity.bindingExpanded.leftSplitHandle.setWidgetCards(first, second)
         mainActivity.bindingExpanded.leftSplitHandle.setOnDragHandle { mainModel.updateDualSplitHandlePosition(it) }
         mainActivity.bindingExpanded.rightSplitHandle.setWidgetCards()
         mainActivity.bindingExpanded.rightSplitHandle.setOnDragHandle(null)
 
-        constrainWidgetCard(group, firstWidgetCard, secondWidgetCard)
+        constrainWidgetCard(group, first, second)
 
         mainModel.dualSplitHandlePosition.observe(mainActivity, dualSplitHandlePositionObserver)
     }
 
-    private fun showTripleWidgetCard(group: WidgetCardDataGroup) {
-        val firstWidgetCard = group.getWidgetCard(1)!!
-        val secondWidgetCard = group.getWidgetCard(2)!!
-        val thirdWidgetCard = group.getWidgetCard(3)!!
-
+    private fun showTripleWidgetCard(group: WidgetCardDataGroup, first: WidgetCardView, second: WidgetCardView, third: WidgetCardView) {
         if (group.isControlPanelForeground) {
             mainActivity.bindingControlPanelExpanded.bottomNavigation.visibility = View.VISIBLE
             mainActivity.bindingControlPanelExpanded.navigationRail.visibility = View.GONE
         }
 
-        refreshWidgetCardContainer(firstWidgetCard, secondWidgetCard, thirdWidgetCard)
+        refreshWidgetCardContainer(first, second, third)
 
-        mainActivity.bindingExpanded.leftSplitHandle.setWidgetCards(firstWidgetCard, secondWidgetCard, thirdWidgetCard)
+        mainActivity.bindingExpanded.leftSplitHandle.setWidgetCards(first, second, third)
         mainActivity.bindingExpanded.leftSplitHandle.setOnDragHandle(null)//TODO
-        mainActivity.bindingExpanded.rightSplitHandle.setWidgetCards(firstWidgetCard, secondWidgetCard, thirdWidgetCard)
+        mainActivity.bindingExpanded.rightSplitHandle.setWidgetCards(first, second, third)
         mainActivity.bindingExpanded.rightSplitHandle.setOnDragHandle(null)//TODO
 
-        constrainWidgetCard(group, firstWidgetCard, secondWidgetCard, thirdWidgetCard)
+        constrainWidgetCard(group, first, second, third)
     }
 
     private fun WidgetCardDataGroup.getWidgetCard(position: Int): WidgetCardView? {
