@@ -27,6 +27,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     private var darkThemePreference: Preference? = null
     private var systemColorPreference: Preference? = null
+    private var fullScreenPreference: Preference? = null
     private var topBottomPaddingPreference: Preference? = null
     private var enableLogPreference: Preference? = null
     private var logViewerPreference: Preference? = null
@@ -43,6 +44,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         darkThemePreference = findPreference("appearance.dark_theme")
         systemColorPreference = findPreference("appearance.system_color")
+        fullScreenPreference = findPreference("appearance.full_screen")
         topBottomPaddingPreference = findPreference("appearance.top_bottom_padding")
         enableLogPreference = findPreference("others.enable_log")
         logViewerPreference = findPreference("others.log_viewer")
@@ -79,6 +81,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 }
             } else {
                 isVisible = false
+            }
+        }
+        fullScreenPreference?.apply {
+            setOnPreferenceChangeListener { _, newValue ->
+                activity.setFullScreen(newValue as Boolean)
+                true
             }
         }
         topBottomPaddingPreference?.apply {

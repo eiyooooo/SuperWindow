@@ -1,15 +1,13 @@
 package com.eiyooooo.superwindow.ui.main
 
-import android.os.Build
 import android.os.Bundle
-import android.view.View
-import android.view.WindowInsets
-import android.view.WindowInsetsController
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -54,7 +52,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             else -> {
-                setupFullScreen()
                 bindingExpanded = ActivityMainExpandedBinding.inflate(layoutInflater).also {
                     bindingControlPanelExpanded = ControlPanelExpandedBinding.inflate(layoutInflater, null, false)
                     it.widgetContainer.addTargetView(it.leftSplitHandle)
@@ -63,6 +60,7 @@ class MainActivity : AppCompatActivity() {
                     widgetCardManager.init()
                     setContentView(it.root)
                 }
+                setFullScreen()
                 ViewCompat.setOnApplyWindowInsetsListener(bindingExpanded.root) { view, insets ->
                     val bars = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
                     view.updatePadding(left = bars.left, right = bars.right)
@@ -129,15 +127,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @Suppress("DEPRECATION")
-    private fun setupFullScreen() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.insetsController?.let {
-                it.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
-                it.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    internal fun setFullScreen(fullScreen: Boolean = Preferences.fullScreen) {
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            if (fullScreen) {
+                systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                hide(WindowInsetsCompat.Type.systemBars())
+                ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { view, windowInsets ->
+                    if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
+                        || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+                    ) {
+                        hide(WindowInsetsCompat.Type.systemBars())
+                    }
+                    ViewCompat.onApplyWindowInsets(view, windowInsets)
+                }
+            } else {
+                systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
+                show(WindowInsetsCompat.Type.systemBars())
+                ViewCompat.setOnApplyWindowInsetsListener(window.decorView, null)
             }
-        } else {
-            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
         }
     }
 

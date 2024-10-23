@@ -35,6 +35,10 @@ object Preferences {
         get() = sharedPreferences.get("appearance.system_color", true)
         set(value) = sharedPreferences.put("appearance.system_color", value)
 
+    var fullScreen
+        get() = sharedPreferences.get("appearance.full_screen", true)
+        set(value) = sharedPreferences.put("appearance.full_screen", value)
+
     var topBottomPadding
         get() = sharedPreferences.get("appearance.top_bottom_padding", 0)
         set(value) = sharedPreferences.put("appearance.top_bottom_padding", value)

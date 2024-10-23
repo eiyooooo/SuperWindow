@@ -24,6 +24,8 @@
     <string name="always_off">Always off</string>
     <string name="always_on">Always on</string>
     <string name="system_color">Use system theme color</string>
+    <string name="full_screen">Full screen</string>
+    <string name="full_screen_summary">Full screen in expanded view</string>
     <string name="top_bottom_padding">Top and bottom padding</string>
     <string name="top_bottom_padding_summary">Set the top and bottom padding of the expanded view</string>
     <string name="others">Others</string>

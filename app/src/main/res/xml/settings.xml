@@ -14,6 +14,13 @@
             android:key="appearance.system_color"
             android:title="@string/system_color"
             app:widgetLayout="@layout/preference_material_switch" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:icon="@drawable/fullscreen"
+            android:key="appearance.full_screen"
+            android:summary="@string/full_screen_summary"
+            android:title="@string/full_screen"
+            app:widgetLayout="@layout/preference_material_switch" />
         <Preference
             android:icon="@drawable/padding"
             android:key="appearance.top_bottom_padding"
