@@ -8,6 +8,9 @@ import android.view.WindowInsetsController
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.eiyooooo.superwindow.R
@@ -60,9 +63,15 @@ class MainActivity : AppCompatActivity() {
                     widgetCardManager.init()
                     setContentView(it.root)
                 }
+                ViewCompat.setOnApplyWindowInsetsListener(bindingExpanded.root) { view, insets ->
+                    val bars = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
+                    view.updatePadding(left = bars.left, right = bars.right)
+                    WindowInsetsCompat.CONSUMED
+                }
                 lifecycleScope.launch {
                     Preferences.topBottomPaddingFlow.collect {
-                        bindingExpanded.root.setPadding(0, it, 0, it)
+                        val padding = getResources().displayMetrics.heightPixels * it / 1000
+                        bindingExpanded.root.updatePadding(top = padding, bottom = padding)
                     }
                 }
                 true
