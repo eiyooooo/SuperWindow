@@ -1,6 +1,7 @@
 package com.eiyooooo.superwindow.ui.main
 
 import android.os.Bundle
+import android.view.DragEvent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -57,6 +58,9 @@ class MainActivity : AppCompatActivity() {
                     it.widgetContainer.addTargetView(it.leftSplitHandle)
                     it.widgetContainer.addTargetView(it.rightSplitHandle)
                     it.overlay.setOnClickListener { hideElevatedView { makeCardsBlur(false) } }
+                    it.root.setOnDragListener { _, event ->
+                        event.action == DragEvent.ACTION_DRAG_STARTED || event.action == DragEvent.ACTION_DROP
+                    }
                     widgetCardManager.init()
                     setContentView(it.root)
                 }
