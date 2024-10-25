@@ -40,13 +40,6 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
 
     private val widgetCard: ItemWidgetCardBinding = ItemWidgetCardBinding.inflate(LayoutInflater.from(context), this, true)
 
-    var position: Int = -1
-
-    fun updatePosition(position: Int): WidgetCardView {
-        this.position = position
-        return this
-    }
-
     fun setControlBarVisibility(visibility: Int) {
         widgetCard.controlBar.visibility = visibility
     }
@@ -74,9 +67,9 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                         val deltaY = abs(event.y - initialY)
                         if ((deltaX > touchSlop || deltaY > touchSlop) && !dragging.get()) {//TODO: 拖动过快时，收不到ACTION_DRAG_STARTED
                             dragging.set(true)
-                            Timber.d("ACTION_MOVE -> startDragAndDrop -> $position!WidgetCardView@${widgetCardData.identifier}")
+                            Timber.d("ACTION_MOVE -> startDragAndDrop -> WidgetCardView@${widgetCardData.identifier}")
                             makeCover()
-                            startDragAndDrop(ClipData.newPlainText("$position!WidgetCardView@${widgetCardData.identifier}", null), shadowBuilder, this@WidgetCardView, View.DRAG_FLAG_OPAQUE)
+                            startDragAndDrop(ClipData.newPlainText("WidgetCardView@${widgetCardData.identifier}", null), shadowBuilder, this@WidgetCardView, View.DRAG_FLAG_OPAQUE)
                             ObjectAnimator.ofFloat(this@WidgetCardView, "alpha", 1F, 0.3F).apply {
                                 duration = 200
                                 interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)

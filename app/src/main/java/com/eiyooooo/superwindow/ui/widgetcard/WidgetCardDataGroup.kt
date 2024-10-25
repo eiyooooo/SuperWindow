@@ -15,45 +15,35 @@ data class WidgetCardDataGroup(
 
     val isControlPanelForeground = firstWidgetCardData.isControlPanel || secondWidgetCardData?.isControlPanel == true || thirdWidgetCardData?.isControlPanel == true
 
-    fun swap(firstPosition: Int, secondPosition: Int): WidgetCardDataGroup {
+    fun swap(first: WidgetCardData, second: WidgetCardData): WidgetCardDataGroup {
+        if (first == second) return this
+
         var newFirstWidgetCardData = firstWidgetCardData
         var newSecondWidgetCardData = secondWidgetCardData
         var newThirdWidgetCardData = thirdWidgetCardData
 
-        when (firstPosition) {
-            1 -> when (secondPosition) {
-                2 -> {
-                    newFirstWidgetCardData = secondWidgetCardData!!
-                    newSecondWidgetCardData = firstWidgetCardData
-                }
-
-                3 -> {
-                    newFirstWidgetCardData = thirdWidgetCardData!!
-                    newThirdWidgetCardData = firstWidgetCardData
+        when (first) {
+            firstWidgetCardData -> {
+                newFirstWidgetCardData = second
+                when (second) {
+                    secondWidgetCardData -> newSecondWidgetCardData = first
+                    thirdWidgetCardData -> newThirdWidgetCardData = first
                 }
             }
 
-            2 -> when (secondPosition) {
-                1 -> {
-                    newSecondWidgetCardData = firstWidgetCardData
-                    newFirstWidgetCardData = secondWidgetCardData!!
-                }
-
-                3 -> {
-                    newSecondWidgetCardData = thirdWidgetCardData!!
-                    newThirdWidgetCardData = secondWidgetCardData
+            secondWidgetCardData -> {
+                newSecondWidgetCardData = second
+                when (second) {
+                    firstWidgetCardData -> newFirstWidgetCardData = first
+                    thirdWidgetCardData -> newThirdWidgetCardData = first
                 }
             }
 
-            3 -> when (secondPosition) {
-                1 -> {
-                    newThirdWidgetCardData = firstWidgetCardData
-                    newFirstWidgetCardData = thirdWidgetCardData!!
-                }
-
-                2 -> {
-                    newThirdWidgetCardData = secondWidgetCardData!!
-                    newSecondWidgetCardData = thirdWidgetCardData
+            thirdWidgetCardData -> {
+                newThirdWidgetCardData = second
+                when (second) {
+                    firstWidgetCardData -> newFirstWidgetCardData = first
+                    secondWidgetCardData -> newSecondWidgetCardData = first
                 }
             }
         }

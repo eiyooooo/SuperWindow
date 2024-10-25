@@ -185,9 +185,9 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                     setOnDragListener(dragListener)
                 }
             }
-            controlPanelWidgetCard.updatePosition(position)
-        } else widgetCardMap[widgetCardData.identifier]?.updatePosition(position) ?: let {
-            val newWidgetCardView = WidgetCardView(mainActivity, widgetCardData = widgetCardData).updatePosition(position).apply {
+            controlPanelWidgetCard
+        } else widgetCardMap[widgetCardData.identifier] ?: let {
+            val newWidgetCardView = WidgetCardView(mainActivity, widgetCardData = widgetCardData).apply {
                 setOnDragListener(dragListener)
             }
             widgetCardMap[widgetCardData.identifier] = newWidgetCardView
@@ -207,9 +207,6 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             } else {
                 it.visibility = View.VISIBLE
             }
-        }
-        widgetCardMap.values.filter { !widgetCardSet.contains(it) }.forEach {
-            it.position = -1
         }
         widgetCards.forEach {
             (it.parent as? ViewGroup)?.removeView(it)
@@ -411,7 +408,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         val draggingView = event.localState as? WidgetCardView ?: return@OnDragListener false
         when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
-                if (event.clipDescription.label.contains("WidgetCardView") && cardView.position != -1) {
+                if (event.clipDescription.label.contains("WidgetCardView") && cardView.parent == draggingView.parent) {
                     Timber.d("ACTION_DRAG_STARTED, DragEvent handling: ${cardView.widgetCardData.identifier}")
                     true
                 } else {
@@ -421,10 +418,10 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             }
 
             DragEvent.ACTION_DRAG_ENTERED -> {
-                Timber.d("ACTION_DRAG_ENTERED, position: ${cardView.position}")
+                Timber.d("ACTION_DRAG_ENTERED")
                 if (cardView != draggingView) {
                     mainModel.updateWidgetCardDataGroup {
-                        it.swap(draggingView.position, cardView.position)
+                        it.swap(draggingView.widgetCardData, cardView.widgetCardData)
                     }
                 }
                 true
