@@ -387,6 +387,25 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
     private val cardDraggingTransition = AutoTransition().apply {
         duration = 250
         interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)
+        addListener(object : Transition.TransitionListener {
+            override fun onTransitionStart(transition: Transition) {
+                swapping.set(true)
+            }
+
+            override fun onTransitionEnd(transition: Transition) {
+                swapping.set(false)
+            }
+
+            override fun onTransitionCancel(transition: Transition) {
+                swapping.set(false)
+            }
+
+            override fun onTransitionPause(transition: Transition) {
+            }
+
+            override fun onTransitionResume(transition: Transition) {
+            }
+        })
     }
 
     private val dualSplitHandlePositionObserver = Observer<Float> {
@@ -402,34 +421,42 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
     }
 
     val dragging = AtomicBoolean(false)
+    private val swapping = AtomicBoolean(false)
 
     private val dragListener = View.OnDragListener { view, event ->
         val cardView = view as? WidgetCardView ?: return@OnDragListener false
         val draggingView = event.localState as? WidgetCardView ?: return@OnDragListener false
         when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
-                if (event.clipDescription.label.contains("WidgetCardView") && cardView.parent == draggingView.parent) {
-                    Timber.d("ACTION_DRAG_STARTED, DragEvent handling: ${cardView.widgetCardData.identifier}")
-                    true
-                } else {
-                    Timber.d("ACTION_DRAG_STARTED, not a valid widget card")
-                    false
-                }
+                event.clipDescription.label.contains("WidgetCardView") && cardView.parent == draggingView.parent
             }
 
             DragEvent.ACTION_DRAG_ENTERED -> {
-                Timber.d("ACTION_DRAG_ENTERED")
-                if (cardView != draggingView) {
+                if (dragging.get() && cardView != draggingView) {
+                    swapping.set(true)
                     mainModel.updateWidgetCardDataGroup {
                         it.swap(draggingView.widgetCardData, cardView.widgetCardData)
                     }
+                    Timber.d("ACTION_DRAG_ENTERED, swap: ${draggingView.widgetCardData.identifier} <-> ${cardView.widgetCardData.identifier}")
                 }
                 true
             }
 
-            DragEvent.ACTION_DROP -> {//TODO: 交换位置过快时，会出现卡片位置不对的情况；交换位置时宽度没交换
+            DragEvent.ACTION_DRAG_LOCATION -> {
+                if (dragging.get() && !swapping.get() && cardView != draggingView) {
+                    swapping.set(true)
+                    mainModel.updateWidgetCardDataGroup {
+                        it.swap(draggingView.widgetCardData, cardView.widgetCardData)
+                    }
+                    Timber.d("ACTION_DRAG_LOCATION, swap: ${draggingView.widgetCardData.identifier} <-> ${cardView.widgetCardData.identifier}")
+                }
+                true
+            }
+
+            DragEvent.ACTION_DROP -> {
                 if (dragging.get()) {
                     dragging.set(false)
+                    swapping.set(false)
                     mainModel.updateWidgetCardDataGroup { it.copy(dragging = false) }
                     Timber.d("ACTION_DROP, WidgetCardDataGroup dragging ended")
                 }
@@ -437,9 +464,9 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             }
 
             DragEvent.ACTION_DRAG_ENDED -> {
-                Timber.d("ACTION_DRAG_ENDED, ${cardView.widgetCardData.identifier}")
                 if (dragging.get()) {
                     dragging.set(false)
+                    swapping.set(false)
                     mainActivity.bindingExpanded.widgetContainer.post {
                         mainModel.updateWidgetCardDataGroup { it.copy(dragging = false) }
                         Timber.d("ACTION_DRAG_ENDED, WidgetCardDataGroup dragging ended")
