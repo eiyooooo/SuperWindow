@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
                     widgetCardManager.init()
                     setContentView(it.root)
                 }
-                setFullScreen()
+                setFullScreen(force = true)
                 ViewCompat.setOnApplyWindowInsetsListener(bindingExpanded.root) { view, insets ->
                     val bars = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
                     view.updatePadding(left = bars.left, right = bars.right)
@@ -131,23 +131,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    internal fun setFullScreen(fullScreen: Boolean = Preferences.fullScreen) {
-        WindowCompat.getInsetsController(window, window.decorView).apply {
-            if (fullScreen) {
-                systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                hide(WindowInsetsCompat.Type.systemBars())
-                ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { view, windowInsets ->
-                    if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
-                        || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
-                    ) {
-                        hide(WindowInsetsCompat.Type.systemBars())
+    internal fun setFullScreen(fullScreen: Boolean = Preferences.fullScreen, force: Boolean = isExpanded) {
+        if (force) {
+            WindowCompat.getInsetsController(window, window.decorView).apply {
+                if (fullScreen) {
+                    systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    hide(WindowInsetsCompat.Type.systemBars())
+                    ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { view, windowInsets ->
+                        if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
+                            || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())
+                        ) {
+                            hide(WindowInsetsCompat.Type.systemBars())
+                        }
+                        ViewCompat.onApplyWindowInsets(view, windowInsets)
                     }
-                    ViewCompat.onApplyWindowInsets(view, windowInsets)
+                } else {
+                    systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
+                    show(WindowInsetsCompat.Type.systemBars())
+                    ViewCompat.setOnApplyWindowInsetsListener(window.decorView, null)
                 }
-            } else {
-                systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
-                show(WindowInsetsCompat.Type.systemBars())
-                ViewCompat.setOnApplyWindowInsetsListener(window.decorView, null)
             }
         }
     }
