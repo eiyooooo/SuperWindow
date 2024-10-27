@@ -25,8 +25,8 @@ import timber.log.Timber
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
-    private var darkThemePreference: Preference? = null
     private var systemColorPreference: Preference? = null
+    private var darkThemePreference: Preference? = null
     private var fullScreenPreference: Preference? = null
     private var topBottomPaddingPreference: Preference? = null
     private var enableLogPreference: Preference? = null
@@ -42,8 +42,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         setPreferencesFromResource(R.xml.settings, rootKey)
 
-        darkThemePreference = findPreference("appearance.dark_theme")
         systemColorPreference = findPreference("appearance.system_color")
+        darkThemePreference = findPreference("appearance.dark_theme")
         fullScreenPreference = findPreference("appearance.full_screen")
         topBottomPaddingPreference = findPreference("appearance.top_bottom_padding")
         enableLogPreference = findPreference("others.enable_log")
@@ -51,6 +51,16 @@ class SettingsFragment : PreferenceFragmentCompat() {
         exportLogPreference = findPreference("others.export_log")
         licensePreference = findPreference("others.license")
 
+        systemColorPreference?.apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                setOnPreferenceChangeListener { _, _ ->
+                    activity.recreate()
+                    true
+                }
+            } else {
+                isVisible = false
+            }
+        }
         darkThemePreference?.apply {
             val darkThemeOptions = arrayOf(getString(R.string.follow_system), getString(R.string.always_off), getString(R.string.always_on))
 
@@ -71,16 +81,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 Preferences.darkThemeFlow.collect {
                     summary = darkThemeOptions.getOrNull(it) ?: getString(R.string.follow_system)
                 }
-            }
-        }
-        systemColorPreference?.apply {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                setOnPreferenceChangeListener { _, _ ->
-                    activity.recreate()
-                    true
-                }
-            } else {
-                isVisible = false
             }
         }
         fullScreenPreference?.apply {

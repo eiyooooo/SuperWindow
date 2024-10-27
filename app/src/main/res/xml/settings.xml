@@ -4,16 +4,16 @@
 
     <PreferenceCategory android:title="@string/appearance">
 
-        <Preference
-            android:icon="@drawable/settings_night_sight"
-            android:key="appearance.dark_theme"
-            android:title="@string/dark_theme" />
         <SwitchPreferenceCompat
             android:defaultValue="true"
             android:icon="@drawable/palette"
             android:key="appearance.system_color"
             android:title="@string/system_color"
             app:widgetLayout="@layout/preference_material_switch" />
+        <Preference
+            android:icon="@drawable/settings_night_sight"
+            android:key="appearance.dark_theme"
+            android:title="@string/dark_theme" />
         <SwitchPreferenceCompat
             android:defaultValue="true"
             android:icon="@drawable/fullscreen"
