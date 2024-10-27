@@ -199,14 +199,9 @@ class MainActivity : AppCompatActivity() {
         elevatedViewContainer.removeAllViews()
     }
 
-    internal fun notifyDragging() {
-        mainModel.updateWidgetCardDataGroup {
-            it.copy(dragging = true)
-        }
-        if (isExpanded) widgetCardManager.dragging.set(true)
-    }
-
     internal fun makeCardsBlur(blur: Boolean) = if (isExpanded) widgetCardManager.makeCardsBlur(blur) else Unit
 
     internal fun removeWidgetCard(target: WidgetCardView) = if (isExpanded) widgetCardManager.removeWidgetCard(target) else Unit
+
+    internal fun startWaitDragEvent() = if (isExpanded) widgetCardManager.startWaitDragEvent() else Unit
 }

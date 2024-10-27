@@ -65,16 +65,16 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                     MotionEvent.ACTION_MOVE -> {
                         val deltaX = abs(event.x - initialX)
                         val deltaY = abs(event.y - initialY)
-                        if ((deltaX > touchSlop || deltaY > touchSlop) && !dragging.get()) {//TODO: 拖动过快时，收不到ACTION_DRAG_STARTED
+                        if ((deltaX > touchSlop || deltaY > touchSlop) && !dragging.get()) {
                             dragging.set(true)
                             Timber.d("ACTION_MOVE -> startDragAndDrop -> WidgetCardView@${widgetCardData.identifier}")
                             makeCover()
-                            startDragAndDrop(ClipData.newPlainText("WidgetCardView@${widgetCardData.identifier}", null), shadowBuilder, this@WidgetCardView, View.DRAG_FLAG_OPAQUE)
+                            (context as? MainActivity)?.startWaitDragEvent()
                             ObjectAnimator.ofFloat(this@WidgetCardView, "alpha", 1F, 0.3F).apply {
                                 duration = 200
                                 interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)
                             }.start()
-                            (context as? MainActivity)?.notifyDragging()
+                            startDragAndDrop(ClipData.newPlainText("WidgetCardView@${widgetCardData.identifier}", null), shadowBuilder, this@WidgetCardView, View.DRAG_FLAG_OPAQUE)
                         }
                         true
                     }

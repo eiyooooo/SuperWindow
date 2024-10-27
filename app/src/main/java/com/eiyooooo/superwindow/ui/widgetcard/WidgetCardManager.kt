@@ -420,15 +420,41 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         constraintSet.applyTo(mainActivity.bindingExpanded.widgetContainer)
     }
 
-    val dragging = AtomicBoolean(false)
+    private val dragging = AtomicBoolean(false)
     private val swapping = AtomicBoolean(false)
+    private var waitDragEventRunnable: Runnable? = null
+
+    internal fun startWaitDragEvent() {
+        dragging.set(true)
+        mainModel.updateWidgetCardDataGroup { if (it.dragging) it else it.copy(dragging = true) }
+
+        waitDragEventRunnable?.let {
+            mainActivity.bindingExpanded.widgetContainer.removeCallbacks(it)
+        }
+        waitDragEventRunnable = Runnable {
+            dragging.set(false)
+            swapping.set(false)
+            mainModel.updateWidgetCardDataGroup { if (it.dragging) it.copy(dragging = false) else it }
+            Timber.d("WidgetCardDataGroup dragging ended by waitDragEventRunnable")
+            waitDragEventRunnable = null
+        }
+        mainActivity.bindingExpanded.widgetContainer.postDelayed(waitDragEventRunnable, 500)
+    }
 
     private val dragListener = View.OnDragListener { view, event ->
         val cardView = view as? WidgetCardView ?: return@OnDragListener false
         val draggingView = event.localState as? WidgetCardView ?: return@OnDragListener false
         when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
-                event.clipDescription.label.contains("WidgetCardView") && cardView.parent == draggingView.parent
+                if (event.clipDescription.label.contains("WidgetCardView") && cardView.parent == draggingView.parent) {
+                    waitDragEventRunnable?.let {
+                        mainActivity.bindingExpanded.widgetContainer.removeCallbacks(it)
+                    }
+                    waitDragEventRunnable = null
+                    true
+                } else {
+                    false
+                }
             }
 
             DragEvent.ACTION_DRAG_ENTERED -> {
@@ -437,7 +463,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                     mainModel.updateWidgetCardDataGroup {
                         it.swap(draggingView.widgetCardData, cardView.widgetCardData)
                     }
-                    Timber.d("ACTION_DRAG_ENTERED, swap: ${draggingView.widgetCardData.identifier} <-> ${cardView.widgetCardData.identifier}")
+                    Timber.d("swap: ${draggingView.widgetCardData.identifier} <-> ${cardView.widgetCardData.identifier} by ACTION_DRAG_ENTERED")
                 }
                 true
             }
@@ -448,7 +474,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                     mainModel.updateWidgetCardDataGroup {
                         it.swap(draggingView.widgetCardData, cardView.widgetCardData)
                     }
-                    Timber.d("ACTION_DRAG_LOCATION, swap: ${draggingView.widgetCardData.identifier} <-> ${cardView.widgetCardData.identifier}")
+                    Timber.d("swap: ${draggingView.widgetCardData.identifier} <-> ${cardView.widgetCardData.identifier} by ACTION_DRAG_LOCATION")
                 }
                 true
             }
@@ -457,8 +483,8 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 if (dragging.get()) {
                     dragging.set(false)
                     swapping.set(false)
-                    mainModel.updateWidgetCardDataGroup { it.copy(dragging = false) }
-                    Timber.d("ACTION_DROP, WidgetCardDataGroup dragging ended")
+                    mainModel.updateWidgetCardDataGroup { if (it.dragging) it.copy(dragging = false) else it }
+                    Timber.d("WidgetCardDataGroup dragging ended by ACTION_DROP")
                 }
                 true
             }
@@ -468,8 +494,8 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                     dragging.set(false)
                     swapping.set(false)
                     mainActivity.bindingExpanded.widgetContainer.post {
-                        mainModel.updateWidgetCardDataGroup { it.copy(dragging = false) }
-                        Timber.d("ACTION_DRAG_ENDED, WidgetCardDataGroup dragging ended")
+                        mainModel.updateWidgetCardDataGroup { if (it.dragging) it.copy(dragging = false) else it }
+                        Timber.d("WidgetCardDataGroup dragging ended by ACTION_DRAG_ENDED")
                     }
                 }
                 true
