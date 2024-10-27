@@ -77,6 +77,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             mainActivity.lifecycleScope.launch {
                 LocalContent.runningTasksInVD.collect { runningTasksInVD ->
                     widgetCardMap.values.filter { !runningTasksInVD.containsKey(it.displayId) }.forEach {
+                        Timber.d("remove widget card: ${it.widgetCardData.identifier} because it's not running in VD")
                         it.release()
                         removeWidgetCard(it)
                     }

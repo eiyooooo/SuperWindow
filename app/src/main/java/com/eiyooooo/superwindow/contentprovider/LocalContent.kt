@@ -113,6 +113,7 @@ object LocalContent {//TODO
             vd.resize(width, height, densityDpi)
             vd.surface = surface
             Timber.d("Resize vd: $displayId for: $packageName, width: $width, height: $height, densityDpi: $densityDpi")
+            showAPP(packageName, displayId)
             return displayId
         }
         DisplayManagerWrapper.createVirtualDisplay(packageName, width, height, densityDpi, surface)?.let {
@@ -150,7 +151,7 @@ object LocalContent {//TODO
                         execReadOutput(cmd)
                         Timber.d("Move stack success, cmd: $cmd")
                     } catch (t: Throwable) {
-                        Timber.e(t, "Move stack failed, cmd: $cmd")
+                        Timber.w(t, "Move stack failed, cmd: $cmd")
                     }
                     return true
                 }
