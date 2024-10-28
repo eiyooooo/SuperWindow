@@ -27,7 +27,6 @@ public class ActivityTaskManager {
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
     public static class RootTaskInfo extends TaskInfo implements Parcelable {
-        // TODO(b/148895075): Move some of the fields to TaskInfo.
         public Rect bounds;
         public int[] childTaskIds;
         public String[] childTaskNames;
