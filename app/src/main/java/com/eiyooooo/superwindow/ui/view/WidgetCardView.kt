@@ -51,7 +51,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
             private var initialX: Float = 0F
             private var initialY: Float = 0F
             private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
-            private val shadowBuilder = WidgetCardDragShadowBuilder(widgetCard, radius)
+            private val shadowBuilder = WidgetCardDragShadowBuilder(widgetCard)
 
             override fun onTouch(v: View, event: MotionEvent): Boolean {
                 return when (event.action) {
