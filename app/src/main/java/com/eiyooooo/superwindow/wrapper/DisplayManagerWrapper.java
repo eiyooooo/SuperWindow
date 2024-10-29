@@ -4,8 +4,12 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
+import android.hardware.display.VirtualDisplayConfig;
+import android.os.Build;
+import android.view.Display;
 import android.view.Surface;
 
+import com.eiyooooo.superwindow.entity.SystemServices;
 import com.eiyooooo.superwindow.util.FakeContext;
 
 import java.lang.reflect.Field;
@@ -42,7 +46,20 @@ public final class DisplayManagerWrapper {
 
     public static VirtualDisplay createVirtualDisplay(String name, int width, int height, int densityDpi, Surface surface) {
         try {
-            return displayManager.createVirtualDisplay(name, width, height, densityDpi, surface, getDisplayFlags());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width, height, densityDpi);
+                builder.setFlags(getDisplayFlags());
+                if (surface != null) {
+                    builder.setSurface(surface);
+                }
+                Display display = SystemServices.INSTANCE.getCurrentDisplay();
+                if (display != null) {
+                    builder.setRequestedRefreshRate(display.getRefreshRate());
+                }
+                return displayManager.createVirtualDisplay(builder.build());
+            } else {
+                return displayManager.createVirtualDisplay(name, width, height, densityDpi, surface, getDisplayFlags());
+            }
         } catch (Throwable t) {
             Timber.e(t, "Error in createVirtualDisplay");
             return null;

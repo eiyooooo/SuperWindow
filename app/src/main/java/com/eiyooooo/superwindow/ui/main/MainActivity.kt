@@ -18,6 +18,7 @@ import com.eiyooooo.superwindow.databinding.ActivityMainExpandedBinding
 import com.eiyooooo.superwindow.databinding.ControlPanelCompactBinding
 import com.eiyooooo.superwindow.databinding.ControlPanelExpandedBinding
 import com.eiyooooo.superwindow.entity.Preferences
+import com.eiyooooo.superwindow.entity.SystemServices
 import com.eiyooooo.superwindow.ui.controlpanel.ControlPanelAdapter
 import com.eiyooooo.superwindow.ui.view.WidgetCardView
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardManager
@@ -48,6 +49,7 @@ class MainActivity : AppCompatActivity() {
                     bindingControlPanelCompact = ControlPanelCompactBinding.inflate(layoutInflater, it.widgetContainer, true)
                     it.overlay.setOnClickListener { hideElevatedView { makeCardsBlur(false) } }
                     setContentView(it.root)
+                    it.root.post { SystemServices.currentDisplay = it.root.display }
                 }
                 false
             }
@@ -63,6 +65,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     widgetCardManager.init()
                     setContentView(it.root)
+                    it.root.post { SystemServices.currentDisplay = it.root.display }
                 }
                 setFullScreen(force = true)
                 ViewCompat.setOnApplyWindowInsetsListener(bindingExpanded.root) { view, insets ->
