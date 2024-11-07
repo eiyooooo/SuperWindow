@@ -37,6 +37,10 @@
     <string name="export_log_fail">Failed to export log</string>
     <string name="license">License</string>
 
+    <string name="replace_app">Replace App</string>
+    <string name="minimize">Minimize</string>
+    <string name="close_app">Close App</string>
+
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
 
