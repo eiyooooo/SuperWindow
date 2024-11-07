@@ -48,7 +48,16 @@ fun NavigationBarView.setupWithViewPager(viewPager: ViewPager2, onPositionChange
     })
 }
 
-fun View.startAlphaScaleAnimation(alphaStart: Float, alphaEnd: Float, alphaInterpolator: Interpolator, scaleStart: Float, scaleEnd: Float, scaleInterpolator: Interpolator, duration: Long) {
+fun View.startAlphaScaleAnimation(
+    alphaStart: Float,
+    alphaEnd: Float,
+    alphaInterpolator: Interpolator,
+    scaleStart: Float,
+    scaleEnd: Float,
+    scaleInterpolator: Interpolator,
+    duration: Long,
+    onAnimationEnd: (() -> Unit)? = null
+): AnimatorSet {
     val alphaAnimation = ObjectAnimator.ofFloat(this, "alpha", alphaStart, alphaEnd).apply {
         this.duration = duration
         this.interpolator = alphaInterpolator
@@ -63,7 +72,24 @@ fun View.startAlphaScaleAnimation(alphaStart: Float, alphaEnd: Float, alphaInter
     }
     val animSet = AnimatorSet()
     animSet.playTogether(alphaAnimation, scaleXAnimation, scaleYAnimation)
+    onAnimationEnd?.let {
+        animSet.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationStart(animation: Animator) {
+            }
+
+            override fun onAnimationEnd(animation: Animator) {
+                it.invoke()
+            }
+
+            override fun onAnimationCancel(animation: Animator) {
+            }
+
+            override fun onAnimationRepeat(animation: Animator) {
+            }
+        })
+    }
     animSet.start()
+    return animSet
 }
 
 fun View.startPressHandleAnimation(isPress: Boolean) = startAlphaScaleAnimation(
@@ -74,6 +100,17 @@ fun View.startPressHandleAnimation(isPress: Boolean) = startAlphaScaleAnimation(
     scaleEnd = if (isPress) 1.25f else 1f,
     scaleInterpolator = PathInterpolatorCompat.create(0.25f, 1f, 0.5f, 1f),
     duration = 200L
+)
+
+fun View.startShowPopupMenuAnimation(show: Boolean, onAnimationEnd: (() -> Unit)? = null) = startAlphaScaleAnimation(
+    alphaStart = if (show) 0f else 1f,
+    alphaEnd = if (show) 1f else 0f,
+    alphaInterpolator = PathInterpolatorCompat.create(0.35f, 0f, 0.66f, 1f),
+    scaleStart = if (show) 0.75f else 1f,
+    scaleEnd = if (show) 1f else 0.75f,
+    scaleInterpolator = PathInterpolatorCompat.create(0.25f, 1f, 0.5f, 1f),
+    duration = 200L,
+    onAnimationEnd = onAnimationEnd
 )
 
 fun startShowElevatedViewAnimation(elevatedViewContainer: View, overlay: View, isShow: Boolean, onAnimationEnd: (() -> Unit)? = null) {

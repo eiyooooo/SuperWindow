@@ -27,6 +27,7 @@ import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardDragShadowBuilder
 import com.eiyooooo.superwindow.util.BlurUtils
 import com.eiyooooo.superwindow.util.dp2px
 import com.eiyooooo.superwindow.util.startPressHandleAnimation
+import com.eiyooooo.superwindow.util.startShowPopupMenuAnimation
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.abs
@@ -81,6 +82,9 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
 
                     MotionEvent.ACTION_UP -> {
                         widgetCard.controlBar.startPressHandleAnimation(false)
+                        if (!dragging.get()) {
+                            triggerPopupMenu()
+                        }
                         true
                     }
 
@@ -190,6 +194,15 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
         setTargetView(widgetCard.controlBar)
         widgetCard.controlBar.setOnTouchListener(controlBarListener)
 
+        post {
+            widgetCard.popupMenu.pivotX = widgetCard.popupMenu.width / 2f
+            widgetCard.popupMenu.pivotY = 0f
+            widgetCard.minimizeControlPanel.pivotX = widgetCard.popupMenu.width / 2f
+            widgetCard.minimizeControlPanel.pivotY = 0f
+            widgetCard.popupMenu.visibility = GONE
+            widgetCard.minimizeControlPanel.visibility = GONE
+        }
+
         widgetCardData.icon?.let {//TODO: use this instead of get icon again
             widgetCard.icon.setImageDrawable(it)
         }
@@ -249,12 +262,47 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
         makeCover()
     }
 
+    private val showingPopup = AtomicBoolean(false)
+    private var showingPopupAnimatorSet: AnimatorSet? = null
+
+    private fun triggerPopupMenu() {
+        if (showingPopupAnimatorSet?.isRunning == true) {
+            return
+        }
+        val targetView = if (widgetCardData.isControlPanel) {
+            widgetCard.minimizeControlPanel
+        } else {
+            widgetCard.popupMenu
+        }
+        if (!showingPopup.get()) {
+            targetView.visibility = VISIBLE
+            showingPopupAnimatorSet = targetView.startShowPopupMenuAnimation(true) {
+                showingPopup.set(true)
+            }
+        } else {
+            showingPopupAnimatorSet = targetView.startShowPopupMenuAnimation(false) {
+                targetView.visibility = GONE
+                showingPopup.set(false)
+            }
+        }
+    }
+
+    private fun hidePopupMenuImmediately() {
+        if (showingPopup.get() || showingPopupAnimatorSet?.isRunning == true) {
+            showingPopupAnimatorSet?.cancel()
+            widgetCard.popupMenu.visibility = GONE
+            widgetCard.minimizeControlPanel.visibility = GONE
+            showingPopup.set(false)
+        }
+    }
+
     private val covering = AtomicBoolean(false)
     private val coverTransitAnimationList = mutableListOf<ObjectAnimator>()
     private val blurring = AtomicBoolean(false)
     private val blurTransitAnimationList = mutableListOf<AnimatorSet>()
 
     fun makeCover() {
+        hidePopupMenuImmediately()
         if (blurring.get()) {
             removeBlurImmediately()
         }
@@ -266,6 +314,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     fun removeCoverImmediately() {
+        hidePopupMenuImmediately()
         if (blurring.get()) return
         cancelCoverTransitAnimations()
         widgetCard.contentContainer.alpha = 1F
@@ -275,6 +324,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     fun startCoverTransitAnimation() {
+        hidePopupMenuImmediately()
         if (blurring.get()) return
         if (covering.get()) {
             ObjectAnimator.ofFloat(widgetCard.contentContainer, "alpha", 0F, 1F).apply {
@@ -314,6 +364,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     fun makeBlur() {
+        hidePopupMenuImmediately()
         if (covering.get()) {
             removeCoverImmediately()
         }
@@ -335,6 +386,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     fun removeBlurImmediately() {
+        hidePopupMenuImmediately()
         if (covering.get()) return
         cancelBlurTransitAnimations()
         widgetCard.contentContainer.alpha = 1F
@@ -349,6 +401,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     fun startBlurTransitAnimation() {
+        hidePopupMenuImmediately()
         if (covering.get()) return
         if (blurring.get()) {
             val blurLayerAnimation = widgetCard.blurLayer.foreground.let {
