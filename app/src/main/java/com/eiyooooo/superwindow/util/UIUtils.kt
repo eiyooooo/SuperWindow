@@ -102,7 +102,7 @@ fun View.startPressHandleAnimation(isPress: Boolean) = startAlphaScaleAnimation(
     duration = 200L
 )
 
-fun View.startShowPopupMenuAnimation(show: Boolean, onAnimationEnd: (() -> Unit)? = null) = startAlphaScaleAnimation(
+fun View.startPopupMenuAnimation(show: Boolean, onAnimationEnd: (() -> Unit)? = null) = startAlphaScaleAnimation(
     alphaStart = if (show) 0f else 1f,
     alphaEnd = if (show) 1f else 0f,
     alphaInterpolator = PathInterpolatorCompat.create(0.35f, 0f, 0.66f, 1f),

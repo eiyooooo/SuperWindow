@@ -26,8 +26,8 @@ import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardDragShadowBuilder
 import com.eiyooooo.superwindow.util.BlurUtils
 import com.eiyooooo.superwindow.util.dp2px
+import com.eiyooooo.superwindow.util.startPopupMenuAnimation
 import com.eiyooooo.superwindow.util.startPressHandleAnimation
-import com.eiyooooo.superwindow.util.startShowPopupMenuAnimation
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.abs
@@ -83,7 +83,11 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                     MotionEvent.ACTION_UP -> {
                         widgetCard.controlBar.startPressHandleAnimation(false)
                         if (!dragging.get()) {
-                            triggerPopupMenu()
+                            if (!showingPopupMenu.get()) {
+                                showPopupMenu()
+                            } else {
+                                startHidePopupMenuAnimation()
+                            }
                         }
                         true
                     }
@@ -260,37 +264,56 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
         makeCover()
     }
 
-    private val showingPopup = AtomicBoolean(false)
-    private var showingPopupAnimatorSet: AnimatorSet? = null
+    private val showingPopupMenu = AtomicBoolean(false)
+    private var popupMenuAnimatorSet: AnimatorSet? = null
 
-    private fun triggerPopupMenu() {
-        if (showingPopupAnimatorSet?.isRunning == true) {
-            return
-        }
+    private fun showPopupMenu() {
+        if (showingPopupMenu.get()) return
+        popupMenuAnimatorSet?.cancel()
         val targetView = if (widgetCardData.isControlPanel) {
             widgetCard.minimizeControlPanel
         } else {
             widgetCard.popupMenu
         }
-        if (!showingPopup.get()) {
-            targetView.visibility = VISIBLE
-            showingPopupAnimatorSet = targetView.startShowPopupMenuAnimation(true) {
-                showingPopup.set(true)
+        targetView.visibility = VISIBLE
+        (context as? MainActivity)?.setTouchEventInterceptor {
+            if (it.action == MotionEvent.ACTION_DOWN) {
+                val rect = Rect()
+                targetView.getGlobalVisibleRect(rect)
+                if (!rect.contains(it.rawX.toInt(), it.rawY.toInt())) {
+                    startHidePopupMenuAnimation()
+                    return@setTouchEventInterceptor true
+                }
             }
-        } else {
-            showingPopupAnimatorSet = targetView.startShowPopupMenuAnimation(false) {
-                targetView.visibility = GONE
-                showingPopup.set(false)
-            }
+            return@setTouchEventInterceptor false
+        }
+        popupMenuAnimatorSet = targetView.startPopupMenuAnimation(true) {
+            showingPopupMenu.set(true)
         }
     }
 
     private fun hidePopupMenuImmediately() {
-        if (showingPopup.get() || showingPopupAnimatorSet?.isRunning == true) {
-            showingPopupAnimatorSet?.cancel()
+        if (showingPopupMenu.get() || popupMenuAnimatorSet?.isRunning == true) {
+            popupMenuAnimatorSet?.cancel()
+            (context as? MainActivity)?.setTouchEventInterceptor()
             widgetCard.popupMenu.visibility = GONE
             widgetCard.minimizeControlPanel.visibility = GONE
-            showingPopup.set(false)
+            showingPopupMenu.set(false)
+        }
+    }
+
+    private fun startHidePopupMenuAnimation() {
+        if (!showingPopupMenu.get()) return
+        popupMenuAnimatorSet?.cancel()
+        val targetView = if (widgetCardData.isControlPanel) {
+            widgetCard.minimizeControlPanel
+        } else {
+            widgetCard.popupMenu
+        }
+        (context as? MainActivity)?.setTouchEventInterceptor()
+        popupMenuAnimatorSet = targetView.startPopupMenuAnimation(false) {
+            targetView.visibility = GONE
+            showingPopupMenu.set(false)
         }
     }
 

@@ -2,6 +2,7 @@ package com.eiyooooo.superwindow.ui.main
 
 import android.os.Bundle
 import android.view.DragEvent
+import android.view.MotionEvent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -172,6 +173,19 @@ class MainActivity : AppCompatActivity() {
         } else {
             Snackbar.make(bindingCompact.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingControlPanelCompact.bottomNavigation).show()
         }
+    }
+
+    private var touchEventInterceptor: ((MotionEvent) -> Boolean)? = null
+
+    internal fun setTouchEventInterceptor(interceptor: ((MotionEvent) -> Boolean)? = null) {
+        touchEventInterceptor = interceptor
+    }
+
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (touchEventInterceptor?.invoke(event) == true) {
+            return true
+        }
+        return super.dispatchTouchEvent(event)
     }
 
     internal fun showElevatedFragment(fragment: Fragment) {
