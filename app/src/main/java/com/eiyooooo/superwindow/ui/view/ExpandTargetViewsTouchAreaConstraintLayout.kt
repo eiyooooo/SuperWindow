@@ -26,25 +26,25 @@ class ExpandTargetViewsTouchAreaConstraintLayout @JvmOverloads constructor(conte
         targetViews.clear()
     }
 
-    override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
-        when (event?.action) {
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                touchingTargetView = getTouchingTargetView(event)
-                if (touchingTargetView != null) {
-                    return touchingTargetView!!.dispatchTouchEvent(event)
+                getTouchingTargetView(event)?.let {
+                    touchingTargetView = it
+                    return it.dispatchTouchEvent(event)
                 }
             }
 
             MotionEvent.ACTION_MOVE -> {
-                if (touchingTargetView != null) {
-                    return touchingTargetView!!.dispatchTouchEvent(event)
+                touchingTargetView?.let {
+                    return it.dispatchTouchEvent(event)
                 }
             }
 
             MotionEvent.ACTION_UP,
             MotionEvent.ACTION_CANCEL -> {
-                if (touchingTargetView != null) {
-                    val result = touchingTargetView!!.dispatchTouchEvent(event)
+                touchingTargetView?.let {
+                    val result = it.dispatchTouchEvent(event)
                     touchingTargetView = null
                     return result
                 }
@@ -53,10 +53,7 @@ class ExpandTargetViewsTouchAreaConstraintLayout @JvmOverloads constructor(conte
         return super.dispatchTouchEvent(event)
     }
 
-    private fun getTouchingTargetView(event: MotionEvent?): View? {
-        val touchX: Int = event?.x?.toInt() ?: 0
-        val touchY: Int = event?.y?.toInt() ?: 0
-
+    private fun getTouchingTargetView(event: MotionEvent): View? {
         for (view in targetViews) {
             if (!view.isShown) continue
             val rect = Rect()
@@ -65,8 +62,7 @@ class ExpandTargetViewsTouchAreaConstraintLayout @JvmOverloads constructor(conte
             rect.right += expandTouchPx
             rect.top -= expandTouchPx
             rect.bottom += expandTouchPx
-
-            if (rect.contains(touchX, touchY)) {
+            if (rect.contains(event.x.toInt(), event.y.toInt())) {
                 return view
             }
         }

@@ -117,11 +117,11 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
         this.expandTouchPx = context.dp2px(expandTouchDp)
     }
 
-    override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         val view = targetView ?: return super.dispatchTouchEvent(event)
-        when (event?.action) {
+        when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                if (isTouchingTargetViewRegion(event)) {
+                if (isTouchingTargetViewWithExpandRegion(event)) {
                     touchingTargetView = true
                     return view.dispatchTouchEvent(event)
                 }
@@ -146,7 +146,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
         return super.dispatchTouchEvent(event)
     }
 
-    private fun isTouchingTargetViewRegion(event: MotionEvent?): Boolean {
+    private fun isTouchingTargetViewWithExpandRegion(event: MotionEvent): Boolean {
         targetView?.let {
             if (!it.isShown) return false
             val rect = Rect()
@@ -155,9 +155,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
             rect.right += expandTouchPx
             rect.top -= expandTouchPx
             rect.bottom += expandTouchPx
-            val touchX: Int = event?.x?.toInt() ?: 0
-            val touchY: Int = event?.y?.toInt() ?: 0
-            if (rect.contains(touchX, touchY)) {
+            if (rect.contains(event.x.toInt(), event.y.toInt())) {
                 return true
             }
         }
