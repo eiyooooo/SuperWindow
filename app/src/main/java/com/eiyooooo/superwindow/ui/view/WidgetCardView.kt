@@ -268,18 +268,18 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     private var popupMenuAnimatorSet: AnimatorSet? = null
 
     private fun showPopupMenu() {
-        if (showingPopupMenu.get()) return
+        if (showingPopupMenu.get() && popupMenuAnimatorSet?.isRunning == false) return
         popupMenuAnimatorSet?.cancel()
-        val targetView = if (widgetCardData.isControlPanel) {
+        val popupMenu = if (widgetCardData.isControlPanel) {
             widgetCard.minimizeControlPanel
         } else {
             widgetCard.popupMenu
         }
-        targetView.visibility = VISIBLE
+        popupMenu.visibility = VISIBLE
         (context as? MainActivity)?.setTouchEventInterceptor {
             if (it.action == MotionEvent.ACTION_DOWN) {
                 val rect = Rect()
-                targetView.getGlobalVisibleRect(rect)
+                popupMenu.getGlobalVisibleRect(rect)
                 if (!rect.contains(it.rawX.toInt(), it.rawY.toInt())) {
                     startHidePopupMenuAnimation()
                     return@setTouchEventInterceptor true
@@ -287,7 +287,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
             }
             return@setTouchEventInterceptor false
         }
-        popupMenuAnimatorSet = targetView.startPopupMenuAnimation(true) {
+        popupMenuAnimatorSet = popupMenu.startPopupMenuAnimation(true) {
             showingPopupMenu.set(true)
         }
     }
@@ -303,16 +303,16 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     private fun startHidePopupMenuAnimation() {
-        if (!showingPopupMenu.get()) return
+        if (!showingPopupMenu.get() && popupMenuAnimatorSet?.isRunning == false) return
         popupMenuAnimatorSet?.cancel()
-        val targetView = if (widgetCardData.isControlPanel) {
+        val popupMenu = if (widgetCardData.isControlPanel) {
             widgetCard.minimizeControlPanel
         } else {
             widgetCard.popupMenu
         }
         (context as? MainActivity)?.setTouchEventInterceptor()
-        popupMenuAnimatorSet = targetView.startPopupMenuAnimation(false) {
-            targetView.visibility = GONE
+        popupMenuAnimatorSet = popupMenu.startPopupMenuAnimation(false) {
+            popupMenu.visibility = GONE
             showingPopupMenu.set(false)
         }
     }
