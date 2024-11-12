@@ -44,9 +44,9 @@ class LocalContentPanelFragment : Fragment() {
             binding.recyclerView.setItemViewCacheSize(appsList.size)
             binding.recyclerView.layoutManager = layoutManager
 
-            val adapter = AppsAdapter(appsList, lifecycleScope, binding.waveSideBarView.selectingLetter) {
+            val adapter = AppsAdapter(appsList, lifecycleScope, binding.waveSideBarView.selectingLetter) { longClick, packageName ->
                 // TODO: handle chose app
-                Timber.d(it)
+                Timber.d("longClick: $longClick, packageName: $packageName")
             }
             binding.recyclerView.adapter = adapter
             binding.recyclerView.post {

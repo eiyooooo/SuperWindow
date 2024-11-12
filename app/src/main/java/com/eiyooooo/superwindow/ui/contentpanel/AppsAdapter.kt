@@ -18,7 +18,7 @@ class AppsAdapter(
     private val appsList: List<Pair<LauncherActivityInfo, Drawable>>,
     private val scope: CoroutineScope,
     private val selectingLetter: StateFlow<Char?>,
-    private val callback: (String) -> Unit
+    private val callback: (Boolean, String) -> Unit
 ) : RecyclerView.Adapter<AppsAdapter.ViewHolder>() {
 
     inner class ViewHolder(binding: ItemAppBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -47,7 +47,11 @@ class AppsAdapter(
             icon.setImageDrawable(drawable)
             appName.text = activityInfo.label
             click.setOnClickListener {
-                callback.invoke(applicationInfo.packageName)
+                callback.invoke(false, applicationInfo.packageName)
+            }
+            click.setOnLongClickListener {
+                callback.invoke(true, applicationInfo.packageName)
+                true
             }
             scope.launch {
                 selectingLetter.collect {
