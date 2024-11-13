@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.eiyooooo.superwindow.contentprovider.LocalContent
 import com.eiyooooo.superwindow.databinding.LocalContentPanelBinding
+import com.eiyooooo.superwindow.ui.main.MainActivity
 import com.github.promeg.pinyinhelper.Pinyin
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,6 +31,10 @@ class LocalContentPanelFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val replace = arguments?.getBoolean("replace") ?: false
+        val targetIdentifier = arguments?.getString("targetIdentifier")
+        val supportLongClick = !replace
+
         binding.waveSideBarView.visibility = View.GONE
         binding.nestedScrollView.visibility = View.GONE
         binding.progressBar.visibility = View.VISIBLE
@@ -44,9 +49,16 @@ class LocalContentPanelFragment : Fragment() {
             binding.recyclerView.setItemViewCacheSize(appsList.size)
             binding.recyclerView.layoutManager = layoutManager
 
-            val adapter = AppsAdapter(appsList, lifecycleScope, binding.waveSideBarView.selectingLetter) { longClick, packageName ->
-                // TODO: handle chose app
-                Timber.d("longClick: $longClick, packageName: $packageName")
+            val adapter = AppsAdapter(appsList, lifecycleScope, binding.waveSideBarView.selectingLetter, supportLongClick) { longClick, data ->
+                if (replace) {
+                    targetIdentifier?.let {
+                        (context as? MainActivity)?.replaceWidgetCard(it, data)
+                    }
+                    (context as? MainActivity)?.hideElevatedView()
+                } else {
+                    // TODO: handle chose app
+                    Timber.d("longClick: $longClick, data: $data")
+                }
             }
             binding.recyclerView.adapter = adapter
             binding.recyclerView.post {

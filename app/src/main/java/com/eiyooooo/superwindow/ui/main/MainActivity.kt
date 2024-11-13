@@ -20,8 +20,10 @@ import com.eiyooooo.superwindow.databinding.ControlPanelCompactBinding
 import com.eiyooooo.superwindow.databinding.ControlPanelExpandedBinding
 import com.eiyooooo.superwindow.entity.Preferences
 import com.eiyooooo.superwindow.entity.SystemServices
+import com.eiyooooo.superwindow.ui.contentpanel.LocalContentPanelFragment
 import com.eiyooooo.superwindow.ui.controlpanel.ControlPanelAdapter
 import com.eiyooooo.superwindow.ui.view.WidgetCardView
+import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardManager
 import com.eiyooooo.superwindow.util.setupWithViewPager
 import com.eiyooooo.superwindow.util.startShowElevatedViewAnimation
@@ -48,7 +50,7 @@ class MainActivity : AppCompatActivity() {
             in 0..599 -> {
                 bindingCompact = ActivityMainCompactBinding.inflate(layoutInflater).also {
                     bindingControlPanelCompact = ControlPanelCompactBinding.inflate(layoutInflater, it.widgetContainer, true)
-                    it.overlay.setOnClickListener { hideElevatedView { makeCardsBlur(false) } }
+                    it.overlay.setOnClickListener { hideElevatedView() }
                     setContentView(it.root)
                     it.root.post { SystemServices.currentDisplay = it.root.display }
                 }
@@ -60,7 +62,7 @@ class MainActivity : AppCompatActivity() {
                     bindingControlPanelExpanded = ControlPanelExpandedBinding.inflate(layoutInflater, null, false)
                     it.widgetContainer.addTargetView(it.leftSplitHandle)
                     it.widgetContainer.addTargetView(it.rightSplitHandle)
-                    it.overlay.setOnClickListener { hideElevatedView { makeCardsBlur(false) } }
+                    it.overlay.setOnClickListener { hideElevatedView() }
                     it.root.setOnDragListener { _, event ->
                         event.action == DragEvent.ACTION_DRAG_STARTED || event.action == DragEvent.ACTION_DROP
                     }
@@ -203,11 +205,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    internal fun hideElevatedView(onAnimationEnd: (() -> Unit)? = null) {
+    internal fun hideElevatedView() {
         val overlay = if (isExpanded) bindingExpanded.overlay else bindingCompact.overlay
         val elevatedViewContainer = if (isExpanded) bindingExpanded.elevatedViewContainer else bindingCompact.elevatedViewContainer
 
-        startShowElevatedViewAnimation(elevatedViewContainer, overlay, false, onAnimationEnd)
+        startShowElevatedViewAnimation(elevatedViewContainer, overlay, false) {
+            makeCardsBlur(false)
+        }
 
         supportFragmentManager.findFragmentById(R.id.elevated_view_container)?.let {
             supportFragmentManager.beginTransaction().remove(it).commit()
@@ -217,6 +221,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     internal fun makeCardsBlur(blur: Boolean) = if (isExpanded) widgetCardManager.makeCardsBlur(blur) else Unit
+
+    internal fun replaceWidgetCard(target: WidgetCardData) {
+        if (isExpanded) {
+            showElevatedFragment(LocalContentPanelFragment().apply {
+                arguments = Bundle().apply {
+                    putBoolean("replace", true)
+                    putString("targetIdentifier", target.identifier)
+                }
+            })
+        }
+    }
+
+    internal fun replaceWidgetCard(targetIdentifier: String, new: WidgetCardData) = if (isExpanded) widgetCardManager.replaceWidgetCard(targetIdentifier, new) else Unit
+
+    internal fun minimizeWidgetCard(target: WidgetCardData) = if (isExpanded) widgetCardManager.minimizeWidgetCard(target) else Unit
 
     internal fun removeWidgetCard(target: WidgetCardView) = if (isExpanded) widgetCardManager.removeWidgetCard(target) else Unit
 

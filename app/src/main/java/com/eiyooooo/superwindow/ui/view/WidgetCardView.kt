@@ -14,6 +14,7 @@ import android.view.MotionEvent
 import android.view.Surface
 import android.view.TextureView
 import android.view.View
+import android.view.View.OnTouchListener
 import android.view.ViewConfiguration
 import android.view.ViewGroup
 import androidx.cardview.widget.CardView
@@ -171,13 +172,11 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     private var textureView: TextureView? = null
 
     private val textureViewTouchListener by lazy {
-        object : OnTouchListener {
-            override fun onTouch(v: View, event: MotionEvent): Boolean {
-                displayId?.let {
-                    LocalContent.injectMotionEvent(event, it)
-                }
-                return true
+        OnTouchListener { _, event ->
+            displayId?.let {
+                LocalContent.injectMotionEvent(event, it)
             }
+            true
         }
     }
 
@@ -195,25 +194,25 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
 
         setTargetView(widgetCard.controlBar)
         widgetCard.controlBar.setOnTouchListener(controlBarListener)
-
-        post {
-            widgetCard.popupMenu.pivotX = widgetCard.popupMenu.width / 2f
-            widgetCard.popupMenu.pivotY = 0f
-            widgetCard.minimizeControlPanel.pivotX = widgetCard.popupMenu.width / 2f
-            widgetCard.minimizeControlPanel.pivotY = 0f
-            widgetCard.popupMenu.visibility = GONE
-            widgetCard.minimizeControlPanel.visibility = GONE
+        widgetCard.replace.setOnClickListener {
+            (context as? MainActivity)?.replaceWidgetCard(widgetCardData)
+        }
+        widgetCard.minimize.setOnClickListener {
+            (context as? MainActivity)?.minimizeWidgetCard(widgetCardData)
+        }
+        widgetCard.close.setOnClickListener {
+            (context as? MainActivity)?.removeWidgetCard(this@WidgetCardView)
+        }
+        widgetCard.minimizeControlPanel.setOnClickListener {
+            (context as? MainActivity)?.minimizeWidgetCard(widgetCardData)
         }
 
-        widgetCardData.icon?.let {//TODO: use this instead of get icon again
+        widgetCardData.icon?.let {
             widgetCard.icon.setImageDrawable(it)
         }
 
         if (widgetCardData.identifierValidated) {
             if (widgetCardData.isLocalProvider) {
-                LocalContent.getPackageIcon(widgetCardData.packageName)?.let {//TODO: remove after add widgetCardData via ContentPanel ready
-                    widgetCard.icon.setImageDrawable(it)
-                }
                 textureView = TextureView(context).apply {
                     layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
@@ -256,6 +255,15 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                 }
                 setContentView(textureView)
             }
+        }
+
+        post {
+            widgetCard.popupMenu.pivotX = widgetCard.popupMenu.width / 2f
+            widgetCard.popupMenu.pivotY = 0f
+            widgetCard.minimizeControlPanel.pivotX = widgetCard.minimizeControlPanel.width / 2f
+            widgetCard.minimizeControlPanel.pivotY = 0f
+            widgetCard.popupMenu.visibility = GONE
+            widgetCard.minimizeControlPanel.visibility = GONE
         }
     }
 

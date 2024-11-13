@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.eiyooooo.superwindow.databinding.ItemAppBinding
+import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
 import com.github.promeg.pinyinhelper.Pinyin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +19,8 @@ class AppsAdapter(
     private val appsList: List<Pair<LauncherActivityInfo, Drawable>>,
     private val scope: CoroutineScope,
     private val selectingLetter: StateFlow<Char?>,
-    private val callback: (Boolean, String) -> Unit
+    private val supportLongClick: Boolean,
+    private val callback: (Boolean, WidgetCardData) -> Unit
 ) : RecyclerView.Adapter<AppsAdapter.ViewHolder>() {
 
     inner class ViewHolder(binding: ItemAppBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -47,11 +49,13 @@ class AppsAdapter(
             icon.setImageDrawable(drawable)
             appName.text = activityInfo.label
             click.setOnClickListener {
-                callback.invoke(false, applicationInfo.packageName)
+                callback.invoke(false, WidgetCardData(applicationInfo.packageName, "local", drawable))
             }
-            click.setOnLongClickListener {
-                callback.invoke(true, applicationInfo.packageName)
-                true
+            if (supportLongClick) {
+                click.setOnLongClickListener {
+                    callback.invoke(true, WidgetCardData(applicationInfo.packageName, "local", drawable))
+                    true
+                }
             }
             scope.launch {
                 selectingLetter.collect {

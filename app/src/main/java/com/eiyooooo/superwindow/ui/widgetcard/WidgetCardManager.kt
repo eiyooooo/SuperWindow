@@ -94,7 +94,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             mainModel.shizukuStatus.filter { it == ShizukuStatus.HAVE_PERMISSION }.first()
             delay(2000)
             mainModel.updateWidgetCardDataGroup {
-                it.copy(secondWidgetCardData = WidgetCardData("com.coloros.note", "local"), thirdWidgetCardData = WidgetCardData("com.samsung.android.app.notes", "local"))
+                it.copy(secondWidgetCardData = WidgetCardData("com.coloros.note", "local", LocalContent.getPackageIcon("com.coloros.note")), thirdWidgetCardData = WidgetCardData("com.samsung.android.app.notes", "local"))
             }
 //            while (true) {
 //                delay(2000)
@@ -215,6 +215,56 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         }
     }
 
+    fun replaceWidgetCard(targetIdentifier: String, newWidgetCardData: WidgetCardData) {
+        lastWidgetCardDataGroup = null
+        mainModel.updateWidgetCardDataGroup { current ->
+            when (targetIdentifier) {
+                current.firstWidgetCardData.identifier -> {
+                    current.copy(firstWidgetCardData = newWidgetCardData, backgroundWidgetCardData = current.backgroundWidgetCardData + current.firstWidgetCardData)
+                }
+
+                current.secondWidgetCardData?.identifier -> {
+                    current.copy(secondWidgetCardData = newWidgetCardData, backgroundWidgetCardData = current.backgroundWidgetCardData + current.secondWidgetCardData)
+                }
+
+                current.thirdWidgetCardData?.identifier -> {
+                    current.copy(thirdWidgetCardData = newWidgetCardData, backgroundWidgetCardData = current.backgroundWidgetCardData + current.thirdWidgetCardData)
+                }
+
+                else -> current
+            }
+        }
+    }
+
+    fun minimizeWidgetCard(target: WidgetCardData) {
+        mainModel.updateWidgetCardDataGroup { current ->
+            when (target.identifier) {
+                current.firstWidgetCardData.identifier -> {
+                    if (current.secondWidgetCardData != null) {
+                        current.copy(
+                            firstWidgetCardData = current.secondWidgetCardData,
+                            secondWidgetCardData = current.thirdWidgetCardData,
+                            thirdWidgetCardData = null,
+                            backgroundWidgetCardData = current.backgroundWidgetCardData + target
+                        )
+                    } else {
+                        current.copy(firstWidgetCardData = controlPanelWidgetCard.widgetCardData, backgroundWidgetCardData = current.backgroundWidgetCardData + target)
+                    }
+                }
+
+                current.secondWidgetCardData?.identifier -> {
+                    current.copy(secondWidgetCardData = current.thirdWidgetCardData, thirdWidgetCardData = null, backgroundWidgetCardData = current.backgroundWidgetCardData + target)
+                }
+
+                current.thirdWidgetCardData?.identifier -> {
+                    current.copy(thirdWidgetCardData = null, backgroundWidgetCardData = current.backgroundWidgetCardData + target)
+                }
+
+                else -> current
+            }
+        }
+    }
+
     fun removeWidgetCard(target: WidgetCardView) {
         mainModel.updateWidgetCardDataGroup { current ->
             when (target.widgetCardData.identifier) {
@@ -269,13 +319,8 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         widgetCards.forEach {
             it.makeCover()
         }
-        if (lastGroup == null) {
-            mainActivity.bindingExpanded.widgetContainer.postDelayed({
-                widgetCards.forEach {
-                    it.startCoverTransitAnimation()
-                }
-            }, 250)
-        } else {
+
+        if (lastGroup != null) {
             TransitionManager.beginDelayedTransition(
                 mainActivity.bindingExpanded.widgetContainer,
                 if (group.dragging) cardDraggingTransition else cardChangedTransition
@@ -338,6 +383,14 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         }
 
         constraintSet.applyTo(mainActivity.bindingExpanded.widgetContainer)
+
+        if (lastGroup == null) {
+            mainActivity.bindingExpanded.widgetContainer.postDelayed({
+                widgetCards.forEach {
+                    it.startCoverTransitAnimation()
+                }
+            }, 250)
+        }
     }
 
     private val cardChangedTransition = AutoTransition().apply {
