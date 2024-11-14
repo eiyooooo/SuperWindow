@@ -24,6 +24,12 @@ fun Context.sp2px(sp: Int): Int {
     return (TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp.toFloat(), resources.displayMetrics) + 0.5f).toInt()
 }
 
+fun Context.getAttrColor(attr: Int): Int {
+    val typedValue = TypedValue()
+    theme.resolveAttribute(attr, typedValue, true)
+    return typedValue.data
+}
+
 fun View.getBitmap(): Bitmap? {
     return try {
         this.drawToBitmap()

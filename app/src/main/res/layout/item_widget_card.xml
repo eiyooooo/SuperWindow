@@ -17,14 +17,13 @@
         android:layout_height="match_parent"
         android:visibility="gone" />
 
-    <View
+    <com.eiyooooo.superwindow.ui.view.ControlBarView
         android:id="@+id/control_bar"
         android:layout_width="50dp"
         android:layout_height="6dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="12dp"
-        android:alpha="0.4"
-        android:background="@drawable/top_handle_background" />
+        android:alpha="0.4" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/popup_menu"
