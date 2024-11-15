@@ -13,13 +13,14 @@ import android.graphics.drawable.Drawable
 import android.hardware.display.VirtualDisplay
 import android.os.Build
 import android.os.UserHandle
-import android.view.MotionEvent
+import android.view.InputEvent
 import android.view.Surface
 import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
 import com.eiyooooo.superwindow.application
 import com.eiyooooo.superwindow.entity.CustomHandler.customHandler
 import com.eiyooooo.superwindow.entity.SystemServices
+import com.eiyooooo.superwindow.util.setDisplayId
 import com.eiyooooo.superwindow.wrapper.DisplayManagerWrapper
 import com.eiyooooo.superwindow.wrapper.IPackageManager
 import com.eiyooooo.superwindow.wrapper.ServiceManager
@@ -294,12 +295,12 @@ object LocalContent {//TODO
         }
     }
 
-    fun injectMotionEvent(motionEvent: MotionEvent, displayId: Int) {
+    fun injectEvent(event: InputEvent, displayId: Int) {
         try {
-            ServiceManager.getSetDisplayIdMethod().invoke(motionEvent, displayId)
-            ServiceManager.getInputManager().injectInputEvent(motionEvent, 0)
+            event.setDisplayId(displayId)
+            ServiceManager.getInputManager().injectInputEvent(event, 0)
         } catch (t: Throwable) {
-            Timber.e(t, "injectMotionEvent failed")
+            Timber.e(t, "injectEvent failed")
         }
     }
 

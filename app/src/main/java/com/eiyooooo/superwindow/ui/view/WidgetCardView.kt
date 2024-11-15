@@ -174,7 +174,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     private val textureViewTouchListener by lazy {
         OnTouchListener { _, event ->
             displayId?.let {
-                LocalContent.injectMotionEvent(event, it)
+                LocalContent.injectEvent(event, it)
             }
             true
         }
