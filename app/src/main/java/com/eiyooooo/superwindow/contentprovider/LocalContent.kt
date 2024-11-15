@@ -12,13 +12,13 @@ import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.hardware.display.VirtualDisplay
 import android.os.Build
-import android.os.Handler
 import android.os.UserHandle
 import android.view.MotionEvent
 import android.view.Surface
 import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
 import com.eiyooooo.superwindow.application
+import com.eiyooooo.superwindow.entity.CustomHandler.customHandler
 import com.eiyooooo.superwindow.entity.SystemServices
 import com.eiyooooo.superwindow.wrapper.DisplayManagerWrapper
 import com.eiyooooo.superwindow.wrapper.IPackageManager
@@ -278,7 +278,7 @@ object LocalContent {//TODO
                             appsMap[it.applicationInfo.packageName] = it to icon
                         }
                     SystemServices.launcherApps.unregisterCallback(appsCallback)
-                    SystemServices.launcherApps.registerCallback(appsCallback, Handler(application.mainLooper))
+                    SystemServices.launcherApps.registerCallback(appsCallback, customHandler)
                 }
             } catch (e: Exception) {
                 Timber.e(e, "initAppsList failed")
