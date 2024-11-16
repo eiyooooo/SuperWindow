@@ -27,26 +27,15 @@ class ControlBarView @JvmOverloads constructor(context: Context, attrs: Attribut
 
     fun changeFocusMode(focus: Boolean) {
         animator?.cancel()
-        if (focus) {
-            animator = ValueAnimator.ofFloat(rectangleAlpha, 0f).apply {
-                duration = 150
-                interpolator = AccelerateInterpolator()
-                addUpdateListener {
-                    rectangleAlpha = it.animatedValue as Float
-                    invalidate()
-                }
-                start()
+        val targetRectangleAlpha = if (focus) 1f else 0f
+        animator = ValueAnimator.ofFloat(rectangleAlpha, targetRectangleAlpha).apply {
+            duration = 150
+            interpolator = AccelerateInterpolator()
+            addUpdateListener {
+                rectangleAlpha = it.animatedValue as Float
+                invalidate()
             }
-        } else {
-            animator = ValueAnimator.ofFloat(rectangleAlpha, 1f).apply {
-                duration = 150
-                interpolator = AccelerateInterpolator()
-                addUpdateListener {
-                    rectangleAlpha = it.animatedValue as Float
-                    invalidate()
-                }
-                start()
-            }
+            start()
         }
         focusMode = focus
     }
