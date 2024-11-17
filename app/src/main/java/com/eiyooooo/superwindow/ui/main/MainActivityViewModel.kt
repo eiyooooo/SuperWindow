@@ -23,7 +23,7 @@ import rikka.shizuku.Shizuku
 class MainActivityViewModel : ViewModel() {
 
     private val mWidgetCardDataGroup: MutableStateFlow<WidgetCardDataGroup> by lazy { MutableStateFlow(WidgetCardDataGroup(firstWidgetCardData = WidgetCardData(true, "controlPanel"))) }
-    val widgetCardDataGroup: LiveData<WidgetCardDataGroup> = mWidgetCardDataGroup.asLiveData()
+    val widgetCardDataGroup: StateFlow<WidgetCardDataGroup> = mWidgetCardDataGroup
 
     fun updateWidgetCardDataGroup(function: (WidgetCardDataGroup) -> WidgetCardDataGroup) {
         mWidgetCardDataGroup.update(function)

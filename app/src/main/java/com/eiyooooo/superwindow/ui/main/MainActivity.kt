@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity() {
 
     internal fun showSnackBar(text: String) {
         if (isExpanded) {
-            val widgetCardDataGroup = mainModel.widgetCardDataGroup.value!!
+            val widgetCardDataGroup = mainModel.widgetCardDataGroup.value
             if (widgetCardDataGroup.isControlPanelForeground) {
                 if (widgetCardDataGroup.foregroundWidgetCardCount == 1) {
                     Snackbar.make(bindingExpanded.root, text, Snackbar.LENGTH_LONG).setAnchorView(bindingExpanded.bar).show()
