@@ -8,10 +8,11 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import com.eiyooooo.superwindow.util.getAttrColor
+import java.util.concurrent.atomic.AtomicBoolean
 
 class ControlBarView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
 
-    private var focusMode = false
+    private var focusMode = AtomicBoolean(false)
     private var rectangleAlpha = 0f
     private var animator: ValueAnimator? = null
 
@@ -26,6 +27,8 @@ class ControlBarView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     fun changeFocusMode(focus: Boolean) {
+        if (focusMode.get() == focus) return
+        focusMode.set(focus)
         animator?.cancel()
         val targetRectangleAlpha = if (focus) 1f else 0f
         animator = ValueAnimator.ofFloat(rectangleAlpha, targetRectangleAlpha).apply {
@@ -37,7 +40,6 @@ class ControlBarView @JvmOverloads constructor(context: Context, attrs: Attribut
             }
             start()
         }
-        focusMode = focus
     }
 
     override fun onDraw(canvas: Canvas) {

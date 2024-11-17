@@ -23,6 +23,7 @@ import androidx.core.view.animation.PathInterpolatorCompat
 import com.eiyooooo.superwindow.contentprovider.LocalContent
 import com.eiyooooo.superwindow.databinding.ItemWidgetCardBinding
 import com.eiyooooo.superwindow.ui.main.MainActivity
+import com.eiyooooo.superwindow.ui.widgetcard.FocusManager
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardDragShadowBuilder
 import com.eiyooooo.superwindow.util.BlurUtils
@@ -123,6 +124,9 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (event.action == MotionEvent.ACTION_DOWN) {
+            FocusManager.updateFocusingWidgetCard { widgetCardData.identifier }
+        }
         val view = targetView ?: return super.dispatchTouchEvent(event)
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -173,10 +177,20 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
 
     private val textureViewTouchListener by lazy {
         OnTouchListener { _, event ->
-            displayId?.let {
-                LocalContent.injectEvent(event, it)
+            if (widgetCardData.isLocalProvider) {
+                displayId?.let {
+                    LocalContent.injectEvent(event, it)
+                }
             }
             true
+        }
+    }
+
+    fun injectBackEvent() {
+        if (widgetCardData.isLocalProvider) {
+            displayId?.let {
+                LocalContent.injectBackEvent(it)
+            }
         }
     }
 
@@ -270,6 +284,10 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     fun release() {
         setContentView()
         makeCover()
+    }
+
+    fun changeFocusMode(focus: Boolean) {
+        widgetCard.controlBar.changeFocusMode(focus)
     }
 
     private val showingPopupMenu = AtomicBoolean(false)

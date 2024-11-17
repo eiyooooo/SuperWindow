@@ -12,8 +12,11 @@ import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.hardware.display.VirtualDisplay
 import android.os.Build
+import android.os.SystemClock
 import android.os.UserHandle
+import android.view.InputDevice
 import android.view.InputEvent
+import android.view.KeyEvent
 import android.view.Surface
 import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
@@ -302,6 +305,13 @@ object LocalContent {//TODO
         } catch (t: Throwable) {
             Timber.e(t, "injectEvent failed")
         }
+    }
+
+    fun injectBackEvent(displayId: Int) {
+        val down = KeyEvent(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK, 0, 0, -1, 0, 0, InputDevice.SOURCE_KEYBOARD)
+        val up = KeyEvent(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK, 0, 0, -1, 0, 0, InputDevice.SOURCE_KEYBOARD)
+        injectEvent(down, displayId)
+        injectEvent(up, displayId)
     }
 
     private fun execReadOutput(command: String): String {

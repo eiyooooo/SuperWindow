@@ -4,6 +4,7 @@ import android.os.Build
 import android.view.DragEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.animation.PathInterpolatorCompat
 import androidx.core.view.children
@@ -82,6 +83,31 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                         removeWidgetCard(it)
                     }
                 }
+            }
+        }
+
+        val onBackPressedCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                widgetCardMap[FocusManager.focusingWidgetCard.value]?.injectBackEvent()
+            }
+        }
+        mainActivity.onBackPressedDispatcher.addCallback(mainActivity, onBackPressedCallback)
+        mainActivity.lifecycleScope.launch {
+            FocusManager.focusingWidgetCard.collect { identifier ->
+                var controlPanelFocus = true
+                widgetCardMap.values.forEach {
+                    val isFocused = it.widgetCardData.identifier == identifier
+                    it.changeFocusMode(isFocused)
+                    if (isFocused) {
+                        controlPanelFocus = false
+                    }
+                }
+                if (::controlPanelWidgetCard.isInitialized) {
+                    controlPanelWidgetCard.changeFocusMode(controlPanelFocus)
+                } else if (controlPanelFocus && identifier != "controlPanel") {
+                    FocusManager.updateFocusingWidgetCard { "controlPanel" }
+                }
+                onBackPressedCallback.isEnabled = !controlPanelFocus
             }
         }
 
@@ -181,9 +207,10 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             else -> thirdWidgetCardData
         } ?: return null
         return if (widgetCardData.isControlPanel) {
-            if (!this@WidgetCardManager::controlPanelWidgetCard.isInitialized) {
+            if (!::controlPanelWidgetCard.isInitialized) {
                 controlPanelWidgetCard = WidgetCardView(mainActivity.bindingControlPanelExpanded.root, widgetCardData).apply {
                     setOnDragListener(dragListener)
+                    changeFocusMode(FocusManager.focusingWidgetCard.value == widgetCardData.identifier)
                 }
             }
             controlPanelWidgetCard
@@ -234,6 +261,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 else -> current
             }
         }
+        FocusManager.updateFocusingWidgetCard { newWidgetCardData.identifier }
     }
 
     fun minimizeWidgetCard(target: WidgetCardData) {
@@ -263,6 +291,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 else -> current
             }
         }
+        FocusManager.updateFocusingWidgetCard { "controlPanel" }
     }
 
     fun removeWidgetCard(target: WidgetCardView) {
@@ -290,6 +319,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             }
         }
         widgetCardMap.remove(target.widgetCardData.identifier)
+        FocusManager.updateFocusingWidgetCard { "controlPanel" }
     }
 
     fun makeCardsBlur(blur: Boolean) {
