@@ -120,7 +120,8 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             mainModel.shizukuStatus.filter { it == ShizukuStatus.HAVE_PERMISSION }.first()
             delay(2000)
             mainModel.updateWidgetCardDataGroup {
-                it.copy(secondWidgetCardData = WidgetCardData("com.coloros.note", "local", LocalContent.getPackageIcon("com.coloros.note")), thirdWidgetCardData = WidgetCardData("com.samsung.android.app.notes", "local"))
+                it.copy(secondWidgetCardData = WidgetCardData("moe.shizuku.privileged.api", "local", LocalContent.getPackageIcon("moe.shizuku.privileged.api")),
+                    thirdWidgetCardData = WidgetCardData("com.eiyooooo.example", "local", LocalContent.getPackageIcon("com.eiyooooo.example")))
             }
 //            while (true) {
 //                delay(2000)
