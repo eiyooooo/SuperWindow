@@ -23,9 +23,9 @@ import androidx.core.view.animation.PathInterpolatorCompat
 import com.eiyooooo.superwindow.contentprovider.LocalContent
 import com.eiyooooo.superwindow.databinding.ItemWidgetCardBinding
 import com.eiyooooo.superwindow.ui.main.MainActivity
-import com.eiyooooo.superwindow.ui.widgetcard.FocusManager
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardDragShadowBuilder
+import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardFocusManager
 import com.eiyooooo.superwindow.util.BlurUtils
 import com.eiyooooo.superwindow.util.dp2px
 import com.eiyooooo.superwindow.util.startPopupMenuAnimation
@@ -125,7 +125,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         if (event.action == MotionEvent.ACTION_DOWN) {
-            FocusManager.updateFocusingWidgetCard { widgetCardData.identifier }
+            WidgetCardFocusManager.updateFocusing { widgetCardData.identifier }
         }
         val view = targetView ?: return super.dispatchTouchEvent(event)
         when (event.action) {

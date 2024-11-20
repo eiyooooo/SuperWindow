@@ -36,6 +36,13 @@ class MainActivityViewModel : ViewModel() {
         mDualSplitHandlePosition.update { position }
     }
 
+    private val mBackPressedCallbackIsEnabled: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    val backPressedCallbackIsEnabled: StateFlow<Boolean> = mBackPressedCallbackIsEnabled
+
+    fun updateBackPressedCallbackIsEnabled(function: (Boolean) -> Boolean) {
+        mBackPressedCallbackIsEnabled.update(function)
+    }
+
     private val mShizukuStatus: MutableStateFlow<ShizukuStatus> by lazy { MutableStateFlow(ShizukuStatus.SHIZUKU_NOT_RUNNING) }
     val shizukuStatus: StateFlow<ShizukuStatus> = mShizukuStatus
 

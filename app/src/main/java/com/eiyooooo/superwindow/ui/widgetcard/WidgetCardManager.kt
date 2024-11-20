@@ -21,6 +21,7 @@ import com.eiyooooo.superwindow.ui.main.ShizukuStatus
 import com.eiyooooo.superwindow.ui.view.WidgetCardView
 import com.eiyooooo.superwindow.util.BlurUtils
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -63,6 +64,8 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                         showSingleWidgetCard(it, first)
                     }
                 }
+
+                WidgetCardFocusManager.refreshFocusMode()
             }
         }
 
@@ -90,26 +93,32 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
 
         val onBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                widgetCardMap[FocusManager.focusingWidgetCard.value]?.injectBackEvent()
+                widgetCardMap[WidgetCardFocusManager.focusing.value]?.injectBackEvent()
+            }
+        }
+        mainActivity.lifecycleScope.launch {
+            mainModel.backPressedCallbackIsEnabled.collect {
+                onBackPressedCallback.isEnabled = it
             }
         }
         mainActivity.onBackPressedDispatcher.addCallback(mainActivity, onBackPressedCallback)
+
         mainActivity.lifecycleScope.launch {
-            FocusManager.focusingWidgetCard.collect { identifier ->
-                var controlPanelFocus = true
+            WidgetCardFocusManager.focusing.combine(WidgetCardFocusManager.focusModeUpdater) { focusingWidgetCard, _ ->
+                focusingWidgetCard
+            }.collect { identifier ->
+                var haveFocus = false
                 widgetCardMap.values.forEach {
-                    val isFocused = it.widgetCardData.identifier == identifier
-                    it.changeFocusMode(isFocused)
-                    if (isFocused) {
-                        controlPanelFocus = false
+                    val focus = it.widgetCardData.identifier == identifier
+                    it.changeFocusMode(focus)
+                    if (focus) {
+                        haveFocus = true
                     }
                 }
-                if (::controlPanelWidgetCard.isInitialized) {
-                    controlPanelWidgetCard.changeFocusMode(controlPanelFocus)
-                } else if (controlPanelFocus && identifier != "controlPanel") {
-                    FocusManager.updateFocusingWidgetCard { "controlPanel" }
+                controlPanelWidgetCard.takeIf { ::controlPanelWidgetCard.isInitialized }?.let {
+                    it.changeFocusMode(it.widgetCardData.identifier == identifier)
                 }
-                onBackPressedCallback.isEnabled = !controlPanelFocus
+                mainModel.updateBackPressedCallbackIsEnabled { haveFocus }
             }
         }
 
@@ -213,7 +222,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             if (!::controlPanelWidgetCard.isInitialized) {
                 controlPanelWidgetCard = WidgetCardView(mainActivity.bindingControlPanelExpanded.root, widgetCardData).apply {
                     setOnDragListener(dragListener)
-                    changeFocusMode(FocusManager.focusingWidgetCard.value == widgetCardData.identifier)
+                    changeFocusMode(WidgetCardFocusManager.focusing.value == widgetCardData.identifier)
                 }
             }
             controlPanelWidgetCard
@@ -264,7 +273,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 else -> current
             }
         }
-        FocusManager.updateFocusingWidgetCard { newWidgetCardData.identifier }
+        WidgetCardFocusManager.updateFocusing { newWidgetCardData.identifier }
     }
 
     fun minimizeWidgetCard(target: WidgetCardData) {
@@ -294,7 +303,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 else -> current
             }
         }
-        FocusManager.updateFocusingWidgetCard { "controlPanel" }
+        WidgetCardFocusManager.updateFocusing { "controlPanel" }
     }
 
     fun removeWidgetCard(target: WidgetCardView) {
@@ -322,7 +331,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             }
         }
         widgetCardMap.remove(target.widgetCardData.identifier)
-        FocusManager.updateFocusingWidgetCard { "controlPanel" }
+        WidgetCardFocusManager.updateFocusing { "controlPanel" }
     }
 
     fun makeCardsBlur(blur: Boolean) {
