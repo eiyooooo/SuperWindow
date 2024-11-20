@@ -66,10 +66,10 @@ class MainActivity : AppCompatActivity() {
                     it.root.setOnDragListener { _, event ->
                         event.action == DragEvent.ACTION_DRAG_STARTED || event.action == DragEvent.ACTION_DROP
                     }
-                    widgetCardManager.init()
                     setContentView(it.root)
                     it.root.post { SystemServices.currentDisplay = it.root.display }
                 }
+                widgetCardManager.init()
                 setFullScreen(force = true)
                 ViewCompat.setOnApplyWindowInsetsListener(bindingExpanded.root) { view, insets ->
                     val bars = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
