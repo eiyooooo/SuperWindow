@@ -27,6 +27,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicReference
 
 class WidgetCardManager(private val mainActivity: MainActivity, private val mainModel: MainActivityViewModel) {
 
@@ -483,25 +485,6 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
     private val cardDraggingTransition = AutoTransition().apply {
         duration = 250
         interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)
-        addListener(object : Transition.TransitionListener {
-            override fun onTransitionStart(transition: Transition) {
-                swapping.set(true)
-            }
-
-            override fun onTransitionEnd(transition: Transition) {
-                swapping.set(false)
-            }
-
-            override fun onTransitionCancel(transition: Transition) {
-                swapping.set(false)
-            }
-
-            override fun onTransitionPause(transition: Transition) {
-            }
-
-            override fun onTransitionResume(transition: Transition) {
-            }
-        })
     }
 
     private val dualSplitHandlePositionObserver = Observer<Float> {
@@ -517,7 +500,8 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
     }
 
     private val dragging = AtomicBoolean(false)
-    private val swapping = AtomicBoolean(false)
+    private val swappingStartTime = AtomicLong(0L)
+    private val lastSwappedWidgetCardView = AtomicReference<WidgetCardView?>(null)
     private var waitDragEventRunnable: Runnable? = null
 
     internal fun startWaitDragEvent() {
@@ -529,7 +513,8 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         }
         waitDragEventRunnable = Runnable {
             dragging.set(false)
-            swapping.set(false)
+            swappingStartTime.set(0L)
+            lastSwappedWidgetCardView.set(null)
             mainModel.updateWidgetCardDataGroup { if (it.dragging) it.copy(dragging = false) else it }
             Timber.d("WidgetCardDataGroup dragging ended by waitDragEventRunnable")
             waitDragEventRunnable = null
@@ -555,22 +540,38 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
 
             DragEvent.ACTION_DRAG_ENTERED -> {
                 if (dragging.get() && cardView != draggingView) {
-                    swapping.set(true)
-                    mainModel.updateWidgetCardDataGroup {
-                        it.swap(draggingView.widgetCardData, cardView.widgetCardData)
+                    if (lastSwappedWidgetCardView.get() != cardView) {
+                        swappingStartTime.set(System.currentTimeMillis())
+                        lastSwappedWidgetCardView.set(cardView)
+                        mainModel.updateWidgetCardDataGroup {
+                            it.swap(draggingView.widgetCardData, cardView.widgetCardData)
+                        }
+                        Timber.d("swap: ${draggingView.widgetCardData.identifier} <-> ${cardView.widgetCardData.identifier} by ACTION_DRAG_ENTERED")
+                    } else {
+                        val currentTime = System.currentTimeMillis()
+                        val lastTime = swappingStartTime.get()
+                        if (lastTime != 0L && currentTime - lastTime >= 250 && swappingStartTime.compareAndSet(lastTime, currentTime)) {
+                            mainModel.updateWidgetCardDataGroup {
+                                it.swap(draggingView.widgetCardData, cardView.widgetCardData)
+                            }
+                            Timber.d("swap: ${draggingView.widgetCardData.identifier} <-> ${cardView.widgetCardData.identifier} by ACTION_DRAG_ENTERED debounce")
+                        }
                     }
-                    Timber.d("swap: ${draggingView.widgetCardData.identifier} <-> ${cardView.widgetCardData.identifier} by ACTION_DRAG_ENTERED")
                 }
                 true
             }
 
             DragEvent.ACTION_DRAG_LOCATION -> {
-                if (dragging.get() && !swapping.get() && cardView != draggingView) {
-                    swapping.set(true)
-                    mainModel.updateWidgetCardDataGroup {
-                        it.swap(draggingView.widgetCardData, cardView.widgetCardData)
+                if (dragging.get() && cardView != draggingView) {
+                    val currentTime = System.currentTimeMillis()
+                    val lastTime = swappingStartTime.get()
+                    if (lastTime != 0L && currentTime - lastTime >= 250 && swappingStartTime.compareAndSet(lastTime, currentTime)) {
+                        lastSwappedWidgetCardView.set(cardView)
+                        mainModel.updateWidgetCardDataGroup {
+                            it.swap(draggingView.widgetCardData, cardView.widgetCardData)
+                        }
+                        Timber.d("swap: ${draggingView.widgetCardData.identifier} <-> ${cardView.widgetCardData.identifier} by ACTION_DRAG_LOCATION")
                     }
-                    Timber.d("swap: ${draggingView.widgetCardData.identifier} <-> ${cardView.widgetCardData.identifier} by ACTION_DRAG_LOCATION")
                 }
                 true
             }
@@ -579,7 +580,8 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             DragEvent.ACTION_DRAG_ENDED -> {
                 if (dragging.get()) {
                     dragging.set(false)
-                    swapping.set(false)
+                    swappingStartTime.set(0L)
+                    lastSwappedWidgetCardView.set(null)
                     mainActivity.bindingExpanded.widgetContainer.post {
                         mainModel.updateWidgetCardDataGroup { if (it.dragging) it.copy(dragging = false) else it }
                         Timber.d("WidgetCardDataGroup dragging ended by DragEvent")
