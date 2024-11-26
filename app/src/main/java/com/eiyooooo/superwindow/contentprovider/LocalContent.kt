@@ -96,9 +96,8 @@ object LocalContent {//TODO
         override fun onTaskRemovalStarted(taskInfo: RunningTaskInfo) {
             mRunningTasksInVD.update {
                 it.filter { (displayId, tasks) ->
-                    tasks.remove(taskInfo.taskId)
                     if (tasks.remove(taskInfo.taskId)) {
-                        Timber.d("Task: $taskInfo.taskId is removed from vd: $displayId")
+                        Timber.d("Task: ${taskInfo.taskId} is closed in vd: $displayId")
                     }
                     tasks.isNotEmpty()
                 }.toMutableMap()
