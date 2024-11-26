@@ -97,7 +97,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             }
         }
         mainActivity.lifecycleScope.launch {
-            mainModel.backPressedCallbackIsEnabled.collect {
+            mainModel.backPressedCallbackIsEnabled.observe(mainActivity) {
                 onBackPressedCallback.isEnabled = it
             }
         }

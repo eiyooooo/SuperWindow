@@ -37,7 +37,7 @@ class MainActivityViewModel : ViewModel() {
     }
 
     private val mBackPressedCallbackIsEnabled: MutableStateFlow<Boolean> = MutableStateFlow(true)
-    val backPressedCallbackIsEnabled: StateFlow<Boolean> = mBackPressedCallbackIsEnabled
+    val backPressedCallbackIsEnabled: LiveData<Boolean> = mBackPressedCallbackIsEnabled.asLiveData()
 
     fun updateBackPressedCallbackIsEnabled(function: (Boolean) -> Boolean) {
         mBackPressedCallbackIsEnabled.update(function)
