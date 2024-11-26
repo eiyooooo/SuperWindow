@@ -446,30 +446,30 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
 
             override fun onTransitionEnd(transition: Transition) {
                 firstWidgetCard?.run {
-                    if (dragging.get()) onDragEnded()
+                    onDragEnded()
                     startCoverTransitAnimation()
                 }
                 secondWidgetCard?.run {
-                    if (dragging.get()) onDragEnded()
+                    onDragEnded()
                     startCoverTransitAnimation()
                 }
                 thirdWidgetCard?.run {
-                    if (dragging.get()) onDragEnded()
+                    onDragEnded()
                     startCoverTransitAnimation()
                 }
             }
 
             override fun onTransitionCancel(transition: Transition) {
                 firstWidgetCard?.run {
-                    if (dragging.get()) onDragEnded()
+                    onDragEnded()
                     startCoverTransitAnimation()
                 }
                 secondWidgetCard?.run {
-                    if (dragging.get()) onDragEnded()
+                    onDragEnded()
                     startCoverTransitAnimation()
                 }
                 thirdWidgetCard?.run {
-                    if (dragging.get()) onDragEnded()
+                    onDragEnded()
                     startCoverTransitAnimation()
                 }
             }
@@ -578,8 +578,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
 
             DragEvent.ACTION_DROP,
             DragEvent.ACTION_DRAG_ENDED -> {
-                if (dragging.get()) {
-                    dragging.set(false)
+                if (dragging.compareAndSet(true, false)) {
                     swappingStartTime.set(0L)
                     lastSwappedWidgetCardView.set(null)
                     mainActivity.bindingExpanded.widgetContainer.post {

@@ -68,8 +68,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                     MotionEvent.ACTION_MOVE -> {
                         val deltaX = abs(event.x - initialX)
                         val deltaY = abs(event.y - initialY)
-                        if ((deltaX > touchSlop || deltaY > touchSlop) && !dragging.get()) {
-                            dragging.set(true)
+                        if ((deltaX > touchSlop || deltaY > touchSlop) && dragging.compareAndSet(false, true)) {
                             Timber.d("ACTION_MOVE -> startDragAndDrop -> WidgetCardView@${widgetCardData.identifier}")
                             makeCover()
                             (context as? MainActivity)?.startWaitDragEvent()
@@ -106,12 +105,13 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     fun onDragEnded() {
-        ObjectAnimator.ofFloat(this, "alpha", 0.3F, 1F).apply {
-            duration = 200
-            interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)
-        }.start()
-        startCoverTransitAnimation()
-        dragging.set(false)
+        if (dragging.compareAndSet(true, false)) {
+            ObjectAnimator.ofFloat(this, "alpha", 0.3F, 1F).apply {
+                duration = 200
+                interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)
+            }.start()
+            startCoverTransitAnimation()
+        }
     }
 
     private var expandTouchPx = 0
@@ -329,17 +329,18 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     private fun startHidePopupMenuAnimation() {
-        if (!showingPopupMenu.get() && popupMenuAnimatorSet?.isRunning == false) return
-        popupMenuAnimatorSet?.cancel()
-        val popupMenu = if (widgetCardData.isControlPanel) {
-            widgetCard.minimizeControlPanel
-        } else {
-            widgetCard.popupMenu
-        }
-        (context as? MainActivity)?.setTouchEventInterceptor()
-        popupMenuAnimatorSet = popupMenu.startPopupMenuAnimation(false) {
-            popupMenu.visibility = GONE
-            showingPopupMenu.set(false)
+        if (showingPopupMenu.get() || popupMenuAnimatorSet?.isRunning == true) {
+            popupMenuAnimatorSet?.cancel()
+            val popupMenu = if (widgetCardData.isControlPanel) {
+                widgetCard.minimizeControlPanel
+            } else {
+                widgetCard.popupMenu
+            }
+            (context as? MainActivity)?.setTouchEventInterceptor()
+            popupMenuAnimatorSet = popupMenu.startPopupMenuAnimation(false) {
+                popupMenu.visibility = GONE
+                showingPopupMenu.set(false)
+            }
         }
     }
 

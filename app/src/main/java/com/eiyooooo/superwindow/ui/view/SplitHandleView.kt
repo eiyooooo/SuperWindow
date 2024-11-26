@@ -60,8 +60,7 @@ class SplitHandleView @JvmOverloads constructor(context: Context, attrs: Attribu
                         val deltaY = abs(event.y - initialY)
                         if (deltaX > touchSlop || deltaY > touchSlop) {
                             onDragHandle?.invoke(initialViewX + event.rawX - initialRawX)
-                            if (!blurring.get()) {
-                                blurring.set(true)
+                            if (blurring.compareAndSet(false, true)) {
                                 for (widgetCard in widgetCards!!) {
                                     widgetCard.makeBlur()
                                 }
