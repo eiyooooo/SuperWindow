@@ -20,7 +20,7 @@ import android.view.ViewGroup
 import androidx.cardview.widget.CardView
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.animation.PathInterpolatorCompat
-import com.eiyooooo.superwindow.contentprovider.LocalContent
+import com.eiyooooo.superwindow.content.LocalContent
 import com.eiyooooo.superwindow.databinding.ItemWidgetCardBinding
 import com.eiyooooo.superwindow.ui.main.MainActivity
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData

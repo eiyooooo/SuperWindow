@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import com.eiyooooo.superwindow.contentprovider.LocalContent
+import com.eiyooooo.superwindow.content.LocalContent
 import com.eiyooooo.superwindow.databinding.LocalContentPanelBinding
 import com.eiyooooo.superwindow.ui.main.MainActivity
 import com.github.promeg.pinyinhelper.Pinyin

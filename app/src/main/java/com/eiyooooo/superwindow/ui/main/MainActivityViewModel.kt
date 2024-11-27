@@ -5,7 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.eiyooooo.superwindow.contentprovider.LocalContent
+import com.eiyooooo.superwindow.content.LocalContent
 import com.eiyooooo.superwindow.ui.controlpanel.HomeData
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardDataGroup

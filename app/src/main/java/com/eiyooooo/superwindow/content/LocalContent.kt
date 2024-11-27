@@ -1,4 +1,4 @@
-package com.eiyooooo.superwindow.contentprovider
+package com.eiyooooo.superwindow.content
 
 import android.annotation.SuppressLint
 import android.app.ActivityManager.RunningTaskInfo

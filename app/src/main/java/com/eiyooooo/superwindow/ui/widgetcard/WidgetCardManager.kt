@@ -14,7 +14,7 @@ import androidx.transition.AutoTransition
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.eiyooooo.superwindow.R
-import com.eiyooooo.superwindow.contentprovider.LocalContent
+import com.eiyooooo.superwindow.content.LocalContent
 import com.eiyooooo.superwindow.ui.main.MainActivity
 import com.eiyooooo.superwindow.ui.main.MainActivityViewModel
 import com.eiyooooo.superwindow.ui.main.ShizukuStatus
