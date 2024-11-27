@@ -2,6 +2,7 @@ package com.eiyooooo.superwindow.ui.controlpanel
 
 import android.annotation.SuppressLint
 import com.eiyooooo.superwindow.ui.controlpanel.card.IntroductionViewHolder
+import com.eiyooooo.superwindow.ui.controlpanel.card.LocalContentViewHolder
 import com.eiyooooo.superwindow.ui.controlpanel.card.ShizukuInstructionViewHolder
 import com.eiyooooo.superwindow.ui.main.MainActivityViewModel
 import com.eiyooooo.superwindow.ui.main.ShizukuStatus
@@ -13,6 +14,7 @@ class HomeFragmentAdapter(private val mainModel: MainActivityViewModel) : IdBase
     companion object {
         private const val ID_INTRODUCTION = 0L
         private const val ID_SHIZUKU = 1L
+        private const val ID_LOCAL_CONTENT = 2L
     }
 
     init {
@@ -32,7 +34,9 @@ class HomeFragmentAdapter(private val mainModel: MainActivityViewModel) : IdBase
         homeData.shizukuStatus.let {
             addItem(ShizukuInstructionViewHolder.CREATOR, it, ID_SHIZUKU)
             mainModel.stopCheckingShizukuPermission()
-            if (it == ShizukuStatus.NO_PERMISSION) {
+            if (it == ShizukuStatus.HAVE_PERMISSION) {
+                addItem(LocalContentViewHolder.CREATOR, it, ID_LOCAL_CONTENT)
+            } else if (it == ShizukuStatus.NO_PERMISSION) {
                 mainModel.startCheckingShizukuPermission()
             }
         }

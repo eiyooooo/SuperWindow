@@ -16,7 +16,8 @@
     <string name="Shizuku_setup_instruction">Shizuku is not running, click to view Shizuku setup instructions</string>
     <string name="Shizuku_authorization_instruction">Once Shizuku permissions are granted, the app will have elevated privileges beyond regular apps, please be mindful of your device\'s security, click to grant Shizuku permission to this app</string>
 
-    <string name="local_content_panel">Local Applications</string>
+    <string name="local_app_launcher">Local App Launcher</string>
+    <string name="expand_mode_hint">Please rotate the device to landscape to enable expanded view</string>
 
     <string name="appearance">Appearance</string>
     <string name="dark_theme">Dark theme</string>

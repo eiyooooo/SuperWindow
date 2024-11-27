@@ -16,7 +16,8 @@
     <string name="Shizuku_setup_instruction">Shizuku未运行，点击查看Shizuku配置说明</string>
     <string name="Shizuku_authorization_instruction">授予Shizuku权限后软件将获得超过普通应用的权限，请注意自身设备的安全，点击授予本软件Shizuku权限</string>
 
-    <string name="local_content_panel">本机应用</string>
+    <string name="local_app_launcher">本地应用启动器</string>
+    <string name="expand_mode_hint">请将设备横屏以启用展开视图</string>
 
     <string name="appearance">界面外观</string>
     <string name="dark_theme">深色主题</string>
