@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.eiyooooo.superwindow.databinding.FragmentHomeBinding
+import com.eiyooooo.superwindow.ui.main.MainActivity
 import com.eiyooooo.superwindow.ui.main.MainActivityViewModel
 import rikka.recyclerview.addEdgeSpacing
 import rikka.recyclerview.addItemSpacing
@@ -16,8 +17,9 @@ import rikka.recyclerview.fixEdgeEffect
 class HomeFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeBinding
+    private val mainActivity: MainActivity by lazy { activity as MainActivity }
     private val mainModel: MainActivityViewModel by activityViewModels()
-    private val adapter by lazy { HomeFragmentAdapter(mainModel) }
+    private val adapter by lazy { HomeFragmentAdapter(mainActivity, mainModel) }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

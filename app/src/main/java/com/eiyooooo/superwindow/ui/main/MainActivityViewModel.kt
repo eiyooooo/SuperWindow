@@ -2,7 +2,6 @@ package com.eiyooooo.superwindow.ui.main
 
 import android.content.pm.PackageManager
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
@@ -15,6 +14,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -36,7 +36,7 @@ class MainActivityViewModel : ViewModel() {
         mDualSplitHandlePosition.update { position }
     }
 
-    private val mBackPressedCallbackIsEnabled: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private val mBackPressedCallbackIsEnabled: MutableStateFlow<Boolean> by lazy { MutableStateFlow(true) }
     val backPressedCallbackIsEnabled: LiveData<Boolean> = mBackPressedCallbackIsEnabled.asLiveData()
 
     fun updateBackPressedCallbackIsEnabled(function: (Boolean) -> Boolean) {
@@ -109,10 +109,10 @@ class MainActivityViewModel : ViewModel() {
 
     var currentControlPanelPage = 0
 
-    val homeData = MediatorLiveData<HomeData>().apply {
-        addSource(mShizukuStatus.asLiveData()) {
-            value = HomeData(it)
-        }
+    val homeData: LiveData<HomeData> by lazy {
+        combine(mShizukuStatus, LocalContent.ready) { shizukuStatus, localContentReady ->
+            HomeData(shizukuStatus, localContentReady)
+        }.asLiveData()
     }
 
     override fun onCleared() {

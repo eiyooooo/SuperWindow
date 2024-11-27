@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
-    private var isExpanded: Boolean = false
+    internal val isExpanded by lazy { resources.configuration.screenWidthDp >= 600 }
     private lateinit var bindingCompact: ActivityMainCompactBinding
     internal lateinit var bindingExpanded: ActivityMainExpandedBinding
     private lateinit var bindingControlPanelCompact: ControlPanelCompactBinding
@@ -46,43 +46,37 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        isExpanded = when (resources.configuration.screenWidthDp) {
-            in 0..599 -> {
-                bindingCompact = ActivityMainCompactBinding.inflate(layoutInflater).also {
-                    bindingControlPanelCompact = ControlPanelCompactBinding.inflate(layoutInflater, it.widgetContainer, true)
-                    it.overlay.setOnClickListener { hideElevatedView() }
-                    setContentView(it.root)
-                    it.root.post { SystemServices.currentDisplay = it.root.display }
+        if (isExpanded) {
+            bindingExpanded = ActivityMainExpandedBinding.inflate(layoutInflater).also {
+                bindingControlPanelExpanded = ControlPanelExpandedBinding.inflate(layoutInflater, null, false)
+                it.widgetContainer.addTargetView(it.leftSplitHandle)
+                it.widgetContainer.addTargetView(it.rightSplitHandle)
+                it.overlay.setOnClickListener { hideElevatedView() }
+                it.root.setOnDragListener { _, event ->
+                    event.action == DragEvent.ACTION_DRAG_STARTED || event.action == DragEvent.ACTION_DROP
                 }
-                false
+                setContentView(it.root)
+                it.root.post { SystemServices.currentDisplay = it.root.display }
             }
-
-            else -> {
-                bindingExpanded = ActivityMainExpandedBinding.inflate(layoutInflater).also {
-                    bindingControlPanelExpanded = ControlPanelExpandedBinding.inflate(layoutInflater, null, false)
-                    it.widgetContainer.addTargetView(it.leftSplitHandle)
-                    it.widgetContainer.addTargetView(it.rightSplitHandle)
-                    it.overlay.setOnClickListener { hideElevatedView() }
-                    it.root.setOnDragListener { _, event ->
-                        event.action == DragEvent.ACTION_DRAG_STARTED || event.action == DragEvent.ACTION_DROP
-                    }
-                    setContentView(it.root)
-                    it.root.post { SystemServices.currentDisplay = it.root.display }
+            widgetCardManager.init()
+            setFullScreen(force = true)
+            ViewCompat.setOnApplyWindowInsetsListener(bindingExpanded.root) { view, insets ->
+                val bars = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
+                view.updatePadding(left = bars.left, right = bars.right)
+                WindowInsetsCompat.CONSUMED
+            }
+            lifecycleScope.launch {
+                Preferences.topBottomPaddingFlow.collect {
+                    val padding = getResources().displayMetrics.heightPixels * it / 1000
+                    bindingExpanded.root.updatePadding(top = padding, bottom = padding)
                 }
-                widgetCardManager.init()
-                setFullScreen(force = true)
-                ViewCompat.setOnApplyWindowInsetsListener(bindingExpanded.root) { view, insets ->
-                    val bars = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
-                    view.updatePadding(left = bars.left, right = bars.right)
-                    WindowInsetsCompat.CONSUMED
-                }
-                lifecycleScope.launch {
-                    Preferences.topBottomPaddingFlow.collect {
-                        val padding = getResources().displayMetrics.heightPixels * it / 1000
-                        bindingExpanded.root.updatePadding(top = padding, bottom = padding)
-                    }
-                }
-                true
+            }
+        } else {
+            bindingCompact = ActivityMainCompactBinding.inflate(layoutInflater).also {
+                bindingControlPanelCompact = ControlPanelCompactBinding.inflate(layoutInflater, it.widgetContainer, true)
+                it.overlay.setOnClickListener { hideElevatedView() }
+                setContentView(it.root)
+                it.root.post { SystemServices.currentDisplay = it.root.display }
             }
         }
 

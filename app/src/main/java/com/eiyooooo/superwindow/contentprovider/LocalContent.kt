@@ -39,20 +39,21 @@ import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuRemoteProcess
 import timber.log.Timber
 
-object LocalContent {//TODO
+object LocalContent {
 
     private val currentPackageName by lazy { application.packageName }
     private val defaultScope = CoroutineScope(Dispatchers.Default)
 
-    private var init = false//TODO: UI
+    private val mReady: MutableStateFlow<Boolean> by lazy { MutableStateFlow(false) }
+    val ready: StateFlow<Boolean> = mReady
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     fun init() {
-        if (init) {
+        if (mReady.value) {
             Timber.d("Managers already init")
             return
         } else {
-            init = try {
+            mReady.value = try {
                 ServiceManager.setupManagers()
                 ServiceManager.getActivityTaskManager().registerTaskStackListener(runningTaskStackListener)
                 defaultScope.launch {
@@ -64,14 +65,14 @@ object LocalContent {//TODO
                 ServiceManager.destroy()
                 false
             }
-            Timber.d("Managers init: $init")
+            Timber.d("Managers init: ${mReady.value}")
         }
     }
 
     fun destroy() {
-        if (init) {
+        if (mReady.value) {
             ServiceManager.destroy()
-            init = false
+            mReady.value = false
         }
     }
 
