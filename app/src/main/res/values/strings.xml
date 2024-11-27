@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">SuperWindow</string>
     <string name="introduction">App Introduction</string>
-    <string name="introduction_detail">1. Multi-screen solution for large-screen devices\n2. Aims to provide the best experience for large-screen devices\n3. Requires Android 14 or higher and Shizuku authorization for local use\n4. For cross-device use, the target device must have Android 12L or higher and ADB enabled</string>
+    <string name="introduction_detail">1. Provides an enhanced multi-screen experience for large-screen devices\n2. Requires Android 14 or higher and Shizuku authorization\n3. This APP is experimental, usability may vary depending on the device.</string>
 
     <string name="home">Home</string>
     <string name="settings">Settings</string>
