@@ -36,39 +36,37 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
     private val widgetCardMap: MutableMap<String, WidgetCardView> = mutableMapOf()
 
     private val firstWidgetCard: WidgetCardView?
-        get() = mainModel.widgetCardDataGroup.value.getWidgetCard(1)
+        get() = mainModel.widgetCardDataGroup.value!!.getWidgetCard(1)
     private val secondWidgetCard: WidgetCardView?
-        get() = mainModel.widgetCardDataGroup.value.getWidgetCard(2)
+        get() = mainModel.widgetCardDataGroup.value!!.getWidgetCard(2)
     private val thirdWidgetCard: WidgetCardView?
-        get() = mainModel.widgetCardDataGroup.value.getWidgetCard(3)
+        get() = mainModel.widgetCardDataGroup.value!!.getWidgetCard(3)
 
     fun init() {
         BlurUtils.init(mainActivity.applicationContext)
 
-        mainActivity.lifecycleScope.launch {
-            mainModel.widgetCardDataGroup.collect {
-                mainModel.dualSplitHandlePosition.removeObserver(dualSplitHandlePositionObserver)
+        mainModel.widgetCardDataGroup.observe(mainActivity) {
+            mainModel.dualSplitHandlePosition.removeObserver(dualSplitHandlePositionObserver)
 
-                val first = it.getWidgetCard(1)
-                val second = it.getWidgetCard(2)
-                val third = it.getWidgetCard(3)
+            val first = it.getWidgetCard(1)
+            val second = it.getWidgetCard(2)
+            val third = it.getWidgetCard(3)
 
-                when {
-                    third != null && second != null && first != null -> {
-                        showTripleWidgetCard(it, first, second, third)
-                    }
-
-                    second != null && first != null -> {
-                        showDualWidgetCard(it, first, second)
-                    }
-
-                    first != null -> {
-                        showSingleWidgetCard(it, first)
-                    }
+            when {
+                third != null && second != null && first != null -> {
+                    showTripleWidgetCard(it, first, second, third)
                 }
 
-                WidgetCardFocusManager.refreshFocusMode()
+                second != null && first != null -> {
+                    showDualWidgetCard(it, first, second)
+                }
+
+                first != null -> {
+                    showSingleWidgetCard(it, first)
+                }
             }
+
+            WidgetCardFocusManager.refreshFocusMode()
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -122,8 +120,8 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                         haveFocus = true
                     }
                 }
-                controlPanelWidgetCard.takeIf { ::controlPanelWidgetCard.isInitialized }?.let {
-                    it.changeFocusMode(it.widgetCardData.identifier == identifier)
+                if (::controlPanelWidgetCard.isInitialized) {
+                    controlPanelWidgetCard.changeFocusMode(controlPanelWidgetCard.widgetCardData.identifier == identifier)
                 }
                 mainModel.updateBackPressedCallbackIsEnabled { haveFocus }
             }
