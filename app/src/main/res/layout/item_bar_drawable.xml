@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawable"
+    android:layout_width="@dimen/bar_icon_width"
+    android:layout_height="match_parent"
+    android:background="@drawable/bar_icon_background"
+    android:contentDescription="@string/icon"
+    android:padding="6dp"
+    android:src="@drawable/rocket_launch" />

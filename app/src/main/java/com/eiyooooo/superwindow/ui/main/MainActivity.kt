@@ -1,8 +1,10 @@
 package com.eiyooooo.superwindow.ui.main
 
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.DragEvent
 import android.view.MotionEvent
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +15,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.RecyclerView
 import com.eiyooooo.superwindow.R
 import com.eiyooooo.superwindow.databinding.ActivityMainCompactBinding
 import com.eiyooooo.superwindow.databinding.ActivityMainExpandedBinding
@@ -20,6 +23,8 @@ import com.eiyooooo.superwindow.databinding.ControlPanelCompactBinding
 import com.eiyooooo.superwindow.databinding.ControlPanelExpandedBinding
 import com.eiyooooo.superwindow.entity.Preferences
 import com.eiyooooo.superwindow.entity.SystemServices
+import com.eiyooooo.superwindow.ui.bar.BarIconAdapter
+import com.eiyooooo.superwindow.ui.bar.BarLayoutManager
 import com.eiyooooo.superwindow.ui.contentpanel.LocalContentPanelFragment
 import com.eiyooooo.superwindow.ui.controlpanel.ControlPanelAdapter
 import com.eiyooooo.superwindow.ui.view.WidgetCardView
@@ -57,6 +62,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 setContentView(it.root)
                 it.root.post { SystemServices.currentDisplay = it.root.display }
+                setupBar(it)
             }
             widgetCardManager.init()
             setFullScreen(force = true)
@@ -128,6 +134,33 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             setSupportActionBar(bindingControlPanelCompact.toolbar)
+        }
+    }
+
+    private fun setupBar(binding: ActivityMainExpandedBinding) {
+        val barAdapter = BarIconAdapter()
+        binding.bar.apply {
+            adapter = barAdapter
+            layoutManager = BarLayoutManager(this@MainActivity)
+            addItemDecoration(object : RecyclerView.ItemDecoration() {
+                val iconWidth = resources.getDimensionPixelSize(R.dimen.bar_icon_width)
+                val dividerWidth = resources.getDimensionPixelSize(R.dimen.bar_divider_width)
+                val space = resources.getDimensionPixelSize(R.dimen.bar_space)
+                override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
+                    val itemCount = parent.adapter?.itemCount ?: return
+                    val position = parent.getChildAdapterPosition(view)
+                    if (position == 0) {
+                        val parentWidth = parent.width
+                        val itemWidth = if (itemCount == 1) iconWidth else dividerWidth + (itemCount - 1) * (iconWidth + space)
+                        outRect.left = (parentWidth - itemWidth) / 2
+                    } else {
+                        outRect.left = space
+                    }
+                }
+            })
+        }
+        mainModel.widgetCardDataGroup.observe(this) {
+            barAdapter.update(it)
         }
     }
 

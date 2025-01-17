@@ -11,7 +11,7 @@
     <com.eiyooooo.superwindow.ui.view.ExpandTargetViewsTouchAreaConstraintLayout
         android:id="@+id/widget_container"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         app:layout_constraintBottom_toTopOf="@+id/bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -43,19 +43,15 @@
 
     </com.eiyooooo.superwindow.ui.view.ExpandTargetViewsTouchAreaConstraintLayout>
 
-    <LinearLayout
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/bar"
         android:layout_width="match_parent"
-        android:layout_height="45dp"
-        android:gravity="center"
-        android:orientation="horizontal"
+        android:layout_height="48dp"
+        android:paddingVertical="6dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/widget_container">
-
-        <!--TODO-->
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@+id/widget_container" />
 
     <View
         android:id="@+id/overlay"

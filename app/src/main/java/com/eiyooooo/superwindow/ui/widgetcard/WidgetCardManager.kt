@@ -74,6 +74,14 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 mainModel.shizukuStatus.collect { shizukuStatus ->
                     if (shizukuStatus == ShizukuStatus.HAVE_PERMISSION) {
                         LocalContent.init()
+                        mainActivity.bindingExpanded.widgetContainer.let {
+                            if (it.layoutParams.height != 0) {
+                                TransitionManager.beginDelayedTransition(it, cardChangedTransition)
+                                it.layoutParams = it.layoutParams.apply {
+                                    height = 0
+                                }
+                            }
+                        }
                     } else {
                         mainModel.updateWidgetCardDataGroup {
                             WidgetCardDataGroup(firstWidgetCardData = WidgetCardData(true, "controlPanel"))
@@ -81,6 +89,14 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                         WidgetCardFocusManager.updateFocusing { "controlPanel" }
                         destroy()
                         LocalContent.destroy()
+                        mainActivity.bindingExpanded.widgetContainer.let {
+                            if (it.layoutParams.height != ViewGroup.LayoutParams.MATCH_PARENT) {
+                                TransitionManager.beginDelayedTransition(it, cardChangedTransition)
+                                it.layoutParams = it.layoutParams.apply {
+                                    height = ViewGroup.LayoutParams.MATCH_PARENT
+                                }
+                            }
+                        }
                     }
                 }
             }
