@@ -3,11 +3,14 @@ package com.eiyooooo.superwindow.util
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.TypedValue
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.Interpolator
 import androidx.core.view.animation.PathInterpolatorCompat
 import androidx.core.view.drawToBitmap
@@ -184,5 +187,32 @@ fun startShowElevatedViewAnimation(elevatedViewContainer: View, overlay: View, i
         playTogether(containerAlphaAnimation, containerScaleXAnimation, containerScaleYAnimation, overlayAlphaAnimation)
         addListener(listener)
         start()
+    }
+}
+
+@SuppressLint("ClickableViewAccessibility")
+fun View.setIconTouchEffect(scale: Float = 0.8f, duration: Long = 100L, animateTarget: View = this) {
+    setOnTouchListener { _, event ->
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                animateTarget.animate()
+                    .scaleX(scale)
+                    .scaleY(scale)
+                    .setInterpolator(AccelerateDecelerateInterpolator())
+                    .setDuration(duration)
+                    .start()
+            }
+
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> {
+                animateTarget.animate()
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setInterpolator(AccelerateDecelerateInterpolator())
+                    .setDuration(100L)
+                    .start()
+            }
+        }
+        false
     }
 }

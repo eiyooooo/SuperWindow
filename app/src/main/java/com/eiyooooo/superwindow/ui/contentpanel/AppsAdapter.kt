@@ -1,18 +1,16 @@
 package com.eiyooooo.superwindow.ui.contentpanel
 
-import android.annotation.SuppressLint
 import android.content.pm.LauncherActivityInfo
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.eiyooooo.superwindow.databinding.ItemAppBinding
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
+import com.eiyooooo.superwindow.util.setIconTouchEffect
 import com.github.promeg.pinyinhelper.Pinyin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -44,7 +42,6 @@ class AppsAdapter(
 
     override fun getItemCount(): Int = appsList.size
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val (activityInfo, drawable) = appsList[position]
         val applicationInfo = activityInfo.applicationInfo
@@ -52,29 +49,7 @@ class AppsAdapter(
         with(holder) {
             icon.setImageDrawable(drawable)
             appName.text = activityInfo.label
-            root.setOnTouchListener { _, event ->
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        icon.animate()
-                            .scaleX(0.75f)
-                            .scaleY(0.75f)
-                            .setInterpolator(AccelerateDecelerateInterpolator())
-                            .setDuration(150L)
-                            .start()
-                    }
-
-                    MotionEvent.ACTION_UP,
-                    MotionEvent.ACTION_CANCEL -> {
-                        icon.animate()
-                            .scaleX(1f)
-                            .scaleY(1f)
-                            .setInterpolator(AccelerateDecelerateInterpolator())
-                            .setDuration(150L)
-                            .start()
-                    }
-                }
-                false
-            }
+            root.setIconTouchEffect(0.75f, 100L, icon)
             root.setOnClickListener {
                 callback.invoke(false, WidgetCardData(applicationInfo.packageName, "local", drawable))
             }
