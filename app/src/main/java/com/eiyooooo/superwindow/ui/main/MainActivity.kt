@@ -151,7 +151,11 @@ class MainActivity : AppCompatActivity() {
                     val position = parent.getChildAdapterPosition(view)
                     if (position == 0) {
                         val parentWidth = parent.width
-                        val itemWidth = if (itemCount == 1) iconWidth else dividerWidth + (itemCount - 1) * (iconWidth + space)
+                        val itemWidth = if (itemCount == 2) {
+                            iconWidth * 2 + space
+                        } else {
+                            dividerWidth + (itemCount - 1) * (iconWidth + space)
+                        }
                         outRect.left = (parentWidth - itemWidth) / 2
                     } else {
                         outRect.left = space
