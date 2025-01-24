@@ -1,81 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#000000"
-    tools:context=".ui.main.MainActivity">
+    android:layout_height="match_parent">
 
-    <com.eiyooooo.superwindow.ui.view.ExpandTargetViewsTouchAreaConstraintLayout
-        android:id="@+id/widget_container"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintBottom_toTopOf="@+id/bar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:background="#000000"
+        tools:context=".ui.main.MainActivity">
 
-        <com.eiyooooo.superwindow.ui.view.SplitHandleView
-            android:id="@+id/left_split_handle"
-            android:layout_width="5dp"
-            android:layout_height="80dp"
-            android:layout_gravity="center"
-            android:layout_margin="4dp"
-            android:alpha="0.5"
-            android:background="@drawable/split_handle_background"
-            android:visibility="gone"
+        <com.eiyooooo.superwindow.ui.view.ExpandTargetViewsTouchAreaConstraintLayout
+            android:id="@+id/widget_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toTopOf="@+id/bar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.eiyooooo.superwindow.ui.view.SplitHandleView
+                android:id="@+id/left_split_handle"
+                android:layout_width="5dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center"
+                android:layout_margin="4dp"
+                android:alpha="0.5"
+                android:background="@drawable/split_handle_background"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.eiyooooo.superwindow.ui.view.SplitHandleView
+                android:id="@+id/right_split_handle"
+                android:layout_width="5dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center"
+                android:layout_margin="4dp"
+                android:alpha="0.5"
+                android:background="@drawable/split_handle_background"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </com.eiyooooo.superwindow.ui.view.ExpandTargetViewsTouchAreaConstraintLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/bar"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:paddingVertical="6dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/widget_container" />
 
-        <com.eiyooooo.superwindow.ui.view.SplitHandleView
-            android:id="@+id/right_split_handle"
-            android:layout_width="5dp"
-            android:layout_height="80dp"
-            android:layout_gravity="center"
-            android:layout_margin="4dp"
-            android:alpha="0.5"
-            android:background="@drawable/split_handle_background"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </com.eiyooooo.superwindow.ui.view.ExpandTargetViewsTouchAreaConstraintLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/bar"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:paddingVertical="6dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/widget_container" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <View
         android:id="@+id/overlay"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:alpha="0.5"
         android:background="?attr/colorSurfaceInverse"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:visibility="gone" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/elevated_view_container"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
         android:visibility="gone"
         app:cardBackgroundColor="?attr/colorSurface"
         app:cardCornerRadius="16dp"
-        app:cardElevation="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:cardElevation="8dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

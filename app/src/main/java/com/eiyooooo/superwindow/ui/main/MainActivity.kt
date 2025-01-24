@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 Preferences.topBottomPaddingFlow.collect {
                     val padding = getResources().displayMetrics.heightPixels * it / 1000
-                    bindingExpanded.root.updatePadding(top = padding, bottom = padding)
+                    bindingExpanded.main.updatePadding(top = padding, bottom = padding)
                 }
             }
         } else {
@@ -225,9 +225,12 @@ class MainActivity : AppCompatActivity() {
         val overlay = if (isExpanded) bindingExpanded.overlay else bindingCompact.overlay
         val elevatedViewContainer = if (isExpanded) bindingExpanded.elevatedViewContainer else bindingCompact.elevatedViewContainer
 
-        elevatedViewContainer.layoutParams = elevatedViewContainer.layoutParams.also {
-            it.width = (resources.displayMetrics.widthPixels * 0.8).toInt()
-            it.height = (resources.displayMetrics.heightPixels * 0.8).toInt()
+        val containerWidth = bindingExpanded.main.width - bindingExpanded.main.paddingLeft - bindingExpanded.main.paddingRight
+        val containerHeight = bindingExpanded.main.height - bindingExpanded.main.paddingTop - bindingExpanded.main.paddingBottom
+
+        elevatedViewContainer.layoutParams = elevatedViewContainer.layoutParams.apply {
+            width = (containerWidth * 0.8).toInt()
+            height = (containerHeight * 0.8).toInt()
         }
 
         makeCardsBlur(true)
