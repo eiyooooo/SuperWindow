@@ -20,10 +20,7 @@ import com.eiyooooo.superwindow.ui.main.MainActivityViewModel
 import com.eiyooooo.superwindow.ui.main.ShizukuStatus
 import com.eiyooooo.superwindow.ui.view.WidgetCardView
 import com.eiyooooo.superwindow.util.BlurUtils
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
@@ -141,38 +138,6 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 }
                 mainModel.updateBackPressedCallbackIsEnabled { haveFocus }
             }
-        }
-
-        //TODO: remove this test module
-        test()
-    }
-
-    private fun test() {
-        mainActivity.lifecycleScope.launch {
-            mainModel.shizukuStatus.filter { it == ShizukuStatus.HAVE_PERMISSION }.first()
-            delay(2000)
-            mainModel.updateWidgetCardDataGroup {
-                it.copy(secondWidgetCardData = WidgetCardData("moe.shizuku.privileged.api", "local", LocalContent.getPackageIcon("moe.shizuku.privileged.api")),
-                    thirdWidgetCardData = WidgetCardData("com.eiyooooo.example", "local", LocalContent.getPackageIcon("com.eiyooooo.example")))
-            }
-//            while (true) {
-//                delay(2000)
-//                mainModel.updateWidgetCardDataGroup {
-//                    it.copy(secondWidgetCardData = WidgetCardData(false, "test1"))
-//                }
-//                delay(2000)
-//                mainModel.updateWidgetCardDataGroup {
-//                    it.copy(thirdWidgetCardData = WidgetCardData(false, "test2"))
-//                }
-//                delay(2000)
-//                mainModel.updateWidgetCardDataGroup {
-//                    it.copy(thirdWidgetCardData = null)
-//                }
-//                delay(2000)
-//                mainModel.updateWidgetCardDataGroup {
-//                    it.copy(secondWidgetCardData = null)
-//                }
-//            }
         }
     }
 
