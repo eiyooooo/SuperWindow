@@ -8,8 +8,8 @@ import com.eiyooooo.superwindow.databinding.ItemWidgetCardBinding
 class WidgetCardDragShadowBuilder(private val widgetCard: ItemWidgetCardBinding) : View.DragShadowBuilder(widgetCard.widgetView) {
 
     override fun onProvideShadowMetrics(size: Point, touch: Point) {
-        size.set(widgetCard.iconContainer.height, widgetCard.iconContainer.width)
-        touch.set(widgetCard.iconContainer.height * 3 / 4, widgetCard.iconContainer.width * 3 / 4)
+        size.set(widgetCard.iconContainer.width, widgetCard.iconContainer.height)
+        touch.set(widgetCard.iconContainer.width / 2, widgetCard.iconContainer.height)
     }
 
     override fun onDrawShadow(canvas: Canvas) {
