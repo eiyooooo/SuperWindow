@@ -1,7 +1,10 @@
 package com.eiyooooo.superwindow.ui.widgetcard
 
+import android.graphics.Rect
 import android.os.Build
 import android.view.DragEvent
+import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
@@ -18,6 +21,7 @@ import com.eiyooooo.superwindow.content.LocalContent
 import com.eiyooooo.superwindow.ui.main.MainActivity
 import com.eiyooooo.superwindow.ui.main.MainActivityViewModel
 import com.eiyooooo.superwindow.ui.main.ShizukuStatus
+import com.eiyooooo.superwindow.ui.view.HintPopupWindow
 import com.eiyooooo.superwindow.ui.view.WidgetCardView
 import com.eiyooooo.superwindow.util.BlurUtils
 import kotlinx.coroutines.flow.combine
@@ -237,6 +241,57 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         widgetCards.forEach {
             (it.parent as? ViewGroup)?.removeView(it)
             mainActivity.bindingExpanded.widgetContainer.addView(it)
+        }
+    }
+
+    fun addWidgetCard(source: View, widgetCardData: WidgetCardData) {
+        val currentGroup = mainModel.widgetCardDataGroup.value ?: return
+
+        if (currentGroup.firstWidgetCardData.identifier == widgetCardData.identifier ||
+            currentGroup.secondWidgetCardData?.identifier == widgetCardData.identifier ||
+            currentGroup.thirdWidgetCardData?.identifier == widgetCardData.identifier
+        ) {
+            val rect = Rect()
+            source.getGlobalVisibleRect(rect)
+            val popupView = HintPopupWindow(mainActivity, R.string.already_open).apply {
+                isOutsideTouchable = true
+                isFocusable = false
+                contentView.measure(
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+                )
+                val popupWidth = contentView.measuredWidth
+                val popupHeight = contentView.measuredHeight
+                val x = rect.left + (rect.width() - popupWidth) / 2
+                val y = rect.top - popupHeight
+                showAtLocation(source, Gravity.NO_GRAVITY, x, y)
+            }
+
+            mainActivity.setTouchEventInterceptor {
+                if (it.action == MotionEvent.ACTION_UP) {
+                    popupView.dismiss()
+                    mainActivity.setTouchEventInterceptor(null)
+                    false
+                } else true
+            }
+        } else {
+            val first = currentGroup.getWidgetCard(1)
+            val second = currentGroup.getWidgetCard(2)
+            val third = currentGroup.getWidgetCard(3)
+
+            when {
+                third != null && second != null && first != null -> {
+                    //TODO
+                }
+
+                second != null && first != null -> {
+                    //TODO
+                }
+
+                first != null -> {
+                    //TODO
+                }
+            }
         }
     }
 

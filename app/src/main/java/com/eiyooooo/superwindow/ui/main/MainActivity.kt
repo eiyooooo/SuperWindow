@@ -267,6 +267,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    internal fun addWidgetCard(source: View, widgetCardData: WidgetCardData) = if (isExpanded) widgetCardManager.addWidgetCard(source, widgetCardData) else Unit
+
     internal fun replaceWidgetCard(targetIdentifier: String, new: WidgetCardData) = if (isExpanded) widgetCardManager.replaceWidgetCard(targetIdentifier, new) else Unit
 
     internal fun minimizeWidgetCard(target: WidgetCardData) = if (isExpanded) widgetCardManager.minimizeWidgetCard(target) else Unit

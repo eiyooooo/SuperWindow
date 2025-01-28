@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.eiyooooo.superwindow.databinding.ItemBarAppIconBinding
+import com.eiyooooo.superwindow.ui.main.MainActivity
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
 import com.eiyooooo.superwindow.util.setIconTouchEffect
 import rikka.recyclerview.BaseViewHolder
@@ -26,7 +27,7 @@ class AppIconViewHolder(private val binding: ItemBarAppIconBinding, root: View) 
     private inline val root get() = binding.root
 
     override fun onLongClick(v: View): Boolean {
-        //TODO
+        (context as? MainActivity)?.addWidgetCard(root, data)
         return true
     }
 

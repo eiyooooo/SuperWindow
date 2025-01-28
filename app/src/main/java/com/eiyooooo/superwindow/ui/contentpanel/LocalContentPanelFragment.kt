@@ -14,7 +14,6 @@ import com.github.promeg.pinyinhelper.Pinyin
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 
 class LocalContentPanelFragment : Fragment() {
 
@@ -49,15 +48,16 @@ class LocalContentPanelFragment : Fragment() {
             binding.recyclerView.setItemViewCacheSize(appsList.size)
             binding.recyclerView.layoutManager = layoutManager
 
-            val adapter = AppsAdapter(appsList, lifecycleScope, binding.waveSideBarView.selectingLetter, supportLongClick) { longClick, data ->
+            val adapter = AppsAdapter(appsList, lifecycleScope, binding.waveSideBarView.selectingLetter, supportLongClick) { iconView, longClick, data ->
                 if (replace) {
                     targetIdentifier?.let {
                         (context as? MainActivity)?.replaceWidgetCard(it, data)
                     }
                     (context as? MainActivity)?.hideElevatedView()
                 } else {
-                    // TODO: handle chose app
-                    Timber.d("longClick: $longClick, data: $data")
+                    if (longClick) {
+                        (context as? MainActivity)?.addWidgetCard(iconView, data)
+                    }
                 }
             }
             binding.recyclerView.adapter = adapter

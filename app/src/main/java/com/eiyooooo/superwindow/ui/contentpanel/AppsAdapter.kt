@@ -21,7 +21,7 @@ class AppsAdapter(
     private val scope: CoroutineScope,
     private val selectingLetter: StateFlow<Char?>,
     private val supportLongClick: Boolean,
-    private val callback: (Boolean, WidgetCardData) -> Unit
+    private val callback: (View, Boolean, WidgetCardData) -> Unit
 ) : RecyclerView.Adapter<AppsAdapter.ViewHolder>() {
 
     inner class ViewHolder(binding: ItemAppBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -51,11 +51,11 @@ class AppsAdapter(
             appName.text = activityInfo.label
             root.setIconTouchEffect(0.75f, 100L, icon)
             root.setOnClickListener {
-                callback.invoke(false, WidgetCardData(applicationInfo.packageName, "local", drawable))
+                callback.invoke(icon, false, WidgetCardData(applicationInfo.packageName, "local", drawable))
             }
             if (supportLongClick) {
                 root.setOnLongClickListener {
-                    callback.invoke(true, WidgetCardData(applicationInfo.packageName, "local", drawable))
+                    callback.invoke(icon, true, WidgetCardData(applicationInfo.packageName, "local", drawable))
                     true
                 }
             }

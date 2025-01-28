@@ -9,6 +9,7 @@
 
     <string name="local_use_not_supported">The current Android version does not support using SuperWindow on this device</string>
     <string name="no_browser">No default browser</string>
+    <string name="already_open">Already open</string>
 
     <string name="Shizuku_explanation">Authorize Shizuku to use Super Window on this device</string>
     <string name="Shizuku_connected">Shizuku connected</string>

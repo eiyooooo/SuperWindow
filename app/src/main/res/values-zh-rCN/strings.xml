@@ -9,6 +9,7 @@
 
     <string name="local_use_not_supported">当前系统安卓版本不支持在本机使用超级视窗</string>
     <string name="no_browser">没有默认浏览器</string>
+    <string name="already_open">已打开</string>
 
     <string name="Shizuku_explanation">授权Shizuku以在本机使用超级视窗</string>
     <string name="Shizuku_connected">Shizuku已连接</string>
