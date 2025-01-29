@@ -42,10 +42,11 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
     private val mRatioAnimator: ValueAnimator = ValueAnimator()
 
     private val mLettersPaint = Paint()
+    private val mFramePaint = Paint()
     private val mTextPaint = Paint()
     private val mWavePaint = Paint()
 
-    private var mTextSize = 0f
+    private var mMaxTextSize = 0f
     private var mLargeTextSize = 0f
 
     private var mOnBackgroundColor = 0
@@ -56,7 +57,7 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
     private var mWidth = 0
     private var mHeight = 0
     private var mItemHeight = 0
-    private var mPadding = 0
+    private var mTextSize = 0f
 
     private val mWavePath = Path()
     private val mBallPath = Path()
@@ -67,7 +68,7 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     private var mRatio = 0f
     private var mPosX = 0f
-    private var mPosY = 0f
+    private var mChoosePosY = 0f
     private var mBallCentreX = 0f
 
     private var mFirstLetterPosY = 0f
@@ -78,18 +79,17 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
         mBackgroundColor = Color.parseColor("#F9F9F9")
         mWaveColor = Color.parseColor("#1A73E8")
         mChooseTextColor = Color.parseColor("#FFFFFF")
-        mTextSize = context.sp2px(10).toFloat()
+        mMaxTextSize = context.sp2px(10).toFloat()
         mLargeTextSize = context.sp2px(32).toFloat()
         mRadius = context.dp2px(20)
         mBallRadius = context.dp2px(24)
-        mPadding = context.sp2px(20)
         if (attrs != null) {
             val a = getContext().obtainStyledAttributes(attrs, R.styleable.WaveSideBarView)
             mOnBackgroundColor = a.getColor(R.styleable.WaveSideBarView_sidebarOnBackgroundColor, mOnBackgroundColor)
             mBackgroundColor = a.getColor(R.styleable.WaveSideBarView_sidebarBackgroundColor, mBackgroundColor)
             mWaveColor = a.getColor(R.styleable.WaveSideBarView_sidebarWaveColor, mWaveColor)
             mChooseTextColor = a.getColor(R.styleable.WaveSideBarView_sidebarChooseTextColor, mChooseTextColor)
-            mTextSize = a.getDimension(R.styleable.WaveSideBarView_sidebarTextSize, mTextSize)
+            mMaxTextSize = a.getDimension(R.styleable.WaveSideBarView_sidebarMaxTextSize, mMaxTextSize)
             mLargeTextSize = a.getDimension(R.styleable.WaveSideBarView_sidebarLargeTextSize, mLargeTextSize)
             mRadius = a.getDimension(R.styleable.WaveSideBarView_sidebarRadius, mRadius.toFloat()).toInt()
             mBallRadius = a.getDimension(R.styleable.WaveSideBarView_sidebarBallRadius, mBallRadius.toFloat()).toInt()
@@ -164,52 +164,66 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         mHeight = MeasureSpec.getSize(heightMeasureSpec)
-        mWidth = measuredWidth
-        mItemHeight = (mHeight - mPadding) / mLetters.size
-        mPosX = mWidth - 1.6f * mTextSize
+        mWidth = MeasureSpec.getSize(widthMeasureSpec)
+        mItemHeight = mHeight / mLetters.size
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        initLetterPaint()
+        drawFrame(canvas)
         drawLetters(canvas)
         drawWavePath(canvas)
         drawBallPath(canvas)
         drawChooseText(canvas)
     }
 
-    private fun drawLetters(canvas: Canvas) {
+    private fun initLetterPaint() {
+        mLettersPaint.reset()
+        mLettersPaint.color = mOnBackgroundColor
+        mLettersPaint.isAntiAlias = true
+        mLettersPaint.textAlign = Paint.Align.CENTER
+        mTextSize = mLettersPaint.scaleTextSizeToFitHeight(mHeight / mLetters.size, mMaxTextSize)
+        mPosX = mWidth - 1.6f * mTextSize
+    }
+
+    private fun Paint.scaleTextSizeToFitHeight(targetHeight: Int, maxTextSize: Float? = null): Float {
+        textSize = 100f
+        val metrics = fontMetrics
+        val newSize = 100f * targetHeight / (metrics.bottom - metrics.top)
+        val finalTextSize = maxTextSize?.coerceAtMost(newSize) ?: newSize
+        textSize = finalTextSize
+        return finalTextSize
+    }
+
+    private fun drawFrame(canvas: Canvas) {
         val rectF = RectF()
         rectF.left = mPosX - mTextSize
         rectF.right = mPosX + mTextSize
-        rectF.top = mTextSize / 2
-        rectF.bottom = mHeight - mTextSize / 2
+        rectF.top = 0f
+        rectF.bottom = mHeight.toFloat()
 
-        mLettersPaint.reset()
-        mLettersPaint.style = Paint.Style.FILL
-        mLettersPaint.color = mBackgroundColor
-        mLettersPaint.isAntiAlias = true
-        canvas.drawRoundRect(rectF, mTextSize, mTextSize, mLettersPaint)
+        mFramePaint.reset()
+        mFramePaint.style = Paint.Style.FILL
+        mFramePaint.color = mBackgroundColor
+        mFramePaint.isAntiAlias = true
+        canvas.drawRoundRect(rectF, mTextSize, mTextSize, mFramePaint)
 
-        mLettersPaint.reset()
-        mLettersPaint.style = Paint.Style.STROKE
-        mLettersPaint.color = mOnBackgroundColor
-        mLettersPaint.isAntiAlias = true
-        canvas.drawRoundRect(rectF, mTextSize, mTextSize, mLettersPaint)
+        mFramePaint.reset()
+        mFramePaint.style = Paint.Style.STROKE
+        mFramePaint.color = mOnBackgroundColor
+        mFramePaint.isAntiAlias = true
+        canvas.drawRoundRect(rectF, mTextSize, mTextSize, mFramePaint)
+    }
 
+    private fun drawLetters(canvas: Canvas) {
+        val fontMetrics = mLettersPaint.fontMetrics
+        val baselineOffset = (mItemHeight - fontMetrics.bottom + fontMetrics.top) / 2 - fontMetrics.top
         for (i in mLetters.indices) {
-            mLettersPaint.reset()
-            mLettersPaint.color = mOnBackgroundColor
-            mLettersPaint.isAntiAlias = true
-            mLettersPaint.textSize = mTextSize
-            mLettersPaint.textAlign = Paint.Align.CENTER
-
-            val fontMetrics = mLettersPaint.fontMetrics
-            val baseline = abs((-fontMetrics.bottom - fontMetrics.top).toDouble()).toFloat()
-
-            val posY = mItemHeight * i + baseline / 2 + mPadding
+            val posY = mItemHeight * i + baselineOffset
 
             if (i == mChoose) {
-                mPosY = posY
+                mChoosePosY = posY
             } else {
                 canvas.drawText(mLetters[i], mPosX, posY, mLettersPaint)
             }
@@ -261,7 +275,7 @@ class WaveSideBarView @JvmOverloads constructor(context: Context, attrs: Attribu
             mLettersPaint.color = mChooseTextColor
             mLettersPaint.textSize = mTextSize
             mLettersPaint.textAlign = Paint.Align.CENTER
-            canvas.drawText(mLetters[mChoose], mPosX, mPosY, mLettersPaint)
+            canvas.drawText(mLetters[mChoose], mPosX, mChoosePosY, mLettersPaint)
 
             if (mRatio >= 0.4f) {
                 val target = mLetters[mChoose]

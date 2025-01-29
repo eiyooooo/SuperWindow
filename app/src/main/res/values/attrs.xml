@@ -5,7 +5,7 @@
         <attr name="sidebarBackgroundColor" format="color|reference"/>
         <attr name="sidebarWaveColor" format="color|reference"/>
         <attr name="sidebarChooseTextColor" format="color|reference"/>
-        <attr name="sidebarTextSize" format="dimension"/>
+        <attr name="sidebarMaxTextSize" format="dimension"/>
         <attr name="sidebarLargeTextSize" format="dimension"/>
         <attr name="sidebarRadius" format="dimension"/>
         <attr name="sidebarBallRadius" format="dimension"/>
