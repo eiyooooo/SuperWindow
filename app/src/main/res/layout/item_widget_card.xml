@@ -133,15 +133,15 @@
         android:layout_gravity="center"
         android:visibility="gone"
         app:cardBackgroundColor="@android:color/transparent"
-        app:cardCornerRadius="20dp"
+        app:cardCornerRadius="@dimen/icon_corner_radius"
         app:cardElevation="0dp">
 
         <ImageView
             android:id="@+id/icon"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             android:contentDescription="@string/icon"
-            android:src="@mipmap/ic_launcher" />
+            android:src="@drawable/home_icon" />
 
     </androidx.cardview.widget.CardView>
 

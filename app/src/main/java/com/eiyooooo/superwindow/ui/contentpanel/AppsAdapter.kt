@@ -21,7 +21,7 @@ class AppsAdapter(
     private val scope: CoroutineScope,
     private val selectingLetter: StateFlow<Char?>,
     private val supportLongClick: Boolean,
-    private val callback: (View, Boolean, WidgetCardData) -> Unit
+    private val callback: (ImageView, Boolean, WidgetCardData) -> Unit
 ) : RecyclerView.Adapter<AppsAdapter.ViewHolder>() {
 
     inner class ViewHolder(binding: ItemAppBinding) : RecyclerView.ViewHolder(binding.root) {

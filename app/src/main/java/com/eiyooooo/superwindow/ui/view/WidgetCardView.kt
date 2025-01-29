@@ -23,8 +23,8 @@ import androidx.core.view.animation.PathInterpolatorCompat
 import com.eiyooooo.superwindow.content.LocalContent
 import com.eiyooooo.superwindow.databinding.ItemWidgetCardBinding
 import com.eiyooooo.superwindow.ui.main.MainActivity
+import com.eiyooooo.superwindow.ui.widgetcard.IconDragShadowBuilder
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
-import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardDragShadowBuilder
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardFocusManager
 import com.eiyooooo.superwindow.util.BlurUtils
 import com.eiyooooo.superwindow.util.dp2px
@@ -54,7 +54,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
             private var initialX: Float = 0F
             private var initialY: Float = 0F
             private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
-            private val shadowBuilder = WidgetCardDragShadowBuilder(widgetCard)
+            private val shadowBuilder = IconDragShadowBuilder(widgetCard.icon)
 
             override fun onTouch(v: View, event: MotionEvent): Boolean {
                 return when (event.action) {

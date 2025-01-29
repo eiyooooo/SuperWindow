@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.DragEvent
 import android.view.MotionEvent
 import android.view.View
+import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -143,7 +144,7 @@ class MainActivity : AppCompatActivity() {
             adapter = barAdapter
             layoutManager = BarLayoutManager(this@MainActivity)
             addItemDecoration(object : RecyclerView.ItemDecoration() {
-                val iconWidth = resources.getDimensionPixelSize(R.dimen.bar_icon_width)
+                val iconWidth = resources.getDimensionPixelSize(R.dimen.bar_icon_size)
                 val dividerWidth = resources.getDimensionPixelSize(R.dimen.bar_divider_width)
                 val space = resources.getDimensionPixelSize(R.dimen.bar_space)
                 override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
@@ -267,7 +268,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    internal fun addWidgetCard(source: View, widgetCardData: WidgetCardData) = if (isExpanded) widgetCardManager.addWidgetCard(source, widgetCardData) else Unit
+    internal fun addWidgetCard(sourceImageView: ImageView, widgetCardData: WidgetCardData) = if (isExpanded) widgetCardManager.addWidgetCard(sourceImageView, widgetCardData) else Unit
 
     internal fun replaceWidgetCard(targetIdentifier: String, new: WidgetCardData) = if (isExpanded) widgetCardManager.replaceWidgetCard(targetIdentifier, new) else Unit
 

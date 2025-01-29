@@ -24,14 +24,14 @@ class AppIconViewHolder(private val binding: ItemBarAppIconBinding, root: View) 
         root.setOnLongClickListener(this)
     }
 
-    private inline val root get() = binding.root
+    private inline val iconView get() = binding.icon
 
     override fun onLongClick(v: View): Boolean {
-        (context as? MainActivity)?.addWidgetCard(root, data)
+        (context as? MainActivity)?.addWidgetCard(iconView, data)
         return true
     }
 
     override fun onBind() {
-        root.setImageDrawable(data.icon)
+        iconView.setImageDrawable(data.icon)
     }
 }

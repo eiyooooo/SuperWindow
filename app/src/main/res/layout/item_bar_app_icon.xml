@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/icon"
-    android:layout_width="@dimen/bar_icon_width"
-    android:layout_height="match_parent"
-    android:background="@android:color/transparent"
-    android:contentDescription="@string/icon" />
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/icon_container"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:cardBackgroundColor="@android:color/transparent"
+    app:cardCornerRadius="@dimen/bar_icon_corner_radius"
+    app:cardElevation="0dp">
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="@dimen/bar_icon_size"
+        android:layout_height="@dimen/bar_icon_size"
+        android:contentDescription="@string/icon"
+        android:src="@drawable/home_icon" />
+
+</androidx.cardview.widget.CardView>

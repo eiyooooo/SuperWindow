@@ -4,18 +4,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.eiyooooo.superwindow.R
-import com.eiyooooo.superwindow.databinding.ItemBarDrawableBinding
+import com.eiyooooo.superwindow.databinding.ItemBarAppIconBinding
 import com.eiyooooo.superwindow.ui.main.MainActivity
 import com.eiyooooo.superwindow.ui.widgetcard.controlPanelWidgetCardData
 import com.eiyooooo.superwindow.util.setIconTouchEffect
 import rikka.recyclerview.BaseViewHolder
 import rikka.recyclerview.BaseViewHolder.Creator
 
-class ControlPanelViewHolder(private val binding: ItemBarDrawableBinding, root: View) : BaseViewHolder<Any?>(root), View.OnLongClickListener {
+class ControlPanelViewHolder(private val binding: ItemBarAppIconBinding, root: View) : BaseViewHolder<Any?>(root), View.OnLongClickListener {
 
     companion object {
         val CREATOR = Creator<Any> { inflater: LayoutInflater, parent: ViewGroup? ->
-            val binding = ItemBarDrawableBinding.inflate(inflater, parent, false)
+            val binding = ItemBarAppIconBinding.inflate(inflater, parent, false)
             ControlPanelViewHolder(binding, binding.root)
         }
     }
@@ -25,14 +25,14 @@ class ControlPanelViewHolder(private val binding: ItemBarDrawableBinding, root: 
         root.setOnLongClickListener(this)
     }
 
-    private inline val root get() = binding.root
+    private inline val iconView get() = binding.icon
 
     override fun onLongClick(v: View): Boolean {
-        (context as? MainActivity)?.addWidgetCard(root, controlPanelWidgetCardData)
+        (context as? MainActivity)?.addWidgetCard(iconView, controlPanelWidgetCardData)
         return true
     }
 
     override fun onBind() {
-        root.setImageResource(R.drawable.home)
+        iconView.setImageResource(R.drawable.home_icon)
     }
 }

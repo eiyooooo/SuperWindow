@@ -7,6 +7,7 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.animation.PathInterpolatorCompat
@@ -244,7 +245,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         }
     }
 
-    fun addWidgetCard(source: View, widgetCardData: WidgetCardData) {
+    fun addWidgetCard(sourceImageView: ImageView, widgetCardData: WidgetCardData) {
         val currentGroup = mainModel.widgetCardDataGroup.value ?: return
 
         if (currentGroup.firstWidgetCardData.identifier == widgetCardData.identifier ||
@@ -252,7 +253,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             currentGroup.thirdWidgetCardData?.identifier == widgetCardData.identifier
         ) {
             val rect = Rect()
-            source.getGlobalVisibleRect(rect)
+            sourceImageView.getGlobalVisibleRect(rect)
             val popupView = HintPopupWindow(mainActivity, R.string.already_open).apply {
                 isOutsideTouchable = true
                 isFocusable = false
@@ -264,7 +265,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                 val popupHeight = contentView.measuredHeight
                 val x = rect.left + (rect.width() - popupWidth) / 2
                 val y = rect.top - popupHeight
-                showAtLocation(source, Gravity.NO_GRAVITY, x, y)
+                showAtLocation(sourceImageView, Gravity.NO_GRAVITY, x, y)
             }
 
             mainActivity.setTouchEventInterceptor {
