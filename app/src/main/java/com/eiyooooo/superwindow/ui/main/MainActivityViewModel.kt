@@ -7,8 +7,8 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.eiyooooo.superwindow.content.LocalContent
 import com.eiyooooo.superwindow.ui.controlpanel.HomeData
-import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardDataGroup
+import com.eiyooooo.superwindow.ui.widgetcard.controlPanelWidgetCardData
 import com.eiyooooo.superwindow.util.BlurUtils
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -22,7 +22,7 @@ import rikka.shizuku.Shizuku
 
 class MainActivityViewModel : ViewModel() {
 
-    private val mWidgetCardDataGroup: MutableStateFlow<WidgetCardDataGroup> by lazy { MutableStateFlow(WidgetCardDataGroup(firstWidgetCardData = WidgetCardData(true, "controlPanel"))) }
+    private val mWidgetCardDataGroup: MutableStateFlow<WidgetCardDataGroup> by lazy { MutableStateFlow(WidgetCardDataGroup(firstWidgetCardData = controlPanelWidgetCardData)) }
     val widgetCardDataGroup: LiveData<WidgetCardDataGroup> = mWidgetCardDataGroup.asLiveData()
 
     fun updateWidgetCardDataGroup(function: (WidgetCardDataGroup) -> WidgetCardDataGroup) {

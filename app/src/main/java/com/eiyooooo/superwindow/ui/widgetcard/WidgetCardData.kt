@@ -2,6 +2,8 @@ package com.eiyooooo.superwindow.ui.widgetcard
 
 import android.graphics.drawable.Drawable
 
+val controlPanelWidgetCardData = WidgetCardData(true, "controlPanel")
+
 data class WidgetCardData(
     val isControlPanel: Boolean,
     val identifier: String,

@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import com.eiyooooo.superwindow.R
 import com.eiyooooo.superwindow.databinding.ItemBarDrawableBinding
 import com.eiyooooo.superwindow.ui.main.MainActivity
-import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
+import com.eiyooooo.superwindow.ui.widgetcard.controlPanelWidgetCardData
 import com.eiyooooo.superwindow.util.setIconTouchEffect
 import rikka.recyclerview.BaseViewHolder
 import rikka.recyclerview.BaseViewHolder.Creator
@@ -27,10 +27,8 @@ class ControlPanelViewHolder(private val binding: ItemBarDrawableBinding, root: 
 
     private inline val root get() = binding.root
 
-    private val cardData by lazy { WidgetCardData(true, "controlPanel") }
-
     override fun onLongClick(v: View): Boolean {
-        (context as? MainActivity)?.addWidgetCard(root, cardData)
+        (context as? MainActivity)?.addWidgetCard(root, controlPanelWidgetCardData)
         return true
     }
 
