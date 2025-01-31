@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewPropertyAnimator
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -30,11 +31,16 @@ class AppsAdapter(
         val appName: TextView = binding.appName
         val root: View = binding.root
 
+        private var animator: ViewPropertyAnimator? = null
+
         fun updateItemAlphaForSelection(letter: Char?, selectedLetter: Char?) {
             val targetAlpha = if (selectedLetter == null || letter == selectedLetter) 1f else 0.1f
-            if (itemView.alpha != targetAlpha) {
-                itemView.animate().alpha(targetAlpha).setDuration(250).start()
-            }
+            animator?.cancel()
+            animator = if (itemView.alpha != targetAlpha) {
+                itemView.animate().alpha(targetAlpha).setDuration(250).apply {
+                    start()
+                }
+            } else null
         }
     }
 
