@@ -3,7 +3,6 @@ package com.eiyooooo.superwindow.ui.widgetcard
 import android.graphics.Rect
 import android.os.Build
 import android.view.DragEvent
-import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -252,8 +251,8 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             currentGroup.secondWidgetCardData?.identifier == widgetCardData.identifier ||
             currentGroup.thirdWidgetCardData?.identifier == widgetCardData.identifier
         ) {
-            val rect = Rect()
-            sourceImageView.getGlobalVisibleRect(rect)
+            val sourceBounds = Rect()
+            sourceImageView.getGlobalVisibleRect(sourceBounds)
             val popupView = HintPopupWindow(mainActivity, R.string.already_open).apply {
                 isOutsideTouchable = true
                 isFocusable = false
@@ -261,11 +260,9 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                     View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
                     View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
                 )
-                val popupWidth = contentView.measuredWidth
-                val popupHeight = contentView.measuredHeight
-                val x = rect.left + (rect.width() - popupWidth) / 2
-                val y = rect.top - popupHeight
-                showAtLocation(sourceImageView, Gravity.NO_GRAVITY, x, y)
+                val xOff = (sourceBounds.width() - contentView.measuredWidth) / 2
+                val yOff = -sourceImageView.height - contentView.measuredHeight
+                showAsDropDown(sourceImageView, xOff, yOff)
             }
 
             mainActivity.setTouchEventInterceptor {

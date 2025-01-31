@@ -40,6 +40,11 @@ class HintPopupWindow(context: Context, text: String) : PopupWindow() {
         contentView.startAnimation(showAnimation)
     }
 
+    override fun showAsDropDown(anchor: View, xoff: Int, yoff: Int, gravity: Int) {
+        super.showAsDropDown(anchor, xoff, yoff, gravity)
+        contentView.startAnimation(showAnimation)
+    }
+
     override fun dismiss() {
         dismissAnimation.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation?) {}
