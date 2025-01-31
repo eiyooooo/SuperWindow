@@ -4,6 +4,7 @@ import com.eiyooooo.superwindow.ui.bar.item.AppIconViewHolder
 import com.eiyooooo.superwindow.ui.bar.item.ControlPanelViewHolder
 import com.eiyooooo.superwindow.ui.bar.item.DividerViewHolder
 import com.eiyooooo.superwindow.ui.bar.item.LocalLauncherViewHolder
+import com.eiyooooo.superwindow.ui.bar.item.SpaceViewHolder
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardDataGroup
 import rikka.recyclerview.IdBasedRecyclerViewAdapter
@@ -12,10 +13,11 @@ import rikka.recyclerview.IndexCreatorPool
 class BarIconAdapter : IdBasedRecyclerViewAdapter(ArrayList()) {
 
     companion object {
-        private const val ID_LOCAL_LAUNCHER = 0L
-        private const val ID_CONTROL_PANEL = 1L
-        private const val ID_DIVIDER_1 = 2L
-        private const val ID_APP_ICON = 3L
+        private const val ID_SPACE = 0L
+        private const val ID_LOCAL_LAUNCHER = 1L
+        private const val ID_CONTROL_PANEL = 2L
+        private const val ID_DIVIDER_1 = 3L
+        private const val ID_APP_ICON = 4L
     }
 
     init {
@@ -29,10 +31,11 @@ class BarIconAdapter : IdBasedRecyclerViewAdapter(ArrayList()) {
     private val dataList = mutableListOf<WidgetCardData>()
 
     internal fun update(group: WidgetCardDataGroup) {
-        if (itemCount < 2) {
+        if (itemCount < 3) {
+            addItem(SpaceViewHolder.CREATOR, null, ID_SPACE)
             addItem(LocalLauncherViewHolder.CREATOR, null, ID_LOCAL_LAUNCHER)
             addItem(ControlPanelViewHolder.CREATOR, null, ID_CONTROL_PANEL)
-            notifyItemRangeInserted(0, 2)
+            notifyItemRangeInserted(0, 3)
         } else {
             notifyItemChanged(0)
         }
@@ -51,12 +54,12 @@ class BarIconAdapter : IdBasedRecyclerViewAdapter(ArrayList()) {
             val index = dataList.indexOf(item)
             if (index != -1) {
                 dataList.removeAt(index)
-                removeItemAt(index + 3)
-                notifyItemRemoved(index + 3)
+                removeItemAt(index + 4)
+                notifyItemRemoved(index + 4)
 
                 if (dataList.isEmpty()) {
-                    removeItemAt(2)
-                    notifyItemRemoved(2)
+                    removeItemAt(3)
+                    notifyItemRemoved(3)
                 }
             }
         }
@@ -68,10 +71,10 @@ class BarIconAdapter : IdBasedRecyclerViewAdapter(ArrayList()) {
             dataList.add(item)
             if (dataList.size == 1) {
                 addItem(DividerViewHolder.CREATOR, null, ID_DIVIDER_1)
-                notifyItemInserted(2)
+                notifyItemInserted(3)
             }
             addItem(AppIconViewHolder.CREATOR, item, ID_APP_ICON + dataList.size - 1)
-            notifyItemInserted(dataList.size + 2)
+            notifyItemInserted(dataList.size + 3)
         }
     }
 }
