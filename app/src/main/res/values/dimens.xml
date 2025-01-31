@@ -6,6 +6,9 @@
     <dimen name="bar_icon_size">36dp</dimen>
     <dimen name="bar_icon_corner_radius">12dp</dimen>
 
+    <dimen name="panel_icon_size">50dp</dimen>
+    <dimen name="panel_icon_corner_radius">10dp</dimen>
+
     <dimen name="bar_divider_width">3dp</dimen>
     <dimen name="bar_space">14dp</dimen>
 </resources>

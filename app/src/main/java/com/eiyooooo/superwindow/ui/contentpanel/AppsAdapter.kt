@@ -25,6 +25,7 @@ class AppsAdapter(
 ) : RecyclerView.Adapter<AppsAdapter.ViewHolder>() {
 
     inner class ViewHolder(binding: ItemAppBinding) : RecyclerView.ViewHolder(binding.root) {
+        val iconContainer: View = binding.iconContainer
         val icon: ImageView = binding.icon
         val appName: TextView = binding.appName
         val root: View = binding.root
@@ -49,7 +50,7 @@ class AppsAdapter(
         with(holder) {
             icon.setImageDrawable(drawable)
             appName.text = activityInfo.label
-            root.setIconTouchEffect(0.75f, 100L, icon)
+            root.setIconTouchEffect(0.75f, 100L, iconContainer)
             root.setOnClickListener {
                 callback.invoke(icon, false, WidgetCardData(applicationInfo.packageName, "local", drawable))
             }
