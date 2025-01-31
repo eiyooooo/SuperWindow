@@ -65,7 +65,7 @@ class HintPopupWindow(context: Context, text: String) : PopupWindow() {
         private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         private val path = Path()
         private val bubblePadding = context.dp2px(12)
-        private val arrowHeight = context.dp2px(8)
+        private val arrowHeight = context.dp2px(16)
         private val cornerRadius = context.dp2px(8).toFloat()
 
         init {
