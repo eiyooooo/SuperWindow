@@ -34,6 +34,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuRemoteProcess
@@ -224,6 +226,8 @@ object LocalContent {
     }
 
     private val appsMap: MutableMap<String, Pair<LauncherActivityInfo, Drawable>> = mutableMapOf()
+    private val appsMapInitMutex = Mutex()
+    private var appsMapInitialized = false
     private val appsCallback = object : LauncherApps.Callback() {
         override fun onPackageRemoved(packageName: String?, user: UserHandle?) {
             packageName?.let {
@@ -271,22 +275,27 @@ object LocalContent {
     }
 
     private suspend fun initAppsMap() {
-        if (appsMap.isEmpty()) {
-            try {
-                withContext(Dispatchers.Default) {
-                    SystemServices.userManager.userProfiles
-                        .flatMap { SystemServices.launcherApps.getActivityList(null, it) }
-                        .filter { it.applicationInfo.packageName != currentPackageName }
-                        .forEach {
-                            val icon = it.applicationInfo.loadIcon(SystemServices.packageManager)
-                            appsMap[it.applicationInfo.packageName] = it to icon
+        if (!appsMapInitialized) {
+            appsMapInitMutex.withLock {
+                if (!appsMapInitialized) {
+                    try {
+                        withContext(Dispatchers.Default) {
+                            SystemServices.userManager.userProfiles
+                                .flatMap { SystemServices.launcherApps.getActivityList(null, it) }
+                                .filter { it.applicationInfo.packageName != currentPackageName }
+                                .forEach {
+                                    val icon = it.applicationInfo.loadIcon(SystemServices.packageManager)
+                                    appsMap[it.applicationInfo.packageName] = it to icon
+                                }
+                            SystemServices.launcherApps.unregisterCallback(appsCallback)
+                            SystemServices.launcherApps.registerCallback(appsCallback, customHandler)
+                            appsMapInitialized = true
                         }
-                    SystemServices.launcherApps.unregisterCallback(appsCallback)
-                    SystemServices.launcherApps.registerCallback(appsCallback, customHandler)
+                    } catch (e: Exception) {
+                        Timber.e(e, "initAppsList failed")
+                        SystemServices.launcherApps.unregisterCallback(appsCallback)
+                    }
                 }
-            } catch (e: Exception) {
-                Timber.e(e, "initAppsList failed")
-                SystemServices.launcherApps.unregisterCallback(appsCallback)
             }
         }
     }
