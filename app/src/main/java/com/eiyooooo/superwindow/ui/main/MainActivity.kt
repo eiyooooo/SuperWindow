@@ -240,19 +240,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    internal fun hideElevatedView() {
-        val overlay = if (isExpanded) bindingExpanded.overlay else bindingCompact.overlay
-        val elevatedViewContainer = if (isExpanded) bindingExpanded.elevatedViewContainer else bindingCompact.elevatedViewContainer
-
-        startShowElevatedViewAnimation(elevatedViewContainer, overlay, false) {
-            makeCardsBlur(false)
-        }
-
+    internal fun hideElevatedView(cancelBlur: Boolean = true) {
         supportFragmentManager.findFragmentById(R.id.elevated_view_container)?.let {
-            supportFragmentManager.beginTransaction().remove(it).commit()
-        }
+            val overlay = if (isExpanded) bindingExpanded.overlay else bindingCompact.overlay
+            val elevatedViewContainer = if (isExpanded) bindingExpanded.elevatedViewContainer else bindingCompact.elevatedViewContainer
 
-        elevatedViewContainer.removeAllViews()
+            startShowElevatedViewAnimation(elevatedViewContainer, overlay, false) {
+                if (cancelBlur) {
+                    makeCardsBlur(false)
+                }
+            }
+
+            supportFragmentManager.beginTransaction().remove(it).commit()
+
+            elevatedViewContainer.removeAllViews()
+        }
     }
 
     internal fun makeCardsBlur(blur: Boolean) = if (isExpanded) widgetCardManager.makeCardsBlur(blur) else Unit
