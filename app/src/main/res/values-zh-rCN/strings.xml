@@ -42,6 +42,7 @@
     <string name="replace_app">替换应用</string>
     <string name="minimize">最小化</string>
     <string name="close_app">关闭应用</string>
+    <string name="replace_by_drag">释放以替换</string>
 
     <string name="confirm">确定</string>
     <string name="cancel">取消</string>

@@ -85,7 +85,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
                         }
                     } else {
                         mainModel.updateWidgetCardDataGroup {
-                            WidgetCardDataGroup(firstWidgetCardData = WidgetCardData(true, "controlPanel"))
+                            WidgetCardDataGroup(firstWidgetCardData = controlPanelWidgetCardData)
                         }
                         WidgetCardFocusManager.updateFocusing { "controlPanel" }
                         destroy()
@@ -379,9 +379,9 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             secondWidgetCard?.makeBlur()
             thirdWidgetCard?.makeBlur()
         } else {
-            firstWidgetCard?.startBlurTransitAnimation()
-            secondWidgetCard?.startBlurTransitAnimation()
-            thirdWidgetCard?.startBlurTransitAnimation()
+            firstWidgetCard?.removeBlur()
+            secondWidgetCard?.removeBlur()
+            thirdWidgetCard?.removeBlur()
         }
     }
 
@@ -468,7 +468,7 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
         if (lastGroup == null) {
             mainActivity.bindingExpanded.widgetContainer.postDelayed({
                 widgetCards.forEach {
-                    it.startCoverTransitAnimation()
+                    it.removeCover()
                 }
             }, 250)
         }
@@ -484,30 +484,30 @@ class WidgetCardManager(private val mainActivity: MainActivity, private val main
             override fun onTransitionEnd(transition: Transition) {
                 firstWidgetCard?.run {
                     onDragEnded()
-                    startCoverTransitAnimation()
+                    removeCover()
                 }
                 secondWidgetCard?.run {
                     onDragEnded()
-                    startCoverTransitAnimation()
+                    removeCover()
                 }
                 thirdWidgetCard?.run {
                     onDragEnded()
-                    startCoverTransitAnimation()
+                    removeCover()
                 }
             }
 
             override fun onTransitionCancel(transition: Transition) {
                 firstWidgetCard?.run {
                     onDragEnded()
-                    startCoverTransitAnimation()
+                    removeCover()
                 }
                 secondWidgetCard?.run {
                     onDragEnded()
-                    startCoverTransitAnimation()
+                    removeCover()
                 }
                 thirdWidgetCard?.run {
                     onDragEnded()
-                    startCoverTransitAnimation()
+                    removeCover()
                 }
             }
 

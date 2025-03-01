@@ -71,7 +71,7 @@ class SplitHandleView @JvmOverloads constructor(context: Context, attrs: Attribu
 
                     MotionEvent.ACTION_UP -> {
                         for (widgetCard in widgetCards!!) {
-                            widgetCard.startBlurTransitAnimation()
+                            widgetCard.removeBlur()
                         }
                         blurring.set(false)
                         startPressHandleAnimation(false)
@@ -80,7 +80,7 @@ class SplitHandleView @JvmOverloads constructor(context: Context, attrs: Attribu
 
                     MotionEvent.ACTION_CANCEL -> {
                         for (widgetCard in widgetCards!!) {
-                            widgetCard.startBlurTransitAnimation()
+                            widgetCard.removeBlur()
                         }
                         blurring.set(false)
                         startPressHandleAnimation(false)

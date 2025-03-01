@@ -18,6 +18,7 @@ import android.view.View.OnTouchListener
 import android.view.ViewConfiguration
 import android.view.ViewGroup
 import androidx.cardview.widget.CardView
+import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.animation.PathInterpolatorCompat
 import com.eiyooooo.superwindow.content.LocalContent
@@ -26,8 +27,10 @@ import com.eiyooooo.superwindow.ui.main.MainActivity
 import com.eiyooooo.superwindow.ui.widgetcard.IconDragShadowBuilder
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardData
 import com.eiyooooo.superwindow.ui.widgetcard.WidgetCardFocusManager
+import com.eiyooooo.superwindow.ui.widgetcard.placeholderWidgetCardData
 import com.eiyooooo.superwindow.util.BlurUtils
 import com.eiyooooo.superwindow.util.dp2px
+import com.eiyooooo.superwindow.util.getAttrColor
 import com.eiyooooo.superwindow.util.startPopupMenuAnimation
 import com.eiyooooo.superwindow.util.startPressHandleAnimation
 import timber.log.Timber
@@ -35,15 +38,19 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.abs
 
 @SuppressLint("ClickableViewAccessibility")
-class WidgetCardView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0, val widgetCardData: WidgetCardData = WidgetCardData()) : CardView(context, attrs, defStyleAttr) {
+class WidgetCardView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0, val widgetCardData: WidgetCardData = placeholderWidgetCardData) : CardView(context, attrs, defStyleAttr) {
 
     constructor(view: View, widgetCardData: WidgetCardData) : this(view.context, widgetCardData = widgetCardData) {
         widgetCard.contentContainer.addView(view)
     }
 
+    private val colorSurface = context.getAttrColor(com.google.android.material.R.attr.colorSurface)
+    private val colorSurfaceDimmed = ColorUtils.blendARGB(colorSurface, 0xFF000000.toInt(), 0.8F)
+
     private val widgetCard: ItemWidgetCardBinding = ItemWidgetCardBinding.inflate(LayoutInflater.from(context), this, true)
 
     fun setControlBarVisibility(visibility: Int) {
+        if (widgetCardData.isPlaceholder) return
         widgetCard.controlBar.visibility = visibility
     }
 
@@ -76,7 +83,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                                 duration = 200
                                 interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)
                             }.start()
-                            startDragAndDrop(ClipData.newPlainText("WidgetCardView@${widgetCardData.identifier}", null), shadowBuilder, this@WidgetCardView, View.DRAG_FLAG_OPAQUE)
+                            startDragAndDrop(ClipData.newPlainText("WidgetCardView@${widgetCardData.identifier}", null), shadowBuilder, this@WidgetCardView, DRAG_FLAG_OPAQUE)
                         }
                         true
                     }
@@ -87,7 +94,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                             if (!showingPopupMenu.get()) {
                                 showPopupMenu()
                             } else {
-                                startHidePopupMenuAnimation()
+                                hidePopupMenu()
                             }
                         }
                         true
@@ -110,7 +117,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                 duration = 200
                 interpolator = PathInterpolatorCompat.create(0.25f, 0.1f, 0.25f, 1f)
             }.start()
-            startCoverTransitAnimation()
+            removeCover()
         }
     }
 
@@ -202,9 +209,10 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     init {
-        id = View.generateViewId()
+        id = generateViewId()
         layoutParams = LayoutParams(0, LayoutParams.MATCH_PARENT)
         radius = context.dp2px(8).toFloat()
+        setCardBackgroundColor(0x00FFFFFF)
 
         setTargetView(widgetCard.controlBar)
         widgetCard.controlBar.setOnTouchListener(controlBarListener)
@@ -269,6 +277,12 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                 }
                 setContentView(textureView)
             }
+        } else if (widgetCardData.isPlaceholder) {
+            widgetCard.widgetView.setBackgroundColor(colorSurfaceDimmed)
+            widgetCard.controlBar.visibility = GONE
+            widgetCard.contentContainer.visibility = GONE
+            widgetCard.iconContainer.visibility = GONE
+            widgetCard.icon.setImageDrawable(null)
         }
 
         post {
@@ -290,10 +304,82 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
         widgetCard.controlBar.changeFocusMode(focus)
     }
 
+    val hinting = AtomicBoolean(false)
+    private var hintAnimatorSet: AnimatorSet? = null
     private val showingPopupMenu = AtomicBoolean(false)
     private var popupMenuAnimatorSet: AnimatorSet? = null
 
+    fun showHint() {
+        if (widgetCardData.isPlaceholder) return
+        if (hinting.get() && hintAnimatorSet?.isRunning == false) return
+        hintAnimatorSet?.cancel()
+        widgetCard.replaceHint.visibility = VISIBLE
+        val interpolator = PathInterpolatorCompat.create(0.35f, 0f, 0f, 1f)
+        val hintAlphaAnimation = ObjectAnimator.ofFloat(widgetCard.replaceHint, "alpha", 0.3F, 1F).apply {
+            this.duration = duration
+            this.interpolator = interpolator
+        }
+        val cardColorAnimation = ObjectAnimator.ofArgb(widgetCard.widgetView, "backgroundColor", colorSurface, colorSurfaceDimmed).apply {
+            this.duration = duration
+            this.interpolator = interpolator
+        }
+        hintAnimatorSet = AnimatorSet().apply {
+            playTogether(cardColorAnimation, hintAlphaAnimation)
+            addListener(object : Animator.AnimatorListener {
+                override fun onAnimationStart(animation: Animator) {
+                }
+
+                override fun onAnimationEnd(animation: Animator) {
+                    hinting.set(true)
+                }
+
+                override fun onAnimationCancel(animation: Animator) {
+                }
+
+                override fun onAnimationRepeat(animation: Animator) {
+                }
+            })
+            start()
+        }
+    }
+
+    fun hideHint() {
+        if (widgetCardData.isPlaceholder) return
+        if (hinting.get() || hintAnimatorSet?.isRunning == true) {
+            hintAnimatorSet?.cancel()
+            val interpolator = PathInterpolatorCompat.create(0.35f, 0f, 0f, 1f)
+            val hintAlphaAnimation = ObjectAnimator.ofFloat(widgetCard.replaceHint, "alpha", 1F, 0.3F).apply {
+                this.duration = duration
+                this.interpolator = interpolator
+            }
+            val cardColorAnimation = ObjectAnimator.ofArgb(widgetCard.widgetView, "backgroundColor", colorSurfaceDimmed, colorSurface).apply {
+                this.duration = duration
+                this.interpolator = interpolator
+            }
+            hintAnimatorSet = AnimatorSet().apply {
+                playTogether(cardColorAnimation, hintAlphaAnimation)
+                addListener(object : Animator.AnimatorListener {
+                    override fun onAnimationStart(animation: Animator) {
+                    }
+
+                    override fun onAnimationEnd(animation: Animator) {
+                        widgetCard.replaceHint.visibility = GONE
+                        hinting.set(false)
+                    }
+
+                    override fun onAnimationCancel(animation: Animator) {
+                    }
+
+                    override fun onAnimationRepeat(animation: Animator) {
+                    }
+                })
+                start()
+            }
+        }
+    }
+
     private fun showPopupMenu() {
+        if (widgetCardData.isPlaceholder) return
         if (showingPopupMenu.get() && popupMenuAnimatorSet?.isRunning == false) return
         popupMenuAnimatorSet?.cancel()
         val popupMenu = if (widgetCardData.isControlPanel) {
@@ -307,7 +393,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                 val rect = Rect()
                 popupMenu.getGlobalVisibleRect(rect)
                 if (!rect.contains(it.rawX.toInt(), it.rawY.toInt())) {
-                    startHidePopupMenuAnimation()
+                    hidePopupMenu()
                     return@setTouchEventInterceptor true
                 }
             }
@@ -319,6 +405,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     private fun hidePopupMenuImmediately() {
+        if (widgetCardData.isPlaceholder) return
         if (showingPopupMenu.get() || popupMenuAnimatorSet?.isRunning == true) {
             popupMenuAnimatorSet?.cancel()
             (context as? MainActivity)?.setTouchEventInterceptor()
@@ -328,7 +415,8 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
         }
     }
 
-    private fun startHidePopupMenuAnimation() {
+    private fun hidePopupMenu() {
+        if (widgetCardData.isPlaceholder) return
         if (showingPopupMenu.get() || popupMenuAnimatorSet?.isRunning == true) {
             popupMenuAnimatorSet?.cancel()
             val popupMenu = if (widgetCardData.isControlPanel) {
@@ -350,28 +438,31 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     private val blurTransitAnimationList = mutableListOf<AnimatorSet>()
 
     fun makeCover() {
+        if (widgetCardData.isPlaceholder) return
         hidePopupMenuImmediately()
         if (blurring.get()) {
             removeBlurImmediately()
         }
         cancelCoverTransitAnimations()
-        widgetCard.iconContainer.visibility = View.VISIBLE
-        widgetCard.contentContainer.visibility = View.GONE
+        widgetCard.iconContainer.visibility = VISIBLE
+        widgetCard.contentContainer.visibility = GONE
         widgetCard.contentContainer.alpha = 0F
         covering.set(true)
     }
 
     fun removeCoverImmediately() {
+        if (widgetCardData.isPlaceholder) return
         hidePopupMenuImmediately()
         if (blurring.get()) return
         cancelCoverTransitAnimations()
         widgetCard.contentContainer.alpha = 1F
-        widgetCard.contentContainer.visibility = View.VISIBLE
-        widgetCard.iconContainer.visibility = View.GONE
+        widgetCard.contentContainer.visibility = VISIBLE
+        widgetCard.iconContainer.visibility = GONE
         covering.set(false)
     }
 
-    fun startCoverTransitAnimation() {
+    fun removeCover() {
+        if (widgetCardData.isPlaceholder) return
         hidePopupMenuImmediately()
         if (blurring.get()) return
         if (covering.get()) {
@@ -379,13 +470,13 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                 duration = 300
                 addListener(object : Animator.AnimatorListener {
                     override fun onAnimationStart(animation: Animator) {
-                        widgetCard.iconContainer.visibility = View.GONE
+                        widgetCard.iconContainer.visibility = GONE
                     }
 
                     override fun onAnimationEnd(animation: Animator) {
                         widgetCard.contentContainer.alpha = 1F
-                        widgetCard.contentContainer.visibility = View.VISIBLE
-                        widgetCard.iconContainer.visibility = View.GONE
+                        widgetCard.contentContainer.visibility = VISIBLE
+                        widgetCard.iconContainer.visibility = GONE
                         covering.set(false)
                     }
 
@@ -396,7 +487,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                     }
                 })
                 interpolator = PathInterpolatorCompat.create(0.35f, 0f, 0.35f, 1f)
-                widgetCard.contentContainer.visibility = View.VISIBLE
+                widgetCard.contentContainer.visibility = VISIBLE
                 startDelay = 250
                 start()
                 coverTransitAnimationList.add(this)
@@ -412,6 +503,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     fun makeBlur() {
+        if (widgetCardData.isPlaceholder) return
         hidePopupMenuImmediately()
         if (covering.get()) {
             removeCoverImmediately()
@@ -426,21 +518,22 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
             widgetCard.blurLayer.foreground = it
             widgetCard.blurLayer.foreground.alpha = 255
         }
-        widgetCard.blurLayer.visibility = View.VISIBLE
-        widgetCard.iconContainer.visibility = View.VISIBLE
-        widgetCard.contentContainer.visibility = View.GONE
+        widgetCard.blurLayer.visibility = VISIBLE
+        widgetCard.iconContainer.visibility = VISIBLE
+        widgetCard.contentContainer.visibility = GONE
         widgetCard.contentContainer.alpha = 0F
         blurring.set(true)
     }
 
     fun removeBlurImmediately() {
+        if (widgetCardData.isPlaceholder) return
         hidePopupMenuImmediately()
         if (covering.get()) return
         cancelBlurTransitAnimations()
         widgetCard.contentContainer.alpha = 1F
-        widgetCard.contentContainer.visibility = View.VISIBLE
-        widgetCard.iconContainer.visibility = View.GONE
-        widgetCard.blurLayer.visibility = View.GONE
+        widgetCard.contentContainer.visibility = VISIBLE
+        widgetCard.iconContainer.visibility = GONE
+        widgetCard.blurLayer.visibility = GONE
         widgetCard.blurLayer.foreground?.let {
             it.alpha = 255
         }
@@ -448,7 +541,8 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
         blurring.set(false)
     }
 
-    fun startBlurTransitAnimation() {
+    fun removeBlur() {
+        if (widgetCardData.isPlaceholder) return
         hidePopupMenuImmediately()
         if (covering.get()) return
         if (blurring.get()) {
@@ -462,14 +556,14 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                 duration = 300
                 addListener(object : Animator.AnimatorListener {
                     override fun onAnimationStart(animation: Animator) {
-                        widgetCard.iconContainer.visibility = View.GONE
+                        widgetCard.iconContainer.visibility = GONE
                     }
 
                     override fun onAnimationEnd(animation: Animator) {
                         widgetCard.contentContainer.alpha = 1F
-                        widgetCard.contentContainer.visibility = View.VISIBLE
-                        widgetCard.iconContainer.visibility = View.GONE
-                        widgetCard.blurLayer.visibility = View.GONE
+                        widgetCard.contentContainer.visibility = VISIBLE
+                        widgetCard.iconContainer.visibility = GONE
+                        widgetCard.blurLayer.visibility = GONE
                         widgetCard.blurLayer.foreground?.let {
                             it.alpha = 255
                         }
@@ -485,7 +579,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                 })
                 interpolator = PathInterpolatorCompat.create(0.35f, 0f, 0.35f, 1f)
             }
-            widgetCard.contentContainer.visibility = View.VISIBLE
+            widgetCard.contentContainer.visibility = VISIBLE
             AnimatorSet().apply {
                 blurLayerAnimation?.let {
                     playTogether(it, contentContainerAnimation)

@@ -145,4 +145,16 @@
 
     </androidx.cardview.widget.CardView>
 
+    <TextView
+        android:id="@+id/replace_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="80dp"
+        android:text="@string/replace_by_drag"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
 </FrameLayout>
