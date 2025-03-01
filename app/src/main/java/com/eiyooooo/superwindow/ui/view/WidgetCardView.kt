@@ -217,15 +217,19 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
         setTargetView(widgetCard.controlBar)
         widgetCard.controlBar.setOnTouchListener(controlBarListener)
         widgetCard.replace.setOnClickListener {
+            hidePopupMenuImmediately()
             (context as? MainActivity)?.replaceWidgetCard(widgetCardData)
         }
         widgetCard.minimize.setOnClickListener {
+            hidePopupMenuImmediately()
             (context as? MainActivity)?.minimizeWidgetCard(widgetCardData)
         }
         widgetCard.close.setOnClickListener {
+            hidePopupMenuImmediately()
             (context as? MainActivity)?.removeWidgetCard(this@WidgetCardView)
         }
         widgetCard.minimizeControlPanel.setOnClickListener {
+            hidePopupMenuImmediately()
             (context as? MainActivity)?.minimizeWidgetCard(widgetCardData)
         }
 
@@ -408,7 +412,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
         if (widgetCardData.isPlaceholder) return
         if (showingPopupMenu.get() || popupMenuAnimatorSet?.isRunning == true) {
             popupMenuAnimatorSet?.cancel()
-            (context as? MainActivity)?.setTouchEventInterceptor()
+            (context as? MainActivity)?.setTouchEventInterceptor(null)
             widgetCard.popupMenu.visibility = GONE
             widgetCard.minimizeControlPanel.visibility = GONE
             showingPopupMenu.set(false)
@@ -424,7 +428,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
             } else {
                 widgetCard.popupMenu
             }
-            (context as? MainActivity)?.setTouchEventInterceptor()
+            (context as? MainActivity)?.setTouchEventInterceptor(null)
             popupMenuAnimatorSet = popupMenu.startPopupMenuAnimation(false) {
                 popupMenu.visibility = GONE
                 showingPopupMenu.set(false)
