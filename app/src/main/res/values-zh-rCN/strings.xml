@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">超级视窗</string>
     <string name="introduction">应用简介</string>
-    <string name="introduction_detail">1. 为大屏设备提供更好的多分屏体验\n2. 使用需安卓14或以上并授权Shizuku\n3. 此软件为实验性软件，可用性根据设备而异</string>
+    <string name="introduction_detail">1. 为大屏设备提供更好的多任务体验\n2. 使用需安卓14或以上并授权Shizuku\n3. 此软件为实验性软件，可用性根据设备而异</string>
 
     <string name="home">主页</string>
     <string name="settings">设置</string>
