@@ -282,7 +282,7 @@ class WidgetCardView @JvmOverloads constructor(context: Context, attrs: Attribut
                 setContentView(textureView)
             }
         } else if (widgetCardData.isPlaceholder) {
-            widgetCard.widgetView.setBackgroundColor(colorSurfaceDimmed)
+            alpha = 0.3F
             widgetCard.controlBar.visibility = GONE
             widgetCard.contentContainer.visibility = GONE
             widgetCard.iconContainer.visibility = GONE
